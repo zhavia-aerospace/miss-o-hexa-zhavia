@@ -1,231 +1,656 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zhavia - Missão Hexa</title>
-    <link rel="stylesheet" href="style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Supercopa Zhavia</title>
+    <link rel="stylesheet" href="style.css" />
     <style>
-        .grid-grupos-bolao { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 20px; }
-        .card-grupo-space { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--cosmic-blue); border-radius: 8px; padding: 15px; }
-        .card-grupo-space h3 { color: var(--galaxy-gold); text-align: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0, 102, 255, 0.2); padding-bottom: 5px; }
-        .label-time-checkbox { display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 4px; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
-        .label-time-checkbox:hover { background: rgba(255, 255, 255, 0.05); }
-        
-        /* Estilo do Bloqueio da Terceira Aba */
-        .painel-bloqueado {
-            text-align: center;
-            padding: 40px 20px;
-            border: 2px dashed #ff3333;
-            background: rgba(255, 51, 51, 0.05);
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        .lock-icon { font-size: 3.5rem; margin-bottom: 15px; display: block; animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.6; }
-        }
+      .grid-grupos-bolao {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .card-grupo-space {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--cosmic-blue);
+        border-radius: 8px;
+        padding: 15px;
+      }
+      .card-grupo-space h3 {
+        color: var(--galaxy-gold);
+        text-align: center;
+        margin-bottom: 12px;
+        border-bottom: 1px solid rgba(0, 102, 255, 0.2);
+        padding-bottom: 5px;
+      }
+      .label-time-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        margin-bottom: 4px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .label-time-checkbox:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
 
-        /* Correção e padronização das bandeiras do Twemoji no Windows */
-        img.emoji {
-            height: 1.2em;
-            width: 1.2em;
-            margin: 0 .05em 0 .1em;
-            vertical-align: -0.1em;
-            display: inline-block;
+      /* Estilo do Bloqueio da Terceira Aba */
+      .painel-bloqueado {
+        text-align: center;
+        padding: 40px 20px;
+        border: 2px dashed #ff3333;
+        background: rgba(255, 51, 51, 0.05);
+        border-radius: 10px;
+        margin-top: 20px;
+      }
+      .lock-icon {
+        font-size: 3.5rem;
+        margin-bottom: 15px;
+        display: block;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          opacity: 0.6;
         }
+        50% {
+          transform: scale(1.1);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 0.6;
+        }
+      }
+
+      /* Correção e padronização das bandeiras do Twemoji no Windows */
+      img.emoji {
+        height: 1.2em;
+        width: 1.2em;
+        margin: 0 0.05em 0 0.1em;
+        vertical-align: -0.1em;
+        display: inline-block;
+      }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@14.1.0/dist/twemoji.min.js" crossorigin="anonymous"></script>
-</head>
-<body>
-
+    <script
+      src="https://cdn.jsdelivr.net/npm/@twemoji/api@14.1.0/dist/twemoji.min.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
     <div id="stars-container"></div>
 
     <header>
-        <div class="logo-zhavia">Zhavia Aerospace</div>
-        <h1>Missão Hexa</h1>
-        <div class="subtitle">🚀 Órbita da Vitória • Copa do Mundo 🌌</div>
-        
-        <nav class="space-nav">
-            <button class="nav-btn active" onclick="mudarAba('home')">🛸 1. Diretrizes</button>
-            <button class="nav-btn" onclick="mudarAba('palpites')">🔮 2. Classificados</button>
-            <button class="nav-btn" onclick="mudarAba('podio')">👑 3. Pódio Final</button>
-        </nav>
+      <div class="logo-zhavia">Zhavia Aerospace</div>
+      <h1>Supercopa Zhavia</h1>
+      <div class="subtitle">🚀 Órbita da Vitória • Copa do Mundo 🌌</div>
+
+      <nav class="space-nav">
+        <button class="nav-btn active" onclick="mudarAba('home')">
+          🛸 1. Diretrizes
+        </button>
+        <button class="nav-btn" onclick="mudarAba('palpites')">
+          🔮 2. Classificados
+        </button>
+        <button class="nav-btn" onclick="mudarAba('podio')">
+          👑 3. Pódio Final
+        </button>
+      </nav>
     </header>
 
     <main>
-        <section id="aba-home" class="tab-content active">
-            
-            <div class="cosmic-panel" style="text-align: center;">
-                <h2>🪐 Missão Hexa: Comando de Bordo</h2>
-                <p style="font-size: 1.15rem; line-height: 1.6; max-width: 800px; margin: 0 auto;">
-                    Bem-vindos ao nosso bolão! Hora de colocar seus conhecimentos futebolísticos à prova (ou contar com a sorte mesmo 😃). Preparem seus telescópios e alinhem suas rotas para a maior competição do universo!
-                </p>
+      <section id="aba-home" class="tab-content active">
+        <div class="cosmic-panel" style="text-align: center">
+          <h2>🪐 Missão Supercopa Zhavia: Comando de Bordo</h2>
+          <p
+            style="
+              font-size: 1.15rem;
+              line-height: 1.6;
+              max-width: 800px;
+              margin: 0 auto;
+            "
+          >
+            Bem-vindos ao nosso bolão! Hora de colocar seus conhecimentos
+            futebolísticos à prova (ou contar com a sorte mesmo 😃). Preparem
+            seus telescópios e alinhem suas rotas para a maior competição do
+            universo!
+          </p>
+        </div>
+
+        <div class="cosmic-panel" style="border-color: var(--cosmic-blue)">
+          <h2 style="color: #fff">
+            <span style="font-size: 1.6rem; margin-right: 5px">⚽</span> Etapa 1
+            – Fase de Grupos
+          </h2>
+          <p style="margin-bottom: 20px; color: #ccc; font-size: 1.05rem">
+            Cada participante deverá acessar a aba
+            <strong>"2. Classificados"</strong>, inserir seu nome e indicar os
+            <strong>2 classificados de cada um dos 12 grupos</strong>.
+          </p>
+
+          <div
+            style="
+              background: rgba(0, 0, 0, 0.3);
+              padding: 15px;
+              border-radius: 8px;
+              margin-bottom: 20px;
+              border-left: 3px solid var(--cosmic-blue);
+            "
+          >
+            <h3
+              style="
+                color: var(--nebula-green);
+                font-size: 1.1rem;
+                margin-bottom: 10px;
+              "
+            >
+              📊 Sistema de Pontuação:
+            </h3>
+            <p style="margin-bottom: 8px">
+              ✅ Acertou <strong>um</strong> dos classificados do grupo:
+              <span style="color: var(--nebula-green); font-weight: bold"
+                >4 pontos</span
+              >
+            </p>
+            <p style="margin-bottom: 8px">
+              ✅✅ Acertou os <strong>dois</strong> classificados do grupo:
+              <span style="color: var(--nebula-green); font-weight: bold"
+                >8 pontos</span
+              >
+            </p>
+            <p style="margin-bottom: 8px">
+              🎯 Acertou também a <strong>ordem exata</strong> dos classificados
+              (1º e 2º lugar):
+              <span style="color: var(--galaxy-gold); font-weight: bold"
+                >Bônus de 2 pontos</span
+              >
+            </p>
+          </div>
+
+          <div
+            style="
+              background: rgba(255, 255, 255, 0.02);
+              padding: 15px;
+              border-radius: 8px;
+              font-size: 0.95rem;
+              border: 1px dashed rgba(255, 255, 255, 0.1);
+            "
+          >
+            <span
+              style="
+                color: var(--galaxy-gold);
+                font-weight: bold;
+                text-transform: uppercase;
+                font-size: 0.85rem;
+                letter-spacing: 1px;
+                display: block;
+                margin-bottom: 5px;
+              "
+              >💡 Exemplo de Telemetria:</span
+            >
+            Se você acertar os dois classificados de um grupo e a posição
+            correta de cada um:<br />
+            • 8 pontos pelos classificados + 2 pontos pelo bônus da ordem =
+            <strong style="color: var(--nebula-green)"
+              >10 pontos no grupo</strong
+            >.
+          </div>
+
+          <div
+            style="
+              margin-top: 20px;
+              text-align: right;
+              font-weight: bold;
+              font-size: 1.1rem;
+              color: var(--galaxy-gold);
+            "
+          >
+            🏅 Pontuação máxima da fase de grupos:
+            <span style="font-size: 1.3rem">120 pontos</span>
+          </div>
+        </div>
+
+        <div class="cosmic-panel" style="border-color: #ff3333; opacity: 0.85">
+          <h2 style="color: #fff">
+            <span style="font-size: 1.6rem; margin-right: 5px">🏆</span> Etapa 2
+            – Pódio Final
+          </h2>
+          <p style="margin-bottom: 20px; color: #ccc; font-size: 1.05rem">
+            Nesta fase (que será liberada futuramente), você deverá escolher
+            quem terminará no pódio supremo da Copa do Mundo:
+          </p>
+
+          <div
+            style="
+              display: flex;
+              gap: 15px;
+              flex-wrap: wrap;
+              margin-bottom: 20px;
+            "
+          >
+            <div
+              style="
+                flex: 1;
+                min-width: 150px;
+                background: rgba(255, 204, 0, 0.05);
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid var(--galaxy-gold);
+                text-align: center;
+              "
+            >
+              <span
+                style="font-size: 1.5rem; display: block; margin-bottom: 5px"
+                >🥇</span
+              >
+              <strong style="color: var(--galaxy-gold)"
+                >1º Lugar (Campeão)</strong
+              >
+              <p style="margin-top: 5px; font-size: 1.1rem; font-weight: bold">
+                25 pontos
+              </p>
             </div>
-
-            <div class="cosmic-panel" style="border-color: var(--cosmic-blue);">
-                <h2 style="color: #fff;"><span style="font-size: 1.6rem; margin-right: 5px;">⚽</span> Etapa 1 – Fase de Grupos</h2>
-                <p style="margin-bottom: 20px; color: #ccc; font-size: 1.05rem;">
-                    Cada participante deverá acessar a aba <strong>"2. Classificados"</strong>, inserir seu nome e indicar os <strong>2 classificados de cada um dos 12 grupos</strong>.
-                </p>
-                
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 3px solid var(--cosmic-blue);">
-                    <h3 style="color: var(--nebula-green); font-size: 1.1rem; margin-bottom: 10px;">📊 Sistema de Pontuação:</h3>
-                    <p style="margin-bottom: 8px;">✅ Acertou <strong>um</strong> dos classificados do grupo: <span style="color: var(--nebula-green); font-weight: bold;">4 pontos</span></p>
-                    <p style="margin-bottom: 8px;">✅✅ Acertou os <strong>dois</strong> classificados do grupo: <span style="color: var(--nebula-green); font-weight: bold;">8 pontos</span></p>
-                    <p style="margin-bottom: 8px;">🎯 Acertou também a <strong>ordem exata</strong> dos classificados (1º e 2º lugar): <span style="color: var(--galaxy-gold); font-weight: bold;">Bônus de 2 pontos</span></p>
-                </div>
-
-                <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; font-size: 0.95rem; border: 1px dashed rgba(255,255,255,0.1);">
-                    <span style="color: var(--galaxy-gold); font-weight: bold; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; display: block; margin-bottom: 5px;">💡 Exemplo de Telemetria:</span>
-                    Se você acertar os dois classificados de um grupo e a posição correta de cada um:<br>
-                    • 8 pontos pelos classificados + 2 pontos pelo bônus da ordem = <strong style="color: var(--nebula-green);">10 pontos no grupo</strong>.
-                </div>
-
-                <div style="margin-top: 20px; text-align: right; font-weight: bold; font-size: 1.1rem; color: var(--galaxy-gold);">
-                    🏅 Pontuação máxima da fase de grupos: <span style="font-size: 1.3rem;">120 pontos</span>
-                </div>
+            <div
+              style="
+                flex: 1;
+                min-width: 150px;
+                background: rgba(255, 255, 255, 0.03);
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #aaa;
+                text-align: center;
+              "
+            >
+              <span
+                style="font-size: 1.5rem; display: block; margin-bottom: 5px"
+                >🥈</span
+              >
+              <strong style="color: #ddd">2º Lugar (Vice)</strong>
+              <p style="margin-top: 5px; font-size: 1.1rem; font-weight: bold">
+                15 pontos
+              </p>
             </div>
-
-            <div class="cosmic-panel" style="border-color: #ff3333; opacity: 0.85;">
-                <h2 style="color: #fff;"><span style="font-size: 1.6rem; margin-right: 5px;">🏆</span> Etapa 2 – Pódio Final</h2>
-                <p style="margin-bottom: 20px; color: #ccc; font-size: 1.05rem;">
-                    Nesta fase (que será liberada futuramente), você deverá escolher quem terminará no pódio supremo da Copa do Mundo:
-                </p>
-
-                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
-                    <div style="flex: 1; min-width: 150px; background: rgba(255, 204, 0, 0.05); padding: 15px; border-radius: 8px; border: 1px solid var(--galaxy-gold); text-align: center;">
-                        <span style="font-size: 1.5rem; display: block; margin-bottom: 5px;">🥇</span>
-                        <strong style="color: var(--galaxy-gold);">1º Lugar (Campeão)</strong>
-                        <p style="margin-top: 5px; font-size: 1.1rem; font-weight: bold;">25 pontos</p>
-                    </div>
-                    <div style="flex: 1; min-width: 150px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px solid #aaa; text-align: center;">
-                        <span style="font-size: 1.5rem; display: block; margin-bottom: 5px;">🥈</span>
-                        <strong style="color: #ddd;">2º Lugar (Vice)</strong>
-                        <p style="margin-top: 5px; font-size: 1.1rem; font-weight: bold;">15 pontos</p>
-                    </div>
-                    <div style="flex: 1; min-width: 150px; background: rgba(184, 115, 51, 0.05); padding: 15px; border-radius: 8px; border: 1px solid #b87333; text-align: center;">
-                        <span style="font-size: 1.5rem; display: block; margin-bottom: 5px;">🥉</span>
-                        <strong style="color: #b87333;">3º Lugar</strong>
-                        <p style="margin-top: 5px; font-size: 1.1rem; font-weight: bold;">10 pontos</p>
-                    </div>
-                </div>
-
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border-left: 3px solid #ff3333;">
-                    🎯 <strong>Bônus Especial:</strong> Acertou a ordem completa do pódio (1º, 2º e 3º lugares): <span style="color: var(--nebula-green); font-weight: bold;">+5 pontos</span>
-                </div>
-
-                <div style="margin-top: 20px; text-align: right; font-weight: bold; font-size: 1.1rem; color: var(--galaxy-gold);">
-                    🏅 Pontuação máxima da etapa final: <span style="font-size: 1.3rem;">55 pontos</span>
-                </div>
+            <div
+              style="
+                flex: 1;
+                min-width: 150px;
+                background: rgba(184, 115, 51, 0.05);
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #b87333;
+                text-align: center;
+              "
+            >
+              <span
+                style="font-size: 1.5rem; display: block; margin-bottom: 5px"
+                >🥉</span
+              >
+              <strong style="color: #b87333">3º Lugar</strong>
+              <p style="margin-top: 5px; font-size: 1.1rem; font-weight: bold">
+                10 pontos
+              </p>
             </div>
+          </div>
 
-            <div class="cosmic-panel" style="background: linear-gradient(135deg, var(--space-panel) 0%, rgba(0, 102, 255, 0.1) 100%); border-color: var(--galaxy-gold); text-align: center; padding: 30px;">
-                <h2 style="justify-content: center; border-left: none; padding-left: 0; font-size: 1.8rem; margin-bottom: 10px;">📊 Cota Máxima da Missão</h2>
-                <p style="color: #aaa; margin-bottom: 15px; font-size: 1.05rem;">A soma de toda a telemetria do torneio está dividida da seguinte forma:</p>
-                
-                <div style="display: inline-flex; gap: 30px; font-size: 1.2rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px;">
-                    <span>🪐 Grupos: <span style="color: #fff;">120 pts</span></span>
-                    <span>👑 Pódio: <span style="color: #fff;">55 pts</span></span>
-                </div>
-                
-                <div style="font-size: 1.6rem; font-weight: 800; color: var(--galaxy-gold); text-shadow: 0 0 10px rgba(255,204,0,0.3);">
-                    🏆 TOTAL MÁXIMO POSSÍVEL: 175 PONTOS
-                </div>
-                
-                <p style="margin-top: 25px; font-style: italic; color: var(--nebula-green); font-size: 1.1rem;">
-                    Boa sorte a todos! Que vença os melhores palpites (ou os mais sortudos)! 🍀⚽
-                </p>
-            </div>
+          <div
+            style="
+              background: rgba(0, 0, 0, 0.3);
+              padding: 15px;
+              border-radius: 8px;
+              border-left: 3px solid #ff3333;
+            "
+          >
+            🎯 <strong>Bônus Especial:</strong> Acertou a ordem completa do
+            pódio (1º, 2º e 3º lugares):
+            <span style="color: var(--nebula-green); font-weight: bold"
+              >+5 pontos</span
+            >
+          </div>
 
-        </section>
+          <div
+            style="
+              margin-top: 20px;
+              text-align: right;
+              font-weight: bold;
+              font-size: 1.1rem;
+              color: var(--galaxy-gold);
+            "
+          >
+            🏅 Pontuação máxima da etapa final:
+            <span style="font-size: 1.3rem">55 pontos</span>
+          </div>
+        </div>
 
-        <section id="aba-palpites" class="tab-content">
-            <div class="cosmic-panel">
-                <h2>🔮 Simulador de Classificados da Fase de Grupos</h2>
-                <p style="margin-bottom: 20px; color: #aaa;">Aponte quem avança na primeira fase. Você precisa selecionar <strong>exatamente 2 nações</strong> por grupo:</p>
-                
-                <div class="user-identity" style="margin-bottom: 25px;">
-                    <label for="username">Nome do Astronauta:</label>
-                    <input type="text" id="username" placeholder="Digite seu nome completo">
-                </div>
+        <div
+          class="cosmic-panel"
+          style="
+            background: linear-gradient(
+              135deg,
+              var(--space-panel) 0%,
+              rgba(0, 102, 255, 0.1) 100%
+            );
+            border-color: var(--galaxy-gold);
+            text-align: center;
+            padding: 30px;
+          "
+        >
+          <h2
+            style="
+              justify-content: center;
+              border-left: none;
+              padding-left: 0;
+              font-size: 1.8rem;
+              margin-bottom: 10px;
+            "
+          >
+            📊 Cota Máxima da Missão
+          </h2>
+          <p style="color: #aaa; margin-bottom: 15px; font-size: 1.05rem">
+            A soma de toda a telemetria do torneio está dividida da seguinte
+            forma:
+          </p>
 
-                <div class="grid-grupos-bolao" id="macro-grid-grupos"></div>
-                
-                <button class="btn-orbit" id="btn-enviar" style="max-width: 350px; margin-top: 30px;" onclick="salvarPalpitesGrupoApenas()">Computar Classificados 🚀</button>
-                <p id="saved-msg" class="success-text"></p>
-            </div>
+          <div
+            style="
+              display: inline-flex;
+              gap: 30px;
+              font-size: 1.2rem;
+              font-weight: bold;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+              padding-bottom: 15px;
+              margin-bottom: 15px;
+            "
+          >
+            <span>🪐 Grupos: <span style="color: #fff">120 pts</span></span>
+            <span>👑 Pódio: <span style="color: #fff">55 pts</span></span>
+          </div>
 
-            <div class="cosmic-panel">
-                <h2>🏆 Radar de Grupos da Tripulação</h2>
-                <div class="user-identity" style="margin: 15px 0;">
-                    <input type="text" id="busca-astronauta" onkeyup="filtrarTabela()" placeholder="🔍 Rastrear por nome do colega...">
-                </div>
-                <div style="overflow-x: auto;">
-                    <table class="ranking-table" style="min-width: 1400px;">
-                        <thead>
-                            <tr>
-                                <th>Astronauta</th>
-                                <th>Gr. A</th><th>Gr. B</th><th>Gr. C</th><th>Gr. D</th><th>Gr. E</th><th>Gr. F</th>
-                                <th>Gr. G</th><th>Gr. H</th><th>Gr. I</th><th>Gr. J</th><th>Gr. K</th><th>Gr. L</th>
-                                <th>Data</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-palpites-corpo">
-                            <tr>
-                                <td colspan="14" style="text-align: center; color: #aaa;">Carregando telemetria global...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+          <div
+            style="
+              font-size: 1.6rem;
+              font-weight: 800;
+              color: var(--galaxy-gold);
+              text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+            "
+          >
+            🏆 TOTAL MÁXIMO POSSÍVEL: 175 PONTOS
+          </div>
 
-        <section id="aba-podio" class="tab-content">
-            <div class="cosmic-panel" style="text-align: center;">
-                <h2>🔮 O Oráculo Espacial da Zhavia</h2>
-                <p style="color: #aaa; margin-bottom: 15px;">Enquanto os confrontos não são decididos, consulte a inteligência cósmica sobre o destino da Copa!</p>
-                <div class="user-identity" style="max-width: 500px; margin: 0 auto 15px auto;">
-                    <input type="text" id="pergunta-oraculo" placeholder="Ex: O Hexa vem esse ano?">
-                </div>
-                <button class="btn-orbit" style="margin: 0 auto; display: inline-block;" onclick="consultarOraculo()">Consultar os Astros 🪐</button>
-                <div id="resposta-oraculo-box" style="display: none; margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.4); border: 1px dashed var(--galaxy-gold); border-radius: 8px;">
-                    <p style="color: var(--galaxy-gold); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px;">👽 Resposta Interceptada:</p>
-                    <p id="resposta-oraculo-texto" style="font-size: 1.3rem; font-weight: bold; margin-top: 5px; color: #fff;"></p>
-                </div>
-            </div>
+          <p
+            style="
+              margin-top: 25px;
+              font-style: italic;
+              color: var(--nebula-green);
+              font-size: 1.1rem;
+            "
+          >
+            Boa sorte a todos! Que vença os melhores palpites (ou os mais
+            sortudos)! 🍀⚽
+          </p>
+        </div>
+      </section>
 
-            <div class="cosmic-panel painel-bloqueado">
-                <span class="lock-icon">🔒</span>
-                <h2 style="color: #ff3333; margin-bottom: 10px;">Transmissão Bloqueada pelo Comando Geral</h2>
-                <p style="color: #ccc; max-width: 600px; margin: 0 auto; line-height: 1.6;">
-                    A simulação dos três primeiros colocados da Copa do Mundo está desativada no momento. 
-                    Esta seção será liberada manualmente pelo comando da <strong>Zhavia Aerospace</strong> assim que os confrontos reais das Oitavas de Final forem decididos. Fique atento aos comunicados de rádio!
-                </p>
-            </div>
-        </section>
+      <section id="aba-palpites" class="tab-content">
+        <div class="cosmic-panel">
+          <div
+            style="
+              background: rgba(255, 204, 0, 0.07);
+              border: 1px dashed var(--galaxy-gold);
+              padding: 12px 15px;
+              border-radius: 6px;
+              margin-bottom: 20px;
+              font-size: 0.95rem;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+            "
+          >
+            <span>⚠️</span>
+            <span style="color: #fff"
+              ><strong>Atenção Tripulante:</strong> Só é possível enviar seus
+              palpites <strong>uma única vez.</strong> Revise suas escolhas com
+              calma e só clique em enviar quando tiver certeza absoluta!</span
+            >
+          </div>
+          <h2>🔮 Simulador de Classificados da Fase de Grupos</h2>
+          <p style="margin-bottom: 20px; color: #aaa">
+            Aponte quem avança na primeira fase. Você precisa selecionar
+            <strong>exatamente 2 nações</strong> por grupo:
+          </p>
+
+          <div class="user-identity" style="margin-bottom: 25px">
+            <label for="username">Nome do Astronauta:</label>
+            <input
+              type="text"
+              id="username"
+              placeholder="Digite seu nome completo"
+            />
+          </div>
+
+          <div class="grid-grupos-bolao" id="macro-grid-grupos"></div>
+
+          <button
+            class="btn-orbit"
+            id="btn-enviar"
+            style="max-width: 350px; margin-top: 30px"
+            onclick="salvarPalpitesGrupoApenas()"
+          >
+            Computar Classificados 🚀
+          </button>
+          <p id="saved-msg" class="success-text"></p>
+        </div>
+
+        <div class="cosmic-panel">
+          <h2>🏆 Radar de Grupos da Tripulação</h2>
+          <div class="user-identity" style="margin: 15px 0">
+            <input
+              type="text"
+              id="busca-astronauta"
+              onkeyup="filtrarTabela()"
+              placeholder="🔍 Rastrear por nome do colega..."
+            />
+          </div>
+          <div style="overflow-x: auto">
+            <table class="ranking-table" style="min-width: 1400px">
+              <thead>
+                <tr>
+                  <th>Astronauta</th>
+                  <th>Gr. A</th>
+                  <th>Gr. B</th>
+                  <th>Gr. C</th>
+                  <th>Gr. D</th>
+                  <th>Gr. E</th>
+                  <th>Gr. F</th>
+                  <th>Gr. G</th>
+                  <th>Gr. H</th>
+                  <th>Gr. I</th>
+                  <th>Gr. J</th>
+                  <th>Gr. K</th>
+                  <th>Gr. L</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-palpites-corpo">
+                <tr>
+                  <td colspan="14" style="text-align: center; color: #aaa">
+                    Carregando telemetria global...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="aba-podio" class="tab-content">
+        <div class="cosmic-panel" style="text-align: center">
+          <h2>🔮 O Oráculo Espacial da Zhavia</h2>
+          <p style="color: #aaa; margin-bottom: 15px">
+            Enquanto os confrontos não são decididos, consulte a inteligência
+            cósmica sobre o destino da Copa!
+          </p>
+          <div
+            class="user-identity"
+            style="max-width: 500px; margin: 0 auto 15px auto"
+          >
+            <input
+              type="text"
+              id="pergunta-oraculo"
+              placeholder="Ex: O Hexa vem esse ano?"
+            />
+          </div>
+          <button
+            class="btn-orbit"
+            style="margin: 0 auto; display: inline-block"
+            onclick="consultarOraculo()"
+          >
+            Consultar os Astros 🪐
+          </button>
+          <div
+            id="resposta-oraculo-box"
+            style="
+              display: none;
+              margin-top: 20px;
+              padding: 15px;
+              background: rgba(0, 0, 0, 0.4);
+              border: 1px dashed var(--galaxy-gold);
+              border-radius: 8px;
+            "
+          >
+            <p
+              style="
+                color: var(--galaxy-gold);
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+              "
+            >
+              👽 Resposta Interceptada:
+            </p>
+            <p
+              id="resposta-oraculo-texto"
+              style="
+                font-size: 1.3rem;
+                font-weight: bold;
+                margin-top: 5px;
+                color: #fff;
+              "
+            ></p>
+          </div>
+        </div>
+
+        <div class="cosmic-panel painel-bloqueado">
+          <span class="lock-icon">🔒</span>
+          <h2 style="color: #ff3333; margin-bottom: 10px">
+            Transmissão Bloqueada pelo Comando Geral
+          </h2>
+          <p
+            style="
+              color: #ccc;
+              max-width: 600px;
+              margin: 0 auto;
+              line-height: 1.6;
+            "
+          >
+            A simulação dos três primeiros colocados da Copa do Mundo está
+            desativada no momento. Esta seção será liberada manualmente pelo
+            comando da <strong>Zhavia Aerospace</strong> assim que os confrontos
+            reais das Oitavas de Final forem decididos. Fique atento aos
+            comunicados de rádio!
+          </p>
+        </div>
+      </section>
     </main>
 
     <footer>
-        <p>&copy; Zhavia Aerospace & Esportes. Todos os direitos reservados à tripulação.</p>
+      <p>
+        &copy; Zhavia Aerospace & Esportes. Todos os direitos reservados à
+        tripulação.
+      </p>
     </footer>
 
     <script src="script.js"></script>
-    <div id="space-alert-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; backdrop-filter: blur(5px); justify-content: center; align-items: center;">
-        <div class="cosmic-panel" style="max-width: 450px; width: 90%; text-align: center; border-color: var(--cosmic-blue); box-shadow: 0 0 25px rgba(0, 102, 255, 0.3); animation: scaleUp 0.3s ease;">
-            <h2 id="space-alert-title" style="color: var(--galaxy-gold); border-left: none; padding-left: 0; justify-content: center; font-size: 1.4rem;">⚠️ Alerta de Órbita</h2>
-            <p id="space-alert-msg" style="color: #fff; margin: 15px 0 20px 0; line-height: 1.5; font-size: 1.05rem;"></p>
-            <button class="btn-orbit" style="max-width: 150px; margin: 0 auto; padding: 8px; border-radius: 20px; font-size: 0.9rem;" onclick="fecharAlertaCosmico()">Compreendido</button>
-        </div>
+    <div
+      id="space-alert-modal"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        backdrop-filter: blur(5px);
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div
+        class="cosmic-panel"
+        style="
+          max-width: 450px;
+          width: 90%;
+          text-align: center;
+          border-color: var(--cosmic-blue);
+          box-shadow: 0 0 25px rgba(0, 102, 255, 0.3);
+          animation: scaleUp 0.3s ease;
+        "
+      >
+        <h2
+          id="space-alert-title"
+          style="
+            color: var(--galaxy-gold);
+            border-left: none;
+            padding-left: 0;
+            justify-content: center;
+            font-size: 1.4rem;
+          "
+        >
+          ⚠️ Alerta de Órbita
+        </h2>
+        <p
+          id="space-alert-msg"
+          style="
+            color: #fff;
+            margin: 15px 0 20px 0;
+            line-height: 1.5;
+            font-size: 1.05rem;
+          "
+        ></p>
+        <button
+          class="btn-orbit"
+          style="
+            max-width: 150px;
+            margin: 0 auto;
+            padding: 8px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+          "
+          onclick="fecharAlertaCosmico()"
+        >
+          Compreendido
+        </button>
+      </div>
     </div>
 
     <style>
-        @keyframes scaleUp {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+      @keyframes scaleUp {
+        from {
+          transform: scale(0.8);
+          opacity: 0;
         }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
     </style>
-</body>
+  </body>
 </html>
