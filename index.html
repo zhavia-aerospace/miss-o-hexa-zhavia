@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -101,6 +101,9 @@
         </button>
         <button class="nav-btn" onclick="mudarAba('podio')">
           👑 3. Pódio Final
+        </button>
+        <button class="nav-btn" onclick="mudarAba('ranking')">
+          🏆 4. Classificação
         </button>
       </nav>
     </header>
@@ -246,7 +249,8 @@
                 text-align: center;
               "
             >
-              <span style="font-size: 1.5rem; display: block; margin-bottom: 5px"
+              <span
+                style="font-size: 1.5rem; display: block; margin-bottom: 5px"
                 >🥇</span
               >
               <strong style="color: var(--galaxy-gold)"
@@ -267,7 +271,8 @@
                 text-align: center;
               "
             >
-              <span style="font-size: 1.5rem; display: block; margin-bottom: 5px"
+              <span
+                style="font-size: 1.5rem; display: block; margin-bottom: 5px"
                 >🥈</span
               >
               <strong style="color: #ddd">2º Lugar (Vice)</strong>
@@ -286,7 +291,8 @@
                 text-align: center;
               "
             >
-              <span style="font-size: 1.5rem; display: block; margin-bottom: 5px"
+              <span
+                style="font-size: 1.5rem; display: block; margin-bottom: 5px"
                 >🥉</span
               >
               <strong style="color: #b87333">3º Lugar</strong>
@@ -412,7 +418,7 @@
             <span>⚠️</span>
             <span style="color: #fff"
               ><strong>Atenção Tripulante:</strong> Só é possível enviar seus
-              palpites <strong>uma única vez por dispositivo.</strong> Revise suas escolhas com
+              palpites <strong>uma única vez.</strong> Revise suas escolhas com
               calma e só clique em enviar quando tiver certeza absoluta!</span
             >
           </div>
@@ -445,39 +451,80 @@
         </div>
 
         <div class="cosmic-panel">
-                <h2>🏆 Radar de Grupos da Tripulação</h2>
+          <h2>🏆 Radar de Grupos da Tripulação</h2>
 
-                <div id="radar-bloqueado" style="text-align: center; padding: 30px 10px; border: 1px dashed #ffcc00; background: rgba(255, 204, 0, 0.03); border-radius: 8px; margin-top: 15px;">
-                    <span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">👁️‍🗨️</span>
-                    <h3 style="color: var(--galaxy-gold); margin-bottom: 8px;">Transmissão em Ponto Cego</h3>
-                    <p style="color: #ccc; max-width: 500px; margin: 0 auto; font-size: 0.95rem; line-height: 1.5;">
-                        Os dados orbitais dos seus colegas estão ocultos. Para liberar o radar e visualizar os palpites de toda a tripulação, você precisa <strong>enviar os seus classificados</strong> primeiro!
-                    </p>
-                </div>
+          <div
+            id="radar-bloqueado"
+            style="
+              text-align: center;
+              padding: 30px 10px;
+              border: 1px dashed #ffcc00;
+              background: rgba(255, 204, 0, 0.03);
+              border-radius: 8px;
+              margin-top: 15px;
+            "
+          >
+            <span style="font-size: 2.5rem; display: block; margin-bottom: 10px"
+              >👁️‍🗨️</span
+            >
+            <h3 style="color: var(--galaxy-gold); margin-bottom: 8px">
+              Transmissão em Ponto Cego
+            </h3>
+            <p
+              style="
+                color: #ccc;
+                max-width: 500px;
+                margin: 0 auto;
+                font-size: 0.95rem;
+                line-height: 1.5;
+              "
+            >
+              Os dados orbitais dos seus colegas estão ocultos. Para liberar o
+              radar e visualizar os palpites de toda a tripulação, você precisa
+              <strong>enviar os seus classificados</strong> primeiro!
+            </p>
+          </div>
 
-                <div id="radar-conteudo" style="display: none;">
-                    <div class="user-identity" style="margin: 15px 0;">
-                        <input type="text" id="busca-astronauta" onkeyup="filtrarTabela()" placeholder="🔍 Rastrear por nome do colega...">
-                    </div>
-                    <div style="overflow-x: auto;">
-                        <table class="ranking-table" style="min-width: 1400px;">
-                            <thead>
-                                <tr>
-                                    <th>Astronauta</th>
-                                    <th>Gr. A</th><th>Gr. B</th><th>Gr. C</th><th>Gr. D</th><th>Gr. E</th><th>Gr. F</th>
-                                    <th>Gr. G</th><th>Gr. H</th><th>Gr. I</th><th>Gr. J</th><th>Gr. K</th><th>Gr. L</th>
-                                    <th>Data</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabela-palpites-corpo">
-                                <tr>
-                                    <td colspan="14" style="text-align: center; color: #aaa;">Carregando telemetria global...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+          <div id="radar-conteudo" style="display: none">
+            <div class="user-identity" style="margin: 15px 0">
+              <input
+                type="text"
+                id="busca-astronauta"
+                onkeyup="filtrarTabela()"
+                placeholder="🔍 Rastrear por nome do colega..."
+              />
             </div>
+            <div style="overflow-x: auto">
+              <table class="ranking-table" style="min-width: 1400px">
+                <thead>
+                  <tr>
+                    <th>Astronauta</th>
+                    <th>Gr. A</th>
+                    <th>Gr. B</th>
+                    <th>Gr. C</th>
+                    <th>Gr. D</th>
+                    <th>Gr. E</th>
+                    <th>Gr. F</th>
+                    <th>Gr. G</th>
+                    <th>Gr. H</th>
+                    <th>Gr. I</th>
+                    <th>Gr. J</th>
+                    <th>Gr. K</th>
+                    <th>Gr. L</th>
+                    <th>Data</th>
+                  </tr>
+                </thead>
+                <tbody id="tabela-palpites-corpo">
+                  <tr>
+                    <td colspan="14" style="text-align: center; color: #aaa">
+                      Carregando telemetria global...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section id="aba-podio" class="tab-content">
@@ -537,7 +584,11 @@
           </div>
         </div>
 
-        <div id="painel-trava-podio" class="cosmic-panel painel-bloqueado" style="display: block;">
+        <div
+          id="painel-trava-podio"
+          class="cosmic-panel painel-bloqueado"
+          style="display: block"
+        >
           <span class="lock-icon">🔒</span>
           <h2 style="color: #ff3333; margin-bottom: 10px">
             Transmissão Bloqueada pelo Comando Geral
@@ -558,43 +609,162 @@
           </p>
         </div>
 
-        <div id="painel-formulario-podio" class="cosmic-panel" style="display: none; border-color: var(--galaxy-gold);">
+        <div
+          id="painel-formulario-podio"
+          class="cosmic-panel"
+          style="display: none; border-color: var(--galaxy-gold)"
+        >
           <h2>👑 Configuração do Pódio Supremo</h2>
-          <p style="color: #aaa; margin-bottom: 20px;">Aponte quem terminará no topo imperial do campeonato:</p>
-          
-          <div class="user-identity" style="margin-bottom: 25px;">
+          <p style="color: #aaa; margin-bottom: 20px">
+            Aponte quem terminará no topo imperial do campeonato:
+          </p>
+
+          <div class="user-identity" style="margin-bottom: 25px">
             <label for="username-podio">Nome do Astronauta:</label>
-            <input type="text" id="username-podio" placeholder="Digite seu nome completo">
+            <input
+              type="text"
+              id="username-podio"
+              placeholder="Digite seu nome completo"
+            />
           </div>
 
-          <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px;">
-            <div class="user-identity" style="flex: 1; min-width: 220px;">
-              <label style="color: var(--galaxy-gold);">🥇 1º Lugar (Campeão):</label>
+          <div
+            style="
+              display: flex;
+              gap: 20px;
+              flex-wrap: wrap;
+              margin-bottom: 25px;
+            "
+          >
+            <div class="user-identity" style="flex: 1; min-width: 220px">
+              <label style="color: var(--galaxy-gold)"
+                >🥇 1º Lugar (Campeão):</label
+              >
               <select id="select-1-lugar" class="select-space-custom">
                 <option value="">-- Selecione o Campeão --</option>
-                <option value="Brasil 🇧🇷">Brasil 🇧🇷</option><option value="Argentina 🇦🇷">Argentina 🇦🇷</option><option value="França 🇫🇷">França 🇫🇷</option><option value="Espanha 🇪🇸">Espanha 🇪🇸</option><option value="Alemanha 🇩🇪">Alemanha 🇩🇪</option><option value="Portugal 🇵🇹">Portugal 🇵🇹</option><option value="Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿">Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿</option><option value="Holanda 🇳🇱">Holanda 🇳🇱</option><option value="Uruguai 🇺🇾">Uruguai 🇺🇾</option><option value="Bélgica 🇧🇪">Bélgica 🇧🇪</option><option value="Marrocos 🇲🇦">Marrocos 🇲🇦</option>
+                <option value="Brasil 🇧🇷">Brasil 🇧🇷</option>
+                <option value="Argentina 🇦🇷">Argentina 🇦🇷</option>
+                <option value="França 🇫🇷">França 🇫🇷</option>
+                <option value="Espanha 🇪🇸">Espanha 🇪🇸</option>
+                <option value="Alemanha 🇩🇪">Alemanha 🇩🇪</option>
+                <option value="Portugal 🇵🇹">Portugal 🇵🇹</option>
+                <option value="Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿">Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿</option>
+                <option value="Holanda 🇳🇱">Holanda 🇳🇱</option>
+                <option value="Uruguai 🇺🇾">Uruguai 🇺🇾</option>
+                <option value="Bélgica 🇧🇪">Bélgica 🇧🇪</option>
+                <option value="Marrocos 🇲🇦">Marrocos 🇲🇦</option>
               </select>
             </div>
 
-            <div class="user-identity" style="flex: 1; min-width: 220px;">
-              <label style="color: #ddd;">🥈 2º Lugar (Vice-Campeão):</label>
+            <div class="user-identity" style="flex: 1; min-width: 220px">
+              <label style="color: #ddd">🥈 2º Lugar (Vice-Campeão):</label>
               <select id="select-2-lugar" class="select-space-custom">
                 <option value="">-- Selecione o Vice --</option>
-                <option value="Brasil 🇧🇷">Brasil 🇧🇷</option><option value="Argentina 🇦🇷">Argentina 🇦🇷</option><option value="França 🇫🇷">França 🇫🇷</option><option value="Espanha 🇪🇸">Espanha 🇪🇸</option><option value="Alemanha 🇩🇪">Alemanha 🇩🇪</option><option value="Portugal 🇵🇹">Portugal 🇵🇹</option><option value="Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿">Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿</option><option value="Holanda 🇳🇱">Holanda 🇳🇱</option><option value="Uruguai 🇺🇾">Uruguai 🇺🇾</option><option value="Bélgica 🇧🇪">Bélgica 🇧🇪</option><option value="Marrocos 🇲🇦">Marrocos 🇲🇦</option>
+                <option value="Brasil 🇧🇷">Brasil 🇧🇷</option>
+                <option value="Argentina 🇦🇷">Argentina 🇦🇷</option>
+                <option value="França 🇫🇷">França 🇫🇷</option>
+                <option value="Espanha 🇪🇸">Espanha 🇪🇸</option>
+                <option value="Alemanha 🇩🇪">Alemanha 🇩🇪</option>
+                <option value="Portugal 🇵🇹">Portugal 🇵🇹</option>
+                <option value="Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿">Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿</option>
+                <option value="Holanda 🇳🇱">Holanda 🇳🇱</option>
+                <option value="Uruguai 🇺🇾">Uruguai 🇺🇾</option>
+                <option value="Bélgica 🇧🇪">Bélgica 🇧🇪</option>
+                <option value="Marrocos 🇲🇦">Marrocos 🇲🇦</option>
               </select>
             </div>
 
-            <div class="user-identity" style="flex: 1; min-width: 220px;">
-              <label style="color: #b87333;">🥉 3º Lugar:</label>
+            <div class="user-identity" style="flex: 1; min-width: 220px">
+              <label style="color: #b87333">🥉 3º Lugar:</label>
               <select id="select-3-lugar" class="select-space-custom">
                 <option value="">-- Selecione o 3º Colocado --</option>
-                <option value="Brasil 🇧🇷">Brasil 🇧🇷</option><option value="Argentina 🇦🇷">Argentina 🇦🇷</option><option value="França 🇫🇷">França 🇫🇷</option><option value="Espanha 🇪🇸">Espanha 🇪🇸</option><option value="Alemanha 🇩🇪">Alemanha 🇩🇪</option><option value="Portugal 🇵🇹">Portugal 🇵🇹</option><option value="Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿">Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿</option><option value="Holanda 🇳🇱">Holanda 🇳🇱</option><option value="Uruguai 🇺🇾">Uruguai 🇺🇾</option><option value="Bélgica 🇧🇪">Bélgica 🇧🇪</option><option value="Marrocos 🇲🇦">Marrocos 🇲🇦</option>
+                <option value="Brasil 🇧🇷">Brasil 🇧🇷</option>
+                <option value="Argentina 🇦🇷">Argentina 🇦🇷</option>
+                <option value="França 🇫🇷">França 🇫🇷</option>
+                <option value="Espanha 🇪🇸">Espanha 🇪🇸</option>
+                <option value="Alemanha 🇩🇪">Alemanha 🇩🇪</option>
+                <option value="Portugal 🇵🇹">Portugal 🇵🇹</option>
+                <option value="Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿">Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿</option>
+                <option value="Holanda 🇳🇱">Holanda 🇳🇱</option>
+                <option value="Uruguai 🇺🇾">Uruguai 🇺🇾</option>
+                <option value="Bélgica 🇧🇪">Bélgica 🇧🇪</option>
+                <option value="Marrocos 🇲🇦">Marrocos 🇲🇦</option>
               </select>
             </div>
           </div>
 
-          <button class="btn-orbit" id="btn-enviar-podio" style="max-width: 350px;" onclick="salvarPodioFinal()">Gravar Pódio na Base 🚀</button>
+          <button
+            class="btn-orbit"
+            id="btn-enviar-podio"
+            style="max-width: 350px"
+            onclick="salvarPodioFinal()"
+          >
+            Gravar Pódio na Base 🚀
+          </button>
           <p id="saved-podio-msg" class="success-text"></p>
+        </div>
+      </section>
+      <section id="aba-ranking" class="tab-content">
+        <div class="cosmic-panel">
+          <h2>🏆 Painel de Liderança</h2>
+          <p style="color: #aaa; margin-bottom: 20px">
+            Acompanhe as pontuações. Os dados são recalculados automaticamente a
+            cada atualização de gabarito na base!
+          </p>
+
+          <div style="overflow-x: auto; width: 100%">
+            <table
+              style="width: 100%; border-collapse: collapse; margin-top: 10px"
+            >
+              <thead>
+                <tr style="border-bottom: 2px solid #222; text-align: left">
+                  <th
+                    style="
+                      padding: 12px 8px;
+                      color: var(--galaxy-gold);
+                      font-size: 1rem;
+                      width: 20%;
+                      text-align: left;
+                    "
+                  >
+                    Posição 🪐
+                  </th>
+                  <th
+                    style="
+                      padding: 12px 8px;
+                      color: #fff;
+                      font-size: 1rem;
+                      width: 50%;
+                      text-align: left;
+                    "
+                  >
+                    Astronauta 🛸
+                  </th>
+                  <th
+                    style="
+                      padding: 12px 8px;
+                      color: var(--nebula-green);
+                      font-size: 1rem;
+                      width: 30%;
+                      text-align: right;
+                    "
+                  >
+                    Pontuação Total 🏆
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tabela-ranking-geral">
+                <tr>
+                  <td
+                    colspan="3"
+                    style="text-align: center; padding: 30px; color: #aaa"
+                  >
+                    Sincronizando com os satélites de pontuação...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </main>

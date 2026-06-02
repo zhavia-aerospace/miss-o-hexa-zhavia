@@ -1,5 +1,10 @@
 const definicaoGrupos = {
-  A: ["México 🇲🇽", "África do Sul 🇿🇦", "Coreia do Sul 🇰🇷", "República Tcheca 🇨🇿"],
+  A: [
+    "México 🇲🇽",
+    "África do Sul 🇿🇦",
+    "Coreia do Sul 🇰🇷",
+    "República Tcheca 🇨🇿",
+  ],
   B: ["Canadá 🇨🇦", "Suíça 🇨🇭", "Catar 🇶🇦", "Bósnia e Herzegovina 🇧🇦"],
   C: ["Brasil 🇧🇷", "Marrocos 🇲🇦", "Escócia 🏴󠁧󠁢󠁳󠁣󠁴󠁿", "Haiti 🇭🇹"],
   D: ["Estados Unidos 🇺🇸", "Paraguai 🇵🇾", "Austrália 🇦🇺", "Turquia 🇹🇷"],
@@ -14,8 +19,18 @@ const definicaoGrupos = {
 };
 
 let escolhasDosGrupos = {
-  A: [], B: [], C: [], D: [], E: [], F: [],
-  G: [], H: [], I: [], J: [], K: [], L: [],
+  A: [],
+  B: [],
+  C: [],
+  D: [],
+  E: [],
+  F: [],
+  G: [],
+  H: [],
+  I: [],
+  J: [],
+  K: [],
+  L: [],
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -38,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
   controlarVisibilidadeRadar();
 });
 
+// ⚡ FUNÇÃO DE MUDANÇA DE ABAS INTEGRADA COM OS GATILHOS VISUAIS
 function mudarAba(nomeAba) {
   document
     .querySelectorAll(".tab-content")
@@ -45,14 +61,20 @@ function mudarAba(nomeAba) {
   document
     .querySelectorAll(".nav-btn")
     .forEach((btn) => btn.classList.remove("active"));
+
   document.getElementById(`aba-${nomeAba}`).classList.add("active");
   if (event && event.currentTarget) {
     event.currentTarget.classList.add("active");
   }
 
-  // Renderiza as bandeiras nos selects quando a aba do pódio abre
-  if (nomeAba === 'podio' && window.twemoji) {
+  // Se o astronauta clicar na Aba 3 (Pódio), renderiza os emojis nas caixas
+  if (nomeAba === "podio" && window.twemoji) {
     twemoji.parse(document.getElementById("painel-formulario-podio"));
+  }
+
+  // 🚀 ADICIONADO: Se o usuário clicar na Aba 4, dispara a busca de telemetria na planilha!
+  if (nomeAba === "ranking") {
+    carregarRankingGeralDaPlanilha();
   }
 }
 
@@ -192,12 +214,22 @@ function salvarPalpitesGrupoApenas() {
 
       document.getElementById("username").value = "";
       escolhasDosGrupos = {
-        A: [], B: [], C: [], D: [], E: [], F: [],
-        G: [], H: [], I: [], J: [], K: [], L: [],
+        A: [],
+        B: [],
+        C: [],
+        D: [],
+        E: [],
+        F: [],
+        G: [],
+        H: [],
+        I: [],
+        J: [],
+        K: [],
+        L: [],
       };
       desenharPainelDeGrupos();
       carregarPalpitesDaPlanilha();
-    controlarVisibilidadeRadar();
+      controlarVisibilidadeRadar();
     })
     .catch(() => {
       msg.style.color = "#ff3333";
@@ -242,13 +274,19 @@ function carregarPalpitesDaPlanilha() {
 }
 
 function filtrarTabela() {
-  const filtro = document.getElementById("busca-astronauta").value.toUpperCase();
-  const linens = document.getElementById("tabela-palpites-corpo").getElementsByTagName("tr");
+  const filtro = document
+    .getElementById("busca-astronauta")
+    .value.toUpperCase();
+  const linens = document
+    .getElementById("tabela-palpites-corpo")
+    .getElementsByTagName("tr");
   for (let i = 0; i < linens.length; i++) {
     const col = linens[i].getElementsByTagName("td")[0];
     if (col) {
       linens[i].style.display =
-        (col.textContent || col.innerText).toUpperCase().indexOf(filtro) > -1 ? "" : "none";
+        (col.textContent || col.innerText).toUpperCase().indexOf(filtro) > -1
+          ? ""
+          : "none";
     }
   }
 }
@@ -269,14 +307,8 @@ async function consultarOraculo() {
   txt.innerText = "Decodificando resposta cósmica...";
   box.style.display = "block";
 
-  let apiKey = localStorage.getItem("zhavia_gemini_key");
-  if (!apiKey) {
-    apiKey = prompt(
-      "🔑 CONEXÃO SEGURA: Insira a Gemini API Key da Zhavia para ativar o Oráculo (Apenas uma vez por máquina):",
-    );
-    if (!apiKey) return;
-    localStorage.setItem("zhavia_gemini_key", apiKey.trim());
-  }
+  // 🔑 COLOQUE SUA CHAVE FIXA AQUI DENTRO DAS ASPAS:
+  const apiKey = "AQ.Ab8RN6L55qowoa0LCx6V6SHd6eMIptUTuwGbRf60s4ksuWYZvg";
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   const instrucao = `Você é o Oráculo Espacial da Supercopa Zhavia. Responda de forma curta (máximo 3 linhas) e bem-humorada sobre futebol, espaço e zoeira corporativa leve.`;
@@ -294,12 +326,12 @@ async function consultarOraculo() {
     const d = await r.json();
     txt.innerText = d.candidates[0].content.parts[0].text;
     document.getElementById("pergunta-oraculo").value = "";
-  } catch {
+  } catch (erro) {
+    console.error("Erro no Oráculo:", erro);
     mostrarAlertaCosmico(
-      "Chave inválida ou problema de conexão. A memória local do Oráculo foi resetada.",
+      "O Oráculo está instável no momento. Tente novamente em outra órbita.",
       "🛸 Falha do Sistema",
     );
-    localStorage.removeItem("zhavia_gemini_key");
   }
 }
 
@@ -312,21 +344,33 @@ function salvarPodioFinal() {
   const btn = document.getElementById("btn-enviar-podio");
 
   if (localStorage.getItem("bolao_podio_enviado") === "true") {
-    mostrarAlertaCosmico("Sua telemetria de campeões já foi transmitida para a base! Não é permitido enviar múltiplos palpites do mesmo dispositivo.", "🛰️ Pódio Já Registrado");
+    mostrarAlertaCosmico(
+      "Sua telemetria de campeões já foi transmitida para a base! Não é permitido enviar múltiplos palpites do mesmo dispositivo.",
+      "🛰️ Pódio Já Registrado",
+    );
     return;
   }
 
-  if (!nome) { 
-    mostrarAlertaCosmico("Identifique-se com seu nome de astronauta para enviar o pódio!", "🛸 Identificação Necessária"); 
-    return; 
+  if (!nome) {
+    mostrarAlertaCosmico(
+      "Identifique-se com seu nome de astronauta para enviar o pódio!",
+      "🛸 Identificação Necessária",
+    );
+    return;
   }
-  if (!p1 || !p2 || !p3) { 
-    mostrarAlertaCosmico("Você precisa selecionar os três colocados do pódio!", "👑 Pódio Incompleto"); 
-    return; 
+  if (!p1 || !p2 || !p3) {
+    mostrarAlertaCosmico(
+      "Você precisa selecionar os três colocados do pódio!",
+      "👑 Pódio Incompleto",
+    );
+    return;
   }
-  if (p1 === p2 || p1 === p3 || p2 === p3) { 
-    mostrarAlertaCosmico("Anomalia detectada! Não é permitido repetir a mesma nação em posições diferentes do pódio.", "🚫 Seleção Duplicada"); 
-    return; 
+  if (p1 === p2 || p1 === p3 || p2 === p3) {
+    mostrarAlertaCosmico(
+      "Anomalia detectada! Não é permitido repetir a mesma nação em posições diferentes do pódio.",
+      "🚫 Seleção Duplicada",
+    );
+    return;
   }
 
   btn.innerText = "Transmitindo pódio à base...";
@@ -351,7 +395,7 @@ function salvarPodioFinal() {
       localStorage.setItem("bolao_podio_enviado", "true");
       msg.style.color = "#00ff66";
       msg.innerText = `👑 Sucesso! O pódio do astronauta ${nome} foi eternizado!`;
-      
+
       document.getElementById("username-podio").value = "";
       document.getElementById("select-1-lugar").value = "";
       document.getElementById("select-2-lugar").value = "";
@@ -366,18 +410,90 @@ function salvarPodioFinal() {
       btn.disabled = false;
     });
 }
-// Gerencia se a tabela fica escondida ou visível baseada no palpite
+
 function controlarVisibilidadeRadar() {
   const painelBloqueado = document.getElementById("radar-bloqueado");
   const painelConteudo = document.getElementById("radar-conteudo");
-  
+
   if (!painelBloqueado || !painelConteudo) return;
 
   if (localStorage.getItem("bolao_hexa_enviado") === "true") {
-    painelBloqueado.style.display = "none";  // Some o aviso de bloqueado
-    painelConteudo.style.display = "block";  // Mostra a tabela de palpites
+    painelBloqueado.style.display = "none";
+    painelConteudo.style.display = "block";
   } else {
-    painelBloqueado.style.display = "block"; // Mantém o aviso ativo
-    painelConteudo.style.display = "none";  // Esconde a tabela
+    painelBloqueado.style.display = "block";
+    painelConteudo.style.display = "none";
   }
+}
+
+// 🌐 BUSCA OS DADOS REAIS DO RANKING DA PLANILHA DO GOOGLE (Lógica Blindada Mapeada por Chaves Limpas)
+// 🌐 BUSCA OS DADOS REAIS DO RANKING DA PLANILHA DO GOOGLE
+function carregarRankingGeralDaPlanilha() {
+  const urlRanking =
+    "https://sheetdb.io/api/v1/uydiragrvi7jc?sheet=Classificacao";
+  const corpoTabela = document.getElementById("tabela-ranking-geral");
+
+  if (!corpoTabela) return;
+
+  fetch(urlRanking)
+    .then((r) => r.json())
+    .then((dados) => {
+      corpoTabela.innerHTML = "";
+
+      if (!dados || dados.length === 0) {
+        corpoTabela.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 20px; color: #ff3333;">⚠️ Nenhum dado encontrado na aba Classificacao.</td></tr>`;
+        return;
+      }
+
+      dados.forEach((item) => {
+        // Puxa as propriedades exatas da planilha
+        const posicao = item.Posicao || item.posicao || "•";
+        const nomeAstronauta = item.Astronauta || item.astronauta;
+
+        // 🛰️ CAPTURA INTELIGENTE: Tenta ler "Pontuacao Total", se não achar tenta "Pontuacao"
+        let pontos =
+          item["Pontuacao Total"] ||
+          item["Pontuacaototal"] ||
+          item.Pontuacao ||
+          item.pontuacao ||
+          "0";
+
+        // Filtro contra erros de processamento temporários da planilha
+        if (pontos === "#N/A" || pontos === "#REF!") {
+          pontos = "0";
+        }
+
+        // Ignora linhas totalmente vazias ou o cabeçalho caso a API duplique
+        if (
+          !nomeAstronauta ||
+          nomeAstronauta.trim() === "" ||
+          nomeAstronauta.includes("#REF!")
+        )
+          return;
+
+        const linha = document.createElement("tr");
+        linha.style.borderBottom = "1px solid #222";
+
+        linha.innerHTML = `
+            <td style="padding: 14px 8px; font-weight: bold; color: var(--galaxy-gold); font-size: 1.1rem; text-align: left;">
+              ${posicao}º
+            </td>
+            <td style="padding: 14px 8px; font-weight: bold; color: #fff; text-align: left;">
+              👨‍🚀 ${nomeAstronauta}
+            </td>
+            <td style="padding: 14px 8px; text-align: right; font-weight: bold; color: var(--nebula-green); font-size: 1.15rem;">
+              ${pontos} pts
+            </td>
+        `;
+        corpoTabela.appendChild(linha);
+      });
+
+      if (corpoTabela.innerHTML === "") {
+        corpoTabela.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 30px; color: #aaa;">🛸 Aguardando computação de pontos na planilha...</td></tr>`;
+      }
+    })
+    .catch((erro) => {
+      console.error("Erro na sincronização:", erro);
+      corpoTabela.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 20px; color: #ff3333;">❌ Falha na conexão com o satélite de pontuação.</td></tr>`;
+    });
 }

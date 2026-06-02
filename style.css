@@ -344,7 +344,7 @@ select.select-space-custom option,
 #select-2-lugar option,
 #select-3-lugar option {
   background-color: #111424 !important; /* Força o fundo escuro do painel ao abrir */
-  color: #ffffff !important;            /* Força as letras a ficarem brancas */
+  color: #ffffff !important; /* Força as letras a ficarem brancas */
   padding: 12px !important;
   font-size: 1rem !important;
 }
