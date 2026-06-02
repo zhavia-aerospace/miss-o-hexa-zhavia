@@ -699,14 +699,35 @@ function alternarSubAbaRadar(tipo) {
   }
 }
 
-// ⚡ ACIONAMENTO AUTOMÁTICO DO SCRIPT
+// ⚡ ACIONAMENTO AUTOMÁTICO DO SCRIPT (MODIFICADO PARA INICIAR OCULTO)
 window.addEventListener("load", () => {
   carregarPlacaresAoVivoDaCopa();
   // Verifica o cache local a cada 2 minutos (Sem gastar requisição da API externa)
   setInterval(carregarPlacaresAoVivoDaCopa, 120000);
+
+  // 📡 CORREÇÃO DE ÓRBITA: Força o painel a iniciar completamente fechado e invisível na montagem da página
+  const painel = document.getElementById("painel-lateral-jogos");
+  const conteudo = document.getElementById("conteudo-painel-lateral");
+  const gatilhoMini = document.getElementById("radar-minimizado-trigger");
+  const cabecalho = document.querySelector(".cabecalho-radar");
+
+  if (painel && conteudo && gatilhoMini) {
+    conteudo.style.display = "none";
+    if (cabecalho) cabecalho.style.display = "none";
+    gatilhoMini.style.display = "flex";
+    painel.className = "cosmic-panel painel-lateral-oculto";
+  }
+  
+  // Injeta dinamicamente a biblioteca de confetes se ela não estiver presente no HTML
+  if (!window.confetti) {
+    const scriptConfetti = document.createElement("script");
+    scriptConfetti.src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js";
+    document.head.appendChild(scriptConfetti);
+  }
 });
-// 🛸 ADICIONADO: FUNÇÃO DE MINIMIZAÇÃO E EXPANÇÃO DO RADAR (OCULTAR / EXIBIR)
-let painelAberto = true;
+
+// 🛸 FUNÇÃO DE MINIMIZAÇÃO E EXPANSÃO DO RADAR
+let painelAberto = false;
 
 function alternarPainelLateral() {
   const painel = document.getElementById("painel-lateral-jogos");
@@ -735,6 +756,7 @@ function alternarPainelLateral() {
     painelAberto = true;
   }
 }
+
 // 🔒 POP-UP DE DETALHES EVOLUÍDO: BUSCA OS PALPITES REAIS DO USUÁRIO NA BASE
 function abrirDetalhesAstronauta(nomeSelecionado) {
   const jaVotouAba2 = localStorage.getItem("bolao_hexa_enviado");
@@ -747,7 +769,6 @@ function abrirDetalhesAstronauta(nomeSelecionado) {
     return;
   }
 
-  // Cria a estrutura inicial do Modal na tela com um feedback de carregamento
   const modal = document.createElement("div");
   modal.className = "modal-detalhes-astronauta";
   modal.id = "modal-espiao-astronauta";
@@ -765,7 +786,6 @@ function abrirDetalhesAstronauta(nomeSelecionado) {
   `;
   document.body.appendChild(modal);
 
-  // Faz a busca na base principal de palpites para descobrir as escolhas do astronauta clicado
   const urlBasePalpites = "https://sheetdb.io/api/v1/uydiragrvi7jc";
 
   fetch(urlBasePalpites)
@@ -774,7 +794,6 @@ function abrirDetalhesAstronauta(nomeSelecionado) {
       const painelInterno = document.getElementById("detalhes-painel-interno");
       if (!painelInterno) return;
 
-      // Procura a linha correspondente ao nome do colega clicado
       const palpiteUsuario = dados.find(
         (item) =>
           item.Nome &&
@@ -787,23 +806,9 @@ function abrirDetalhesAstronauta(nomeSelecionado) {
         return;
       }
 
-      // Monta uma lista organizada e compacta com as escolhas de todos os grupos
       let htmlPalpites = `<div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-top:5px;">`;
 
-      const letrasGrupos = [
-        "A",
-        "B",
-        "C",
-        "D",
-        "E",
-        "F",
-        "G",
-        "H",
-        "I",
-        "J",
-        "K",
-        "L",
-      ];
+      const letrasGrupos = ["A","B","C","D","E","F","G","H","I","J","K","L"];
       letrasGrupos.forEach((letra) => {
         const dadosGrupo = palpiteUsuario[`Grupo_${letra}`] || "Não enviado";
         htmlPalpites += `
@@ -815,8 +820,6 @@ function abrirDetalhesAstronauta(nomeSelecionado) {
       });
 
       htmlPalpites += `</div>`;
-
-      // Rodapé informativo sobre a Aba 3 que será liberada no futuro
       htmlPalpites += `
         <hr style="border:0; border-top:1px solid rgba(255,255,255,0.05); margin:12px 0 5px 0;">
         <p style="color:#667099; text-align:center; font-size:0.75rem; font-style:italic;">[Pódio Final Supremo protegido por criptografia - Liberado nas Oitavas]</p>
@@ -824,7 +827,6 @@ function abrirDetalhesAstronauta(nomeSelecionado) {
 
       painelInterno.innerHTML = htmlPalpites;
 
-      // Aplica o Twemoji para renderizar as bandeirinhas no Pop-up perfeitamente
       if (window.twemoji) {
         twemoji.parse(painelInterno);
       }
@@ -855,7 +857,6 @@ function verificarNovosGols(dadosNovos) {
       const golAwayMudou = jogoNovo.goals.away > jogoAntigo.goals.away;
 
       if (golHomeMudou || golAwayMudou) {
-        // 🔥 DISPARA BANNER FLASH NO TOPO DA TELA!
         const banner = document.createElement("div");
         banner.className = "banner-alerta-gol";
         banner.id = "flash-gol";
@@ -867,7 +868,6 @@ function verificarNovosGols(dadosNovos) {
         `;
         document.body.appendChild(banner);
 
-        // Remove o banner sozinho após 6 segundos
         setTimeout(() => {
           if (document.getElementById("flash-gol"))
             document.getElementById("flash-gol").remove();
