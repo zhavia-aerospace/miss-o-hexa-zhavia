@@ -1,3 +1,8 @@
+/* =============================================
+   Supercopa Zhavia — Global CSS
+   Portado do style.css original + suporte React
+   ============================================= */
+
 /* Reset e Variáveis */
 * {
   margin: 0;
@@ -23,7 +28,7 @@ body {
   min-height: 100vh;
 }
 
-/* Fundo Estelar Dinâmico */
+/* Fundo Estelar */
 #stars-container {
   position: fixed;
   top: 0;
@@ -42,13 +47,8 @@ body {
 }
 
 @keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 1;
-  }
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
 }
 
 /* Cabeçalho */
@@ -83,7 +83,7 @@ h1 {
   margin-bottom: 25px;
 }
 
-/* Menu de Abas */
+/* Navegação */
 .space-nav {
   display: flex;
   justify-content: center;
@@ -108,7 +108,7 @@ h1 {
   transform: translateY(-2px);
 }
 
-/* Container */
+/* Container principal */
 main {
   max-width: 1000px;
   margin: 35px auto;
@@ -133,36 +133,17 @@ h2 {
   padding-left: 10px;
 }
 
-/* Gerenciamento das Abas */
+/* Abas (React usa condicional, mas mantemos a classe para fade) */
 .tab-content {
-  display: none;
-}
-
-.tab-content.active {
-  display: block;
   animation: fadeIn 0.5s ease;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Notícias */
-.feed-noticias li {
-  list-style: none;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  color: #ccc;
-}
-
-/* Formulário e Simulador */
+/* Formulários */
 .user-identity {
   margin-bottom: 20px;
   display: flex;
@@ -179,43 +160,7 @@ h2 {
   font-size: 1rem;
 }
 
-.simulator-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 20px;
-  border-radius: 8px;
-}
-
-.team {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-weight: bold;
-}
-
-.team-icon {
-  font-size: 2.5rem;
-}
-
-.score-input {
-  width: 65px;
-  height: 55px;
-  font-size: 1.8rem;
-  text-align: center;
-  background: var(--space-dark);
-  border: 2px solid var(--cosmic-blue);
-  color: white;
-  border-radius: 5px;
-}
-
-.vs {
-  color: var(--galaxy-gold);
-  font-weight: bold;
-}
-
+/* Botão principal */
 .btn-orbit {
   display: block;
   width: 100%;
@@ -232,10 +177,15 @@ h2 {
   transition: all 0.3s;
 }
 
-.btn-orbit:hover {
+.btn-orbit:hover:not(:disabled) {
   background: var(--nebula-green);
   color: black;
   box-shadow: 0 0 15px var(--nebula-green);
+}
+
+.btn-orbit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .success-text {
@@ -263,56 +213,70 @@ h2 {
   color: var(--galaxy-gold);
 }
 
-/* Grid de Missões */
-.missions-grid {
+/* Grid de grupos */
+.grid-grupos-bolao {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
+  margin-top: 20px;
 }
 
-.mission-card {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(0, 102, 255, 0.2);
-  padding: 20px;
+.card-grupo-space {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--cosmic-blue);
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
+  padding: 15px;
 }
 
-.mission-card:hover {
-  border-color: var(--galaxy-gold);
-  transform: scale(1.02);
-}
-
-.mission-status {
-  display: inline-block;
-  margin-top: 15px;
-  font-size: 0.8rem;
-  padding: 4px 8px;
-  border-radius: 4px;
-  background: rgba(0, 255, 102, 0.1);
-  color: var(--nebula-green);
-}
-
-.mission-card.done {
-  border-color: var(--nebula-green);
-}
-
-.mission-card.done .mission-status {
-  background: var(--nebula-green);
-  color: black;
-}
-
-footer {
+.card-grupo-space h3 {
+  color: var(--galaxy-gold);
   text-align: center;
-  padding: 30px;
-  font-size: 0.8rem;
-  color: #444;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 102, 255, 0.2);
+  padding-bottom: 5px;
 }
 
-/* Customização Avançada dos Menus de Seleção Cósmicos */
+.label-time-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.label-time-checkbox:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Bloqueio da aba Pódio */
+.painel-bloqueado {
+  text-align: center;
+  padding: 40px 20px;
+  border: 2px dashed #ff3333;
+  background: rgba(255, 51, 51, 0.05);
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.lock-icon {
+  font-size: 3.5rem;
+  margin-bottom: 15px;
+  display: block;
+  animation: lockPulse 2s infinite;
+}
+
+@keyframes lockPulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.6; }
+}
+
+/* Select espacial */
 select.select-space-custom {
-  background-color: #111424 !important; /* Mesma cor de fundo do seu cosmic-panel */
+  background-color: #111424 !important;
   color: #ffffff !important;
   border: 1px solid var(--cosmic-blue) !important;
   padding: 12px;
@@ -337,22 +301,16 @@ select.select-space-custom:focus {
   box-shadow: 0 0 15px rgba(255, 204, 0, 0.2);
 }
 
-/* 🪐 FORÇAR A ESTILIZAÇÃO DO DROPDOWN INTERNO (OPÇÕES DO SELETOR) */
-select.select-space-custom option,
-.select-space-custom option,
-#select-1-lugar option,
-#select-2-lugar option,
-#select-3-lugar option {
-  background-color: #111424 !important; /* Força o fundo escuro do painel ao abrir */
-  color: #ffffff !important; /* Força as letras a ficarem brancas */
+select.select-space-custom option {
+  background-color: #111424 !important;
+  color: #ffffff !important;
   padding: 12px !important;
   font-size: 1rem !important;
 }
-/* ==========================================================================
-   📡 DESIGN SISTEMA DE RADAR / CENTRAL DE TRANSMISSÃO REESTILIZADA
-   ========================================================================== */
 
-/* Base e Comportamento de Transição do Painel Lateral */
+/* =============================================
+   Painel Lateral de Jogos
+   ============================================= */
 #painel-lateral-jogos {
   position: fixed;
   top: 90px;
@@ -361,13 +319,10 @@ select.select-space-custom option,
   background: rgba(10, 12, 26, 0.93);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(0, 102, 255, 0.35);
-  box-shadow:
-    0 0 30px rgba(0, 66, 255, 0.2),
-    inset 0 0 15px rgba(0, 102, 255, 0.1);
+  box-shadow: 0 0 30px rgba(0, 66, 255, 0.2), inset 0 0 15px rgba(0, 102, 255, 0.1);
   transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Estado 1: Painel Expandido (Normal) */
 .painel-lateral-expandido {
   width: 330px;
   max-height: calc(100vh - 130px);
@@ -376,7 +331,6 @@ select.select-space-custom option,
   padding: 18px !important;
 }
 
-/* Estado 2: Painel Oculto (Estilo Gadget/Radar Circular) */
 .painel-lateral-oculto {
   width: 65px !important;
   height: 65px !important;
@@ -392,7 +346,6 @@ select.select-space-custom option,
   cursor: pointer;
 }
 
-/* Header interno do Radar */
 .cabecalho-radar {
   display: flex;
   justify-content: space-between;
@@ -409,7 +362,6 @@ select.select-space-custom option,
   gap: 8px;
 }
 
-/* Luz piscante de Telemetria Ativa */
 .radar-ping {
   width: 8px;
   height: 8px;
@@ -421,22 +373,11 @@ select.select-space-custom option,
 }
 
 @keyframes pingDoSatelite {
-  0% {
-    transform: scale(0.9);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 0.4;
-    box-shadow: 0 0 12px #ff3333;
-  }
-  100% {
-    transform: scale(0.9);
-    opacity: 1;
-  }
+  0% { transform: scale(0.9); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.4; box-shadow: 0 0 12px #ff3333; }
+  100% { transform: scale(0.9); opacity: 1; }
 }
 
-/* Botão Switch Futurista */
 .switch-btn-espacial {
   background: rgba(0, 102, 255, 0.1);
   border: 1px solid var(--cosmic-blue);
@@ -460,7 +401,6 @@ select.select-space-custom option,
   transform: scale(1.03);
 }
 
-/* Componentes Visuais do Mini-Radar Pulsante (Quando oculto) */
 #radar-minimizado-trigger {
   width: 100%;
   height: 100%;
@@ -500,90 +440,41 @@ select.select-space-custom option,
 }
 
 @keyframes ondasRadar {
-  0% {
-    transform: scale(0.6);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.6);
-    opacity: 0;
-  }
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0; }
 }
-/* Customização da barra de rolagem da aba de Histórico do Radar */
-#radar-bloco-historico::-webkit-scrollbar {
-  width: 5px;
-}
-#radar-bloco-historico::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-#radar-bloco-historico::-webkit-scrollbar-thumb {
-  background: var(--cosmic-blue);
-  border-radius: 4px;
-}
-#radar-bloco-historico::-webkit-scrollbar-thumb:hover {
-  background: var(--nebula-green);
-}
-/* ==========================================================================
-   🥇 ESTILIZAÇÃO DO PÓDIO CÓSMICO (RANKING) & MODAL DE DETALHES
-   ========================================================================== */
 
-/* Cores de Destaque para o Pódio */
+/* =============================================
+   Pódio e Ranking
+   ============================================= */
 .podio-1 {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 204, 0, 0.15) 0%,
-    rgba(0, 0, 0, 0) 100%
-  ) !important;
+  background: linear-gradient(90deg, rgba(255, 204, 0, 0.15) 0%, rgba(0, 0, 0, 0) 100%) !important;
   border-left: 4px solid var(--galaxy-gold) !important;
 }
-.podio-1 .posicao-num {
-  color: var(--galaxy-gold) !important;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
+.podio-1 .posicao-num { color: var(--galaxy-gold) !important; font-weight: bold; font-size: 1.2rem; }
 
 .podio-2 {
-  background: linear-gradient(
-    90deg,
-    rgba(200, 200, 200, 0.15) 0%,
-    rgba(0, 0, 0, 0) 100%
-  ) !important;
+  background: linear-gradient(90deg, rgba(200, 200, 200, 0.15) 0%, rgba(0, 0, 0, 0) 100%) !important;
   border-left: 4px solid #d1d1d1 !important;
 }
-.podio-2 .posicao-num {
-  color: #d1d1d1 !important;
-  font-weight: bold;
-  font-size: 1.1rem;
-}
+.podio-2 .posicao-num { color: #d1d1d1 !important; font-weight: bold; font-size: 1.1rem; }
 
 .podio-3 {
-  background: linear-gradient(
-    90deg,
-    rgba(205, 127, 50, 0.15) 0%,
-    rgba(0, 0, 0, 0) 100%
-  ) !important;
+  background: linear-gradient(90deg, rgba(205, 127, 50, 0.15) 0%, rgba(0, 0, 0, 0) 100%) !important;
   border-left: 4px solid #cd7f32 !important;
 }
-.podio-3 .posicao-num {
-  color: #cd7f32 !important;
-  font-weight: bold;
-  font-size: 1.05rem;
-}
+.podio-3 .posicao-num { color: #cd7f32 !important; font-weight: bold; font-size: 1.05rem; }
 
-/* Linha de clique do Ranking */
 .ranking-row-clicavel {
   cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    background-color 0.2s ease;
+  transition: background-color 0.2s ease;
+  box-sizing: border-box;
 }
 .ranking-row-clicavel:hover {
   background-color: rgba(0, 102, 255, 0.1) !important;
-  transform: translateX(4px);
 }
 
-/* Modal de Detalhes do Usuário (Palpites) */
+/* Modal de detalhes */
 .modal-detalhes-astronauta {
   position: fixed;
   top: 0;
@@ -597,6 +488,7 @@ select.select-space-custom option,
   justify-content: center;
   z-index: 2000;
 }
+
 .modal-detalhes-content {
   background: var(--space-panel);
   border: 1px solid var(--cosmic-blue);
@@ -608,6 +500,7 @@ select.select-space-custom option,
   position: relative;
   animation: scaleUp 0.3s ease;
 }
+
 .modal-detalhes-fechar {
   position: absolute;
   top: 15px;
@@ -619,11 +512,9 @@ select.select-space-custom option,
   cursor: pointer;
   transition: color 0.2s;
 }
-.modal-detalhes-fechar:hover {
-  color: #ff3333;
-}
+.modal-detalhes-fechar:hover { color: #ff3333; }
 
-/* Banner de Alerta de Gol Volátil */
+/* Banner de gol */
 .banner-alerta-gol {
   position: fixed;
   top: 20px;
@@ -640,64 +531,67 @@ select.select-space-custom option,
   gap: 12px;
   animation: slideDownIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
 @keyframes slideDownIn {
-  0% {
-    top: -80px;
-    opacity: 0;
-  }
-  100% {
-    top: 20px;
-    opacity: 1;
-  }
-}
-/* 🚫 ELIMINA O SCROLL HORIZONTAL NO RANKING */
-#aba-ranking .cosmic-panel div {
-  overflow-x: hidden !important;
+  0% { top: -80px; opacity: 0; }
+  100% { top: 20px; opacity: 1; }
 }
 
-/* 🧬 AJUSTE DE TRANSIÇÃO DO MOUSE PARA EVITAR EMPURRÃO */
-.ranking-row-clicavel {
-  box-sizing: border-box;
+@keyframes scaleUp {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
-.ranking-row-clicavel:hover {
-  background-color: rgba(0, 102, 255, 0.1) !important;
-  /* Removemos o translateX para não empurrar a linha para fora da tela */
+/* Twemoji */
+img.emoji {
+  height: 1.2em;
+  width: 1.2em;
+  margin: 0 0.05em 0 0.1em;
+  vertical-align: -0.1em;
+  display: inline-block;
 }
-/* 📱 ADAPTAÇÃO RESPONSIVA APENAS PARA TELAS MÓVEIS (MÁXIMO 768px) */
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 30px;
+  font-size: 0.8rem;
+  color: #444;
+}
+
+/* =============================================
+   Responsivo
+   ============================================= */
 @media (max-width: 768px) {
   .space-nav {
     display: flex !important;
-    flex-wrap: wrap !important; /* Permite quebrar linha se faltar espaço no celular */
+    flex-wrap: wrap !important;
     gap: 8px !important;
     justify-content: center !important;
     width: 100% !important;
     padding: 0 5px !important;
   }
-
   .nav-btn {
-    flex: 1 1 auto !important; /* Cresce proporcionalmente */
-    min-width: 120px !important; /* Tamanho confortável para toque */
+    flex: 1 1 auto !important;
+    min-width: 120px !important;
     padding: 10px 14px !important;
     font-size: 0.9rem !important;
     text-align: center !important;
   }
+  #painel-lateral-jogos {
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+  }
 }
 
-/* Redução ainda maior para celulares muito pequenos */
 @media (max-width: 480px) {
   .nav-btn {
     font-size: 0.8rem !important;
     padding: 8px 10px !important;
-    min-width: 45% !important; /* Ficam dispostos em duas colunas perfeitas */
+    min-width: 45% !important;
   }
-  
   .grid-grupos-bolao {
-    grid-template-columns: 1fr !important; /* Força os grupos a ficarem em uma única coluna no celular */
+    grid-template-columns: 1fr !important;
   }
-}
-
-/* 🚫 DESATIVADO SEU TRANSLATE ANTERIOR DO HOVER NO RANKING CONTRA SCROLL */
-.ranking-row-clicavel:hover {
-  transform: none !important;
 }

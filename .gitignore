@@ -1,0 +1,13 @@
+# Dependências
+node_modules/
+
+# Builds
+client/dist/
+
+# Variáveis de ambiente (nunca commitar)
+server/.env
+client/.env
+
+# Editor
+.vscode/
+.idea/
