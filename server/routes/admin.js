@@ -29,6 +29,17 @@ router.delete('/palpites', async (_req, res) => {
   }
 });
 
+// DELETE /api/admin/palpites/:id — remove um palpite individual
+router.delete('/palpites/:id', async (req, res) => {
+  try {
+    const deletado = await Palpite.findByIdAndDelete(req.params.id);
+    if (!deletado) return res.status(404).json({ error: 'Palpite não encontrado' });
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ error: 'Erro ao deletar palpite' });
+  }
+});
+
 // POST /api/admin/ranking — substitui o ranking completo
 router.post('/ranking', async (req, res) => {
   const { ranking } = req.body;

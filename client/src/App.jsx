@@ -11,9 +11,16 @@ import AbaRanking from './components/tabs/AbaRanking.jsx';
 import AbaAdmin from './components/AbaAdmin.jsx';
 
 const IS_ADMIN = window.location.pathname === '/adminrafael';
+const JA_ENVIOU_KEY = 'bolao_hexa_enviado';
 
 export default function App() {
   const [abaAtiva, setAbaAtiva] = useState('home');
+  const [jaEnviou, setJaEnviou] = useState(() => localStorage.getItem(JA_ENVIOU_KEY) === 'true');
+
+  function handleMudarAba(aba) {
+    if (aba === 'ranking' && !jaEnviou) return;
+    setAbaAtiva(aba);
+  }
 
   if (IS_ADMIN) {
     return (
@@ -28,13 +35,13 @@ export default function App() {
     <AlertProvider>
       <StarsBackground />
 
-      <Header abaAtiva={abaAtiva} onMudarAba={setAbaAtiva} />
+      <Header abaAtiva={abaAtiva} onMudarAba={handleMudarAba} jaEnviou={jaEnviou} />
 
       <main>
         {abaAtiva === 'home' && <AbaHome />}
-        {abaAtiva === 'palpites' && <AbaPalpites />}
+        {abaAtiva === 'palpites' && <AbaPalpites onPalpiteEnviado={() => setJaEnviou(true)} />}
         {abaAtiva === 'podio' && <AbaPodio />}
-        {abaAtiva === 'ranking' && <AbaRanking />}
+        {abaAtiva === 'ranking' && jaEnviou && <AbaRanking />}
       </main>
 
       <PainelLateralJogos />

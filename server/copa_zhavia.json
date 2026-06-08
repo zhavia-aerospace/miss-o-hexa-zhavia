@@ -1,0 +1,326 @@
+[
+  {
+    "nome": "Lucas Menegusso",
+    "data": "2026-06-05T14:40:15",
+    "palpites": {
+      "Grupo A": {
+        "1º": "México",
+        "2º": "Coreia do Sul"
+      },
+      "Grupo B": {
+        "1º": "Suíça",
+        "2º": "Canadá"
+      },
+      "Grupo C": {
+        "1º": "Brasil",
+        "2º": "Marrocos"
+      },
+      "Grupo D": {
+        "1º": "Turquia",
+        "2º": "Paraguai"
+      },
+      "Grupo E": {
+        "1º": "Alemanha",
+        "2º": "Equador"
+      },
+      "Grupo F": {
+        "1º": "Holanda",
+        "2º": "Japão"
+      },
+      "Grupo G": {
+        "1º": "Bélgica",
+        "2º": "Egito"
+      },
+      "Grupo H": {
+        "1º": "Espanha",
+        "2º": "Uruguai"
+      },
+      "Grupo I": {
+        "1º": "França",
+        "2º": "Noruega"
+      },
+      "Grupo J": {
+        "1º": "Argentina",
+        "2º": "Áustria"
+      },
+      "Grupo K": {
+        "1º": "Portugal",
+        "2º": "Colômbia"
+      },
+      "Grupo L": {
+        "1º": "Inglaterra",
+        "2º": "Croácia"
+      }
+    }
+  },
+  {
+    "nome": "Marcela Piga",
+    "data": "2026-06-05T20:46:48",
+    "palpites": {
+      "Grupo A": {
+        "1º": "África do Sul",
+        "2º": "Coreia do Sul"
+      },
+      "Grupo B": {
+        "1º": "Catar",
+        "2º": "Canadá"
+      },
+      "Grupo C": {
+        "1º": "Brasil",
+        "2º": "Escócia"
+      },
+      "Grupo D": {
+        "1º": "Turquia",
+        "2º": "Austrália"
+      },
+      "Grupo E": {
+        "1º": "Alemanha",
+        "2º": "Equador"
+      },
+      "Grupo F": {
+        "1º": "Holanda",
+        "2º": "Japão"
+      },
+      "Grupo G": {
+        "1º": "Bélgica",
+        "2º": "Nova Zelândia"
+      },
+      "Grupo H": {
+        "1º": "Espanha",
+        "2º": "Arábia Saudita"
+      },
+      "Grupo I": {
+        "1º": "França",
+        "2º": "Senegal"
+      },
+      "Grupo J": {
+        "1º": "Argentina",
+        "2º": "Áustria"
+      },
+      "Grupo K": {
+        "1º": "Portugal",
+        "2º": "Uzbequistão"
+      },
+      "Grupo L": {
+        "1º": "Inglaterra",
+        "2º": "Gana"
+      }
+    }
+  },
+  {
+    "nome": "Amanda Campos",
+    "data": "2026-06-08T10:17:13",
+    "palpites": {
+      "Grupo A": {
+        "1º": "Coreia do Sul",
+        "2º": "México"
+      },
+      "Grupo B": {
+        "1º": "Canadá",
+        "2º": "Suíça"
+      },
+      "Grupo C": {
+        "1º": "Brasil",
+        "2º": "Marrocos"
+      },
+      "Grupo D": {
+        "1º": "Estados Unidos",
+        "2º": "Austrália"
+      },
+      "Grupo E": {
+        "1º": "Alemanha",
+        "2º": "Equador"
+      },
+      "Grupo F": {
+        "1º": "Holanda",
+        "2º": "Japão"
+      },
+      "Grupo G": {
+        "1º": "Bélgica",
+        "2º": "Egito"
+      },
+      "Grupo H": {
+        "1º": "Espanha",
+        "2º": "Uruguai"
+      },
+      "Grupo I": {
+        "1º": "França",
+        "2º": "Senegal"
+      },
+      "Grupo J": {
+        "1º": "Argentina",
+        "2º": "Áustria"
+      },
+      "Grupo K": {
+        "1º": "Portugal",
+        "2º": "Colômbia"
+      },
+      "Grupo L": {
+        "1º": "Croácia",
+        "2º": "Inglaterra"
+      }
+    }
+  },
+  {
+    "nome": "Guilherme Ferazza",
+    "data": "2026-06-08T10:38:03",
+    "palpites": {
+      "Grupo A": {
+        "1º": "México",
+        "2º": "Coreia do Sul"
+      },
+      "Grupo B": {
+        "1º": "Canadá",
+        "2º": "Suíça"
+      },
+      "Grupo C": {
+        "1º": "Brasil",
+        "2º": "Marrocos"
+      },
+      "Grupo D": {
+        "1º": "Estados Unidos",
+        "2º": "Turquia"
+      },
+      "Grupo E": {
+        "1º": "Alemanha",
+        "2º": "Equador"
+      },
+      "Grupo F": {
+        "1º": "Holanda",
+        "2º": "Japão"
+      },
+      "Grupo G": {
+        "1º": "Bélgica",
+        "2º": "Egito"
+      },
+      "Grupo H": {
+        "1º": "Espanha",
+        "2º": "Uruguai"
+      },
+      "Grupo I": {
+        "1º": "França",
+        "2º": "Senegal"
+      },
+      "Grupo J": {
+        "1º": "Argentina",
+        "2º": "Áustria"
+      },
+      "Grupo K": {
+        "1º": "Portugal",
+        "2º": "Colômbia"
+      },
+      "Grupo L": {
+        "1º": "Inglaterra",
+        "2º": "Croácia"
+      }
+    }
+  },
+  {
+    "nome": "Daniel Pereira",
+    "data": "2026-06-08T10:50:28",
+    "palpites": {
+      "Grupo A": {
+        "1º": "México",
+        "2º": "República Tcheca"
+      },
+      "Grupo B": {
+        "1º": "Suíça",
+        "2º": "Canadá"
+      },
+      "Grupo C": {
+        "1º": "Brasil",
+        "2º": "Marrocos"
+      },
+      "Grupo D": {
+        "1º": "Turquia",
+        "2º": "Estados Unidos"
+      },
+      "Grupo E": {
+        "1º": "Costa do Marfim",
+        "2º": "Equador"
+      },
+      "Grupo F": {
+        "1º": "Japão",
+        "2º": "Holanda"
+      },
+      "Grupo G": {
+        "1º": "Bélgica",
+        "2º": "Irã"
+      },
+      "Grupo H": {
+        "1º": "Uruguai",
+        "2º": "Cabo Verde"
+      },
+      "Grupo I": {
+        "1º": "Senegal",
+        "2º": "França"
+      },
+      "Grupo J": {
+        "1º": "Argentina",
+        "2º": "Argélia"
+      },
+      "Grupo K": {
+        "1º": "Colômbia",
+        "2º": "Portugal"
+      },
+      "Grupo L": {
+        "1º": "Inglaterra",
+        "2º": "Gana"
+      }
+    }
+  },
+  {
+    "nome": "Cicero Augusto Vidal",
+    "data": "2026-06-08T11:49:07",
+    "palpites": {
+      "Grupo A": {
+        "1º": "México",
+        "2º": "Coreia do Sul"
+      },
+      "Grupo B": {
+        "1º": "Suíça",
+        "2º": "Canadá"
+      },
+      "Grupo C": {
+        "1º": "Brasil",
+        "2º": "Marrocos"
+      },
+      "Grupo D": {
+        "1º": "Estados Unidos",
+        "2º": "Paraguai"
+      },
+      "Grupo E": {
+        "1º": "Alemanha",
+        "2º": "Costa do Marfim"
+      },
+      "Grupo F": {
+        "1º": "Japão",
+        "2º": "Holanda"
+      },
+      "Grupo G": {
+        "1º": "Bélgica",
+        "2º": "Egito"
+      },
+      "Grupo H": {
+        "1º": "Espanha",
+        "2º": "Uruguai"
+      },
+      "Grupo I": {
+        "1º": "França",
+        "2º": "Senegal"
+      },
+      "Grupo J": {
+        "1º": "Argentina",
+        "2º": "Áustria"
+      },
+      "Grupo K": {
+        "1º": "Portugal",
+        "2º": "Colômbia"
+      },
+      "Grupo L": {
+        "1º": "Inglaterra",
+        "2º": "Croácia"
+      }
+    }
+  }
+]

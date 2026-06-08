@@ -33,6 +33,11 @@ async function zerarTodosPalpites() {
   return r.json();
 }
 
+async function deletarPalpite(id) {
+  const r = await fetch(`${BASE}/api/admin/palpites/${id}`, { method: 'DELETE' });
+  return r.json();
+}
+
 async function salvarRanking(ranking) {
   const r = await fetch(`${BASE}/api/admin/ranking`, {
     method: 'POST',
@@ -302,6 +307,7 @@ export default function AbaAdmin() {
                     <th style={thStyle}>Astronauta</th>
                     {LETRAS_GRUPOS.map((l) => <th key={l} style={{ ...thStyle, minWidth: 90 }}>Gr. {l}</th>)}
                     <th style={thStyle}>Enviado em</th>
+                    <th style={thStyle}></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -322,6 +328,18 @@ export default function AbaAdmin() {
                       ))}
                       <td style={{ ...tdStyle, color: '#667', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                         {new Date(p.createdAt).toLocaleString('pt-BR')}
+                      </td>
+                      <td style={tdStyle}>
+                        <button
+                          onClick={async () => {
+                            if (!window.confirm(`Remover o palpite de "${p.nome}"?`)) return;
+                            const res = await deletarPalpite(p._id);
+                            if (res.success) setDados((d) => ({ ...d, palpites: d.palpites.filter((x) => x._id !== p._id) }));
+                          }}
+                          style={{ background: '#3a0000', border: '1px solid #900', color: '#ff6666', padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: '0.8rem' }}
+                        >
+                          🗑️
+                        </button>
                       </td>
                     </tr>
                   ))}

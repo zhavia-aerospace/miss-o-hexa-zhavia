@@ -108,6 +108,19 @@ h1 {
   transform: translateY(-2px);
 }
 
+.nav-btn.locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: #444;
+  color: #888;
+}
+
+.nav-btn.locked:hover {
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
 /* Container principal */
 main {
   max-width: 1000px;

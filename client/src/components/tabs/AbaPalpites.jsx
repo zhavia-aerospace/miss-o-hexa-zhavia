@@ -6,7 +6,7 @@ import DetalhesAstronauta from '../DetalhesAstronauta.jsx';
 
 const JA_ENVIOU_KEY = 'bolao_hexa_enviado';
 
-export default function AbaPalpites() {
+export default function AbaPalpites({ onPalpiteEnviado }) {
   const { mostrarAlerta } = useAlerta();
   const [nome, setNome] = useState('');
   const [escolhas, setEscolhas] = useState(escolhasIniciais);
@@ -81,12 +81,21 @@ export default function AbaPalpites() {
       await postPalpite(nome.trim(), escolhas);
       localStorage.setItem(JA_ENVIOU_KEY, 'true');
       setJaEnviou(true);
+      onPalpiteEnviado?.();
       setMsgEnvio(`🚀 Sucesso, ${nome.trim()}! Seus palpites foram computados!`);
       setNome('');
       setEscolhas(escolhasIniciais());
       carregarPalpites();
     } catch (err) {
-      setMsgEnvio(`❌ ${err.message}`);
+      if (err.message === 'Já existe um palpite com este nome') {
+        localStorage.setItem(JA_ENVIOU_KEY, 'true');
+        setJaEnviou(true);
+        onPalpiteEnviado?.();
+        carregarPalpites();
+        setMsgEnvio(`✅ Identificamos que "${nome.trim()}" já enviou os palpites! Ranking liberado.`);
+      } else {
+        setMsgEnvio(`❌ ${err.message}`);
+      }
     } finally {
       setEnviando(false);
     }
