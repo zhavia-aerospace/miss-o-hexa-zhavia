@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LETRAS_GRUPOS, definicaoGrupos } from '../data/grupos.js';
 import { timesPodio } from '../data/times.js';
 import AvatarNome from './AvatarNome.jsx';
@@ -62,6 +62,7 @@ export default function AbaAdmin() {
   const [linhasRanking, setLinhasRanking] = useState([]);
   const [salvando, setSalvando] = useState(false);
   const [msgRanking, setMsgRanking] = useState('');
+  const [selecionadoRanking, setSelecionadoRanking] = useState(null);
 
   // Estado do gabarito
   const [gabGrupos, setGabGrupos] = useState(() =>
@@ -180,6 +181,10 @@ export default function AbaAdmin() {
 
   function editarLinha(idx, campo, valor) {
     setLinhasRanking((prev) => prev.map((l, i) => (i === idx ? { ...l, [campo]: valor } : l)));
+  }
+
+  function getPalpitePessoa(nome) {
+    return dados.palpites.find(p => p.nome.toLowerCase() === nome.toLowerCase());
   }
 
   async function handleSalvarRanking() {
@@ -577,35 +582,74 @@ export default function AbaAdmin() {
                 </tr>
               </thead>
               <tbody>
-                {linhasRanking.map((linha, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                    <td style={{ ...tdStyle, color: '#667', textAlign: 'center' }}>{i + 1}</td>
-                    <td style={tdStyle}>
-                      <input
-                        value={linha.astronauta}
-                        onChange={(e) => editarLinha(i, 'astronauta', e.target.value)}
-                        placeholder="Nome do participante"
-                        style={inputStyle}
-                      />
-                    </td>
-                    <td style={tdStyle}>
-                      <input
-                        type="number"
-                        value={linha.pontuacao}
-                        onChange={(e) => editarLinha(i, 'pontuacao', e.target.value)}
-                        placeholder="0"
-                        style={{ ...inputStyle, textAlign: 'center' }}
-                      />
-                    </td>
-                    <td style={{ ...tdStyle, textAlign: 'center' }}>
-                      <button
-                        onClick={() => removeLinha(i)}
-                        style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '1rem' }}
-                        title="Remover"
-                      >✕</button>
-                    </td>
-                  </tr>
-                ))}
+                {linhasRanking.map((linha, i) => {
+                  const palpiteEncontrado = getPalpitePessoa(linha.astronauta);
+                  const estaAberto = selecionadoRanking === i;
+
+                  return (
+                    <React.Fragment key={i}>
+                      <tr
+                        style={{
+                          borderBottom: estaAberto ? 'none' : '1px solid rgba(255,255,255,0.04)',
+                          background: estaAberto ? 'rgba(0,102,255,0.1)' : 'transparent',
+                          cursor: palpiteEncontrado ? 'pointer' : 'default',
+                        }}
+                        onClick={() => palpiteEncontrado && setSelecionadoRanking(estaAberto ? null : i)}
+                      >
+                        <td style={{ ...tdStyle, color: '#667', textAlign: 'center' }}>{i + 1}</td>
+                        <td style={{ ...tdStyle, fontWeight: palpiteEncontrado ? 'bold' : 'normal' }}>
+                          {palpiteEncontrado && <span style={{ color: 'var(--nebula-green)', marginRight: 5, cursor: 'pointer' }}>👁️</span>}
+                          <input
+                            value={linha.astronauta}
+                            onChange={(e) => editarLinha(i, 'astronauta', e.target.value)}
+                            placeholder="Nome do participante"
+                            style={inputStyle}
+                          />
+                        </td>
+                        <td style={tdStyle}>
+                          <input
+                            type="number"
+                            value={linha.pontuacao}
+                            onChange={(e) => editarLinha(i, 'pontuacao', e.target.value)}
+                            placeholder="0"
+                            style={{ ...inputStyle, textAlign: 'center' }}
+                          />
+                        </td>
+                        <td style={{ ...tdStyle, textAlign: 'center' }}>
+                          <button
+                            onClick={() => removeLinha(i)}
+                            style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '1rem' }}
+                            title="Remover"
+                          >✕</button>
+                        </td>
+                      </tr>
+
+                      {estaAberto && palpiteEncontrado && (
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'rgba(0,102,255,0.08)' }}>
+                          <td colSpan="4" style={{ padding: '16px 12px' }}>
+                            <div style={{ color: '#ccc', fontSize: '0.85rem' }}>
+                              <div style={{ color: 'var(--nebula-green)', fontWeight: 'bold', marginBottom: 10 }}>📋 Palpites de Grupos:</div>
+                              {LETRAS_GRUPOS.map((l) => (
+                                <div key={l} style={{ marginBottom: 8, paddingLeft: 12 }}>
+                                  <span style={{ color: 'var(--galaxy-gold)', fontWeight: 'bold' }}>Grupo {l}:</span>
+                                  {palpiteEncontrado.grupos?.[l] ? (
+                                    <>
+                                      <span style={{ color: 'var(--galaxy-gold)' }}> 1º {palpiteEncontrado.grupos[l][0]}</span>
+                                      {' • '}
+                                      <span style={{ color: 'var(--nebula-green)' }}>2º {palpiteEncontrado.grupos[l][1]}</span>
+                                    </>
+                                  ) : (
+                                    <span style={{ color: '#666' }}> (sem palpite)</span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>
