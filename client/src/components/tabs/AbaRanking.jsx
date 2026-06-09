@@ -1,18 +1,29 @@
 import { useEffect, useState } from 'react';
-import { getRanking } from '../../services/api.js';
+import { getRanking, getPalpites } from '../../services/api.js';
 import AvatarNome from '../AvatarNome.jsx';
+import DetalhesAstronauta from '../DetalhesAstronauta.jsx';
 
 export default function AbaRanking() {
   const [ranking, setRanking] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+  const [palpites, setPalpites] = useState([]);
+  const [astronautaSelecionado, setAstronautaSelecionado] = useState(null);
 
   useEffect(() => {
     getRanking()
       .then(setRanking)
       .catch(() => setErro('❌ Falha na conexão com o satélite de pontuação.'))
       .finally(() => setCarregando(false));
+    getPalpites().then(setPalpites).catch(() => {});
   }, []);
+
+  function abrirTelemetria(nomeAstronauta) {
+    const palpite = palpites.find(
+      (p) => p.nome.trim().toLowerCase() === nomeAstronauta.trim().toLowerCase()
+    );
+    if (palpite) setAstronautaSelecionado(palpite);
+  }
 
   const CLASSE_PODIO = { 1: 'podio-1', 2: 'podio-2', 3: 'podio-3' };
 
@@ -47,7 +58,8 @@ export default function AbaRanking() {
                 <tr
                   key={item._id}
                   className={`ranking-row-clicavel ${CLASSE_PODIO[item.posicao] ?? ''}`}
-                  style={{ borderBottom: '1px solid #222' }}
+                  style={{ borderBottom: '1px solid #222', cursor: palpites.some((p) => p.nome.trim().toLowerCase() === item.astronauta.trim().toLowerCase()) ? 'pointer' : 'default' }}
+                  onClick={() => abrirTelemetria(item.astronauta)}
                 >
                   <td className="posicao-num" style={{ padding: '14px 8px', fontWeight: 'bold', color: 'var(--galaxy-gold)', fontSize: '1.1rem' }}>
                     {item.posicao}º
@@ -64,6 +76,13 @@ export default function AbaRanking() {
           </table>
         </div>
       </div>
+
+      {astronautaSelecionado && (
+        <DetalhesAstronauta
+          palpite={astronautaSelecionado}
+          onFechar={() => setAstronautaSelecionado(null)}
+        />
+      )}
     </section>
   );
 }
