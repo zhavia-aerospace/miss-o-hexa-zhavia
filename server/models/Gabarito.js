@@ -23,6 +23,7 @@ const gabaritoSchema = new mongoose.Schema({
   },
   podioLiberado: { type: Boolean, default: false },
   palpitesTravados: { type: Boolean, default: false },
+  youtubeVideoId: { type: String, default: '' },
 }, { timestamps: true });
 
 export default mongoose.model('Gabarito', gabaritoSchema);

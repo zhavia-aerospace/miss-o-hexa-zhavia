@@ -1,12 +1,21 @@
 import { useEffect, useState } from 'react';
 import { getJogos } from '../services/api.js';
 
+const BASE = import.meta.env.VITE_API_URL ?? '';
 const POLL_INTERVAL = 15 * 60 * 1000; // sincronizado com cache do servidor
 
 export default function PainelLateralJogos() {
   const [aberto, setAberto] = useState(false);
   const [jogos, setJogos] = useState([]);
   const [subAba, setSubAba] = useState('live');
+  const [youtubeVideoId, setYoutubeVideoId] = useState('');
+
+  useEffect(() => {
+    fetch(`${BASE}/api/gabarito`)
+      .then((r) => r.json())
+      .then((g) => setYoutubeVideoId(g.youtubeVideoId ?? ''))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const carregar = () => getJogos().then((r) => setJogos(r.data ?? [])).catch(() => {});
@@ -45,16 +54,27 @@ export default function PainelLateralJogos() {
           <div>
             {/* Player YouTube */}
             <div style={{ marginBottom: 20 }}>
-              <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 6, border: '1px solid #1c233a' }}>
-                <iframe
-                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                  src="https://www.youtube.com/embed/live_stream?channel=UCm3_j4RLeM0zSerq076Z_fA"
-                  frameBorder="0"
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                  title="CazéTV Live"
-                />
-              </div>
+              {youtubeVideoId ? (
+                <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 6, border: '1px solid #1c233a' }}>
+                  <iframe
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                    src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1`}
+                    frameBorder="0"
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                    title="Transmissão ao vivo"
+                  />
+                </div>
+              ) : (
+                <a
+                  href="https://www.youtube.com/@CazeTV/live"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#ff0000', color: '#fff', fontWeight: 'bold', fontSize: '0.95rem', padding: '14px', borderRadius: 8, textDecoration: 'none', border: 'none' }}
+                >
+                  📺 Assistir ao Vivo — CazéTV
+                </a>
+              )}
             </div>
 
             <hr style={{ border: 0, borderTop: '1px solid rgba(0,102,255,0.2)', margin: '15px 0' }} />

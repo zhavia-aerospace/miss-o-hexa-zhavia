@@ -52,6 +52,24 @@ router.patch('/podio-liberado', async (req, res) => {
   }
 });
 
+// PATCH /api/gabarito/youtube-id — define o video ID do YouTube para o painel ao vivo
+router.patch('/youtube-id', async (req, res) => {
+  const { videoId } = req.body;
+  if (typeof videoId !== 'string') {
+    return res.status(400).json({ error: '"videoId" deve ser string' });
+  }
+  try {
+    await Gabarito.findOneAndUpdate(
+      {},
+      { youtubeVideoId: videoId.trim() },
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, youtubeVideoId: videoId.trim() });
+  } catch {
+    res.status(500).json({ error: 'Erro ao atualizar' });
+  }
+});
+
 // PATCH /api/gabarito/palpites-travados — trava ou destrava novos palpites de grupos
 router.patch('/palpites-travados', async (req, res) => {
   const { travado } = req.body;

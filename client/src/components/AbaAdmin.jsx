@@ -71,6 +71,8 @@ export default function AbaAdmin() {
   const [gabPodio, setGabPodio] = useState({ p1: '', p2: '', p3: '' });
   const [podioLiberado, setPodioLiberado] = useState(false);
   const [palpitesTravados, setPalpitesTravados] = useState(false);
+  const [youtubeVideoId, setYoutubeVideoId] = useState('');
+  const [msgYoutube, setMsgYoutube] = useState('');
   const [salvandoGab, setSalvandoGab] = useState(false);
   const [msgGab, setMsgGab] = useState('');
 
@@ -98,9 +100,25 @@ export default function AbaAdmin() {
         if (gab.podio) setGabPodio({ p1: gab.podio.p1 ?? '', p2: gab.podio.p2 ?? '', p3: gab.podio.p3 ?? '' });
         setPodioLiberado(gab.podioLiberado === true);
         setPalpitesTravados(gab.palpitesTravados === true);
+        setYoutubeVideoId(gab.youtubeVideoId ?? '');
       })
       .finally(() => setCarregando(false));
   }, []);
+
+  async function handleSalvarYoutube() {
+    setMsgYoutube('');
+    try {
+      const r = await fetch(`${BASE}/api/gabarito/youtube-id`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId: youtubeVideoId }),
+      });
+      const res = await r.json();
+      setMsgYoutube(res.success ? '✅ Salvo!' : `❌ ${res.error}`);
+    } catch {
+      setMsgYoutube('❌ Falha na conexão.');
+    }
+  }
 
   async function handleTogglePalpites() {
     const novoEstado = !palpitesTravados;
@@ -442,6 +460,28 @@ export default function AbaAdmin() {
             Informe os <strong>2 classificados reais</strong> de cada grupo (1º e 2º lugar) e o pódio final.<br />
             Após salvar, clique em <strong>"⚡ Calcular Pontuações"</strong> para gerar o ranking automaticamente.
           </p>
+
+          {/* YouTube Video ID */}
+          <div style={{ marginBottom: 28, padding: '14px 18px', borderRadius: 8, border: '1px solid rgba(0,102,255,0.25)', background: 'rgba(0,0,0,0.3)' }}>
+            <label style={{ color: 'var(--nebula-green)', fontWeight: 'bold', fontSize: '0.9rem', display: 'block', marginBottom: 8 }}>📺 Video ID do YouTube (painel ao vivo)</label>
+            <p style={{ color: '#666', fontSize: '0.8rem', marginBottom: 10 }}>Cole o ID do vídeo (ex: <code style={{ color: '#aaa' }}>dQw4w9WgXcQ</code>) da transmissão ao vivo. Deixe vazio para mostrar botão de link.</p>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+              <input
+                type="text"
+                value={youtubeVideoId}
+                onChange={(e) => { setYoutubeVideoId(e.target.value); setMsgYoutube(''); }}
+                placeholder="Ex: dQw4w9WgXcQ"
+                style={{ background: 'var(--space-dark)', border: '1px solid #444', color: '#fff', padding: '8px 12px', borderRadius: 5, fontSize: '0.9rem', flex: 1, minWidth: 200 }}
+              />
+              <button
+                onClick={handleSalvarYoutube}
+                style={{ background: 'rgba(0,102,255,0.3)', border: '1px solid var(--cosmic-blue)', color: '#fff', padding: '8px 18px', borderRadius: 5, cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+              >
+                💾 Salvar
+              </button>
+            </div>
+            {msgYoutube && <p style={{ marginTop: 8, fontSize: '0.85rem', color: msgYoutube.startsWith('❌') ? '#ff6666' : 'var(--nebula-green)' }}>{msgYoutube}</p>}
+          </div>
 
           {/* Grupos */}
           <h3 style={{ color: 'var(--nebula-green)', marginBottom: 16, fontSize: '1rem' }}>⚽ Grupos A – L</h3>

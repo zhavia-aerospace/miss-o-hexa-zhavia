@@ -157,128 +157,157 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
     <section className="tab-content">
       {/* Formulário de palpite */}
       <div className="cosmic-panel">
-        {palpitesTravados && !jaEnviou && (
-          <div style={{ background: 'rgba(255,51,51,0.08)', border: '2px solid #ff3333', borderRadius: 10, padding: '24px 20px', marginBottom: 20, textAlign: 'center' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: 10 }}>🔒</div>
-            <h3 style={{ color: '#ff5555', margin: '0 0 8px', fontSize: '1.2rem' }}>Fase de Palpites Encerrada</h3>
-            <p style={{ color: '#aaa', margin: 0, fontSize: '0.95rem' }}>Os palpites de grupos estão travados. A Copa já começou — boa sorte a todos! ⚽🇧🇷</p>
-          </div>
-        )}
-        <div style={{ background: 'rgba(255,204,0,0.07)', border: '1px dashed var(--galaxy-gold)', padding: '12px 15px', borderRadius: 6, marginBottom: 20, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span>⚠️</span>
-          <span style={{ color: '#fff' }}><strong>Atenção Tripulante:</strong> Só é possível enviar seus palpites <strong>uma única vez.</strong></span>
-        </div>
-
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          🔮 Simulador de Classificados da Fase de Grupos
-          {!jaEnviou && (
-            <button
-              onClick={() => { setMostrarLogin((v) => !v); setMsgLogin(''); }}
-              style={{ fontSize: '0.8rem', padding: '5px 14px', borderRadius: 20, border: '1px solid var(--cosmic-blue)', background: mostrarLogin ? 'var(--cosmic-blue)' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}
-            >
-              🔑 Identificar
-            </button>
-          )}
-        </h2>
-
-        {!jaEnviou && mostrarLogin && (
-          <div style={{ margin: '14px 0 20px', padding: '16px', border: '1px solid rgba(0,102,255,0.35)', borderRadius: 8, background: 'rgba(0,102,255,0.06)' }}>
-            <p style={{ color: '#aaa', marginBottom: 10, fontSize: '0.9rem' }}>Já enviou seus palpites? Confirme seu nome para desbloquear o ranking:</p>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-              <AutocompleteNome
-                value={nomeLogin}
-                onChange={(v) => { setNomeLogin(v); setMsgLogin(''); }}
-                onEnter={handleLogin}
-                sugestoes={nomesExistentes}
-                placeholder="Seu nome..."
-              />
-              <button
-                onClick={handleLogin}
-                disabled={verificando}
-                style={{ background: 'var(--cosmic-blue)', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 6, cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem', opacity: verificando ? 0.6 : 1, whiteSpace: 'nowrap' }}
-              >
-                {verificando ? 'Verificando...' : 'Confirmar 🚀'}
-              </button>
+        {palpitesTravados && !jaEnviou ? (
+          <>
+            <div style={{ background: 'rgba(255,51,51,0.08)', border: '2px solid #ff3333', borderRadius: 10, padding: '24px 20px', marginBottom: 24, textAlign: 'center' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: 10 }}>🔒</div>
+              <h3 style={{ color: '#ff5555', margin: '0 0 8px', fontSize: '1.2rem' }}>Fase de Palpites Encerrada</h3>
+              <p style={{ color: '#aaa', margin: 0, fontSize: '0.95rem' }}>Os palpites de grupos estão travados. A Copa já começou — boa sorte a todos! ⚽🇧🇷</p>
             </div>
-            {msgLogin && (
-              <p style={{ marginTop: 8, fontSize: '0.88rem', color: msgLogin.startsWith('❌') || msgLogin.startsWith('⚠️') ? '#ff6666' : 'var(--nebula-green)' }}>
-                {msgLogin}
+            <div style={{ padding: '16px', border: '1px solid rgba(0,102,255,0.35)', borderRadius: 8, background: 'rgba(0,102,255,0.06)' }}>
+              <p style={{ color: '#aaa', marginBottom: 10, fontSize: '0.9rem' }}>Confirme seu nome para ver os palpites da tripulação:</p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                <AutocompleteNome
+                  value={nomeLogin}
+                  onChange={(v) => { setNomeLogin(v); setMsgLogin(''); }}
+                  onEnter={handleLogin}
+                  sugestoes={nomesExistentes}
+                  placeholder="Seu nome..."
+                />
+                <button
+                  onClick={handleLogin}
+                  disabled={verificando}
+                  style={{ background: 'var(--cosmic-blue)', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 6, cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem', opacity: verificando ? 0.6 : 1, whiteSpace: 'nowrap' }}
+                >
+                  {verificando ? 'Verificando...' : 'Confirmar 🚀'}
+                </button>
+              </div>
+              {msgLogin && (
+                <p style={{ marginTop: 8, fontSize: '0.88rem', color: msgLogin.startsWith('❌') || msgLogin.startsWith('⚠️') ? '#ff6666' : 'var(--nebula-green)' }}>
+                  {msgLogin}
+                </p>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ background: 'rgba(255,204,0,0.07)', border: '1px dashed var(--galaxy-gold)', padding: '12px 15px', borderRadius: 6, marginBottom: 20, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span>⚠️</span>
+              <span style={{ color: '#fff' }}><strong>Atenção Tripulante:</strong> Só é possível enviar seus palpites <strong>uma única vez.</strong></span>
+            </div>
+
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              🔮 Simulador de Classificados da Fase de Grupos
+              {!jaEnviou && (
+                <button
+                  onClick={() => { setMostrarLogin((v) => !v); setMsgLogin(''); }}
+                  style={{ fontSize: '0.8rem', padding: '5px 14px', borderRadius: 20, border: '1px solid var(--cosmic-blue)', background: mostrarLogin ? 'var(--cosmic-blue)' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}
+                >
+                  🔑 Identificar
+                </button>
+              )}
+            </h2>
+
+            {!jaEnviou && mostrarLogin && (
+              <div style={{ margin: '14px 0 20px', padding: '16px', border: '1px solid rgba(0,102,255,0.35)', borderRadius: 8, background: 'rgba(0,102,255,0.06)' }}>
+                <p style={{ color: '#aaa', marginBottom: 10, fontSize: '0.9rem' }}>Já enviou seus palpites? Confirme seu nome para desbloquear o ranking:</p>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                  <AutocompleteNome
+                    value={nomeLogin}
+                    onChange={(v) => { setNomeLogin(v); setMsgLogin(''); }}
+                    onEnter={handleLogin}
+                    sugestoes={nomesExistentes}
+                    placeholder="Seu nome..."
+                  />
+                  <button
+                    onClick={handleLogin}
+                    disabled={verificando}
+                    style={{ background: 'var(--cosmic-blue)', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 6, cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem', opacity: verificando ? 0.6 : 1, whiteSpace: 'nowrap' }}
+                  >
+                    {verificando ? 'Verificando...' : 'Confirmar 🚀'}
+                  </button>
+                </div>
+                {msgLogin && (
+                  <p style={{ marginTop: 8, fontSize: '0.88rem', color: msgLogin.startsWith('❌') || msgLogin.startsWith('⚠️') ? '#ff6666' : 'var(--nebula-green)' }}>
+                    {msgLogin}
+                  </p>
+                )}
+              </div>
+            )}
+            <p style={{ marginBottom: 20, color: '#aaa' }}>
+              Selecione <strong>exatamente 2 nações</strong> por grupo:
+            </p>
+
+            <div className="user-identity" style={{ marginBottom: 25 }}>
+              <label htmlFor="username">Nome do Astronauta:</label>
+              <input
+                id="username"
+                type="text"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                placeholder="Digite seu nome completo"
+                autoComplete="off"
+              />
+            </div>
+
+            {/* Grid de grupos */}
+            <div className="grid-grupos-bolao" ref={gridRef}>
+              {LETRAS_GRUPOS.map((letra) => {
+                const lista = escolhas[letra];
+                return (
+                  <div
+                    key={letra}
+                    className="card-grupo-space"
+                    style={{ borderColor: lista.length === 2 ? 'var(--nebula-green)' : 'var(--cosmic-blue)' }}
+                  >
+                    <h3>Grupo {letra}</h3>
+                    {definicaoGrupos[letra].map((time) => {
+                      const pos = lista.indexOf(time);
+                      const selecionado = pos !== -1;
+                      return (
+                        <div
+                          key={time}
+                          className="label-time-checkbox"
+                          onClick={() => selecionarTime(letra, time)}
+                          style={{
+                            background: pos === 0
+                              ? 'rgba(255,204,0,0.15)'
+                              : pos === 1
+                              ? 'rgba(0,255,102,0.15)'
+                              : 'transparent',
+                          }}
+                        >
+                          <span style={{
+                            display: 'inline-block',
+                            width: 24,
+                            fontWeight: 'bold',
+                            color: pos === 0 ? 'var(--galaxy-gold)' : pos === 1 ? 'var(--nebula-green)' : '#666',
+                          }}>
+                            {pos === 0 ? '1º' : pos === 1 ? '2º' : '•'}
+                          </span>
+                          <span style={{ color: '#fff', fontSize: '1.1rem' }}>{time}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              className="btn-orbit"
+              style={{ maxWidth: 350, marginTop: 30 }}
+              onClick={enviarPalpite}
+              disabled={enviando}
+            >
+              {enviando ? 'Transmitindo dados à base...' : 'Computar Classificados 🚀'}
+            </button>
+            {msgEnvio && (
+              <p className="success-text" style={{ color: msgEnvio.startsWith('❌') ? '#ff3333' : 'var(--nebula-green)' }}>
+                {msgEnvio}
               </p>
             )}
-          </div>
-        )}
-        <p style={{ marginBottom: 20, color: '#aaa' }}>
-          Selecione <strong>exatamente 2 nações</strong> por grupo:
-        </p>
-
-        <div className="user-identity" style={{ marginBottom: 25 }}>
-          <label htmlFor="username">Nome do Astronauta:</label>
-          <input
-            id="username"
-            type="text"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            placeholder="Digite seu nome completo"
-            autoComplete="off"
-          />
-        </div>
-
-        {/* Grid de grupos */}
-        <div className="grid-grupos-bolao" ref={gridRef}>
-          {LETRAS_GRUPOS.map((letra) => {
-            const lista = escolhas[letra];
-            return (
-              <div
-                key={letra}
-                className="card-grupo-space"
-                style={{ borderColor: lista.length === 2 ? 'var(--nebula-green)' : 'var(--cosmic-blue)' }}
-              >
-                <h3>Grupo {letra}</h3>
-                {definicaoGrupos[letra].map((time) => {
-                  const pos = lista.indexOf(time);
-                  const selecionado = pos !== -1;
-                  return (
-                    <div
-                      key={time}
-                      className="label-time-checkbox"
-                      onClick={() => selecionarTime(letra, time)}
-                      style={{
-                        background: pos === 0
-                          ? 'rgba(255,204,0,0.15)'
-                          : pos === 1
-                          ? 'rgba(0,255,102,0.15)'
-                          : 'transparent',
-                      }}
-                    >
-                      <span style={{
-                        display: 'inline-block',
-                        width: 24,
-                        fontWeight: 'bold',
-                        color: pos === 0 ? 'var(--galaxy-gold)' : pos === 1 ? 'var(--nebula-green)' : '#666',
-                      }}>
-                        {pos === 0 ? '1º' : pos === 1 ? '2º' : '•'}
-                      </span>
-                      <span style={{ color: '#fff', fontSize: '1.1rem' }}>{time}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-
-        <button
-          className="btn-orbit"
-          style={{ maxWidth: 350, marginTop: 30, opacity: palpitesTravados ? 0.4 : 1, cursor: palpitesTravados ? 'not-allowed' : 'pointer' }}
-          onClick={enviarPalpite}
-          disabled={enviando || palpitesTravados}
-        >
-          {enviando ? 'Transmitindo dados à base...' : palpitesTravados ? '🔒 Palpites encerrados' : 'Computar Classificados 🚀'}
-        </button>
-        {msgEnvio && (
-          <p className="success-text" style={{ color: msgEnvio.startsWith('❌') ? '#ff3333' : 'var(--nebula-green)' }}>
-            {msgEnvio}
-          </p>
+          </>
         )}
       </div>
 
