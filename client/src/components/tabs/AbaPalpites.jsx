@@ -6,6 +6,8 @@ import DetalhesAstronauta from '../DetalhesAstronauta.jsx';
 import AvatarNome from '../AvatarNome.jsx';
 import AutocompleteNome from '../AutocompleteNome.jsx';
 
+const BASE = import.meta.env.VITE_API_URL ?? '';
+
 const JA_ENVIOU_KEY = 'bolao_hexa_enviado';
 
 export default function AbaPalpites({ onPalpiteEnviado }) {
@@ -23,6 +25,7 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
   const [msgLogin, setMsgLogin] = useState('');
   const [nomesExistentes, setNomesExistentes] = useState([]);
   const [mostrarLogin, setMostrarLogin] = useState(false);
+  const [palpitesTravados, setPalpitesTravados] = useState(false);
   const gridRef = useRef(null);
 
   const carregarPalpites = useCallback(async () => {
@@ -43,6 +46,13 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
       getNomesPalpites().then(setNomesExistentes).catch(() => {});
     }
   }, [jaEnviou]);
+
+  useEffect(() => {
+    fetch(`${BASE}/api/gabarito`)
+      .then((r) => r.json())
+      .then((gab) => setPalpitesTravados(gab.palpitesTravados === true))
+      .catch(() => {});
+  }, []);
 
   // Aplica Twemoji no grid quando as escolhas mudam
   useEffect(() => {
@@ -147,6 +157,13 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
     <section className="tab-content">
       {/* Formulário de palpite */}
       <div className="cosmic-panel">
+        {palpitesTravados && !jaEnviou && (
+          <div style={{ background: 'rgba(255,51,51,0.08)', border: '2px solid #ff3333', borderRadius: 10, padding: '24px 20px', marginBottom: 20, textAlign: 'center' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: 10 }}>🔒</div>
+            <h3 style={{ color: '#ff5555', margin: '0 0 8px', fontSize: '1.2rem' }}>Fase de Palpites Encerrada</h3>
+            <p style={{ color: '#aaa', margin: 0, fontSize: '0.95rem' }}>Os palpites de grupos estão travados. A Copa já começou — boa sorte a todos! ⚽🇧🇷</p>
+          </div>
+        )}
         <div style={{ background: 'rgba(255,204,0,0.07)', border: '1px dashed var(--galaxy-gold)', padding: '12px 15px', borderRadius: 6, marginBottom: 20, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 10 }}>
           <span>⚠️</span>
           <span style={{ color: '#fff' }}><strong>Atenção Tripulante:</strong> Só é possível enviar seus palpites <strong>uma única vez.</strong></span>
@@ -252,11 +269,11 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
 
         <button
           className="btn-orbit"
-          style={{ maxWidth: 350, marginTop: 30 }}
+          style={{ maxWidth: 350, marginTop: 30, opacity: palpitesTravados ? 0.4 : 1, cursor: palpitesTravados ? 'not-allowed' : 'pointer' }}
           onClick={enviarPalpite}
-          disabled={enviando}
+          disabled={enviando || palpitesTravados}
         >
-          {enviando ? 'Transmitindo dados à base...' : 'Computar Classificados 🚀'}
+          {enviando ? 'Transmitindo dados à base...' : palpitesTravados ? '🔒 Palpites encerrados' : 'Computar Classificados 🚀'}
         </button>
         {msgEnvio && (
           <p className="success-text" style={{ color: msgEnvio.startsWith('❌') ? '#ff3333' : 'var(--nebula-green)' }}>

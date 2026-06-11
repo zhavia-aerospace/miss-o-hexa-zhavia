@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Palpite from '../models/Palpite.js';
+import Gabarito from '../models/Gabarito.js';
 
 const router = Router();
 
@@ -59,6 +60,11 @@ router.post('/', async (req, res) => {
   }
 
   try {
+    const config = await Gabarito.findOne();
+    if (config?.palpitesTravados) {
+      return res.status(403).json({ error: 'Os palpites estão encerrados. Boa sorte na Copa! ⚽🔒' });
+    }
+
     const palpite = new Palpite({ nome: nome.trim(), grupos });
     await palpite.save();
     res.status(201).json({ success: true, message: 'Palpite registrado com sucesso!' });

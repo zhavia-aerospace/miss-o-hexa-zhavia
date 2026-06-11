@@ -70,6 +70,7 @@ export default function AbaAdmin() {
   );
   const [gabPodio, setGabPodio] = useState({ p1: '', p2: '', p3: '' });
   const [podioLiberado, setPodioLiberado] = useState(false);
+  const [palpitesTravados, setPalpitesTravados] = useState(false);
   const [salvandoGab, setSalvandoGab] = useState(false);
   const [msgGab, setMsgGab] = useState('');
 
@@ -96,9 +97,25 @@ export default function AbaAdmin() {
         }
         if (gab.podio) setGabPodio({ p1: gab.podio.p1 ?? '', p2: gab.podio.p2 ?? '', p3: gab.podio.p3 ?? '' });
         setPodioLiberado(gab.podioLiberado === true);
+        setPalpitesTravados(gab.palpitesTravados === true);
       })
       .finally(() => setCarregando(false));
   }, []);
+
+  async function handleTogglePalpites() {
+    const novoEstado = !palpitesTravados;
+    try {
+      const r = await fetch(`${BASE}/api/gabarito/palpites-travados`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ travado: novoEstado }),
+      });
+      const res = await r.json();
+      if (res.success) setPalpitesTravados(novoEstado);
+    } catch {
+      // silencia
+    }
+  }
 
   async function handleTogglePodio() {
     const novoEstado = !podioLiberado;
@@ -293,6 +310,22 @@ export default function AbaAdmin() {
               style={{ background: '#5a0000', border: '1px solid #c00', color: '#ff6666', padding: '6px 14px', borderRadius: 5, cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
             >
               🗑️ Zerar todos
+            </button>
+            <button
+              onClick={handleTogglePalpites}
+              style={{
+                padding: '6px 16px',
+                borderRadius: 20,
+                border: `2px solid ${palpitesTravados ? 'var(--nebula-green)' : '#ff3333'}`,
+                background: 'transparent',
+                color: palpitesTravados ? 'var(--nebula-green)' : '#ff3333',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {palpitesTravados ? '🔓 Reabrir palpites' : '🔒 Travar palpites'}
             </button>
             <input
               type="text"

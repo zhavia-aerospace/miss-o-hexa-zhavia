@@ -22,6 +22,7 @@ const gabaritoSchema = new mongoose.Schema({
     p3: { type: String, default: '' },
   },
   podioLiberado: { type: Boolean, default: false },
+  palpitesTravados: { type: Boolean, default: false },
 }, { timestamps: true });
 
 export default mongoose.model('Gabarito', gabaritoSchema);

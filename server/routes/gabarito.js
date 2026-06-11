@@ -52,4 +52,22 @@ router.patch('/podio-liberado', async (req, res) => {
   }
 });
 
+// PATCH /api/gabarito/palpites-travados — trava ou destrava novos palpites de grupos
+router.patch('/palpites-travados', async (req, res) => {
+  const { travado } = req.body;
+  if (typeof travado !== 'boolean') {
+    return res.status(400).json({ error: '"travado" deve ser boolean' });
+  }
+  try {
+    await Gabarito.findOneAndUpdate(
+      {},
+      { palpitesTravados: travado },
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, palpitesTravados: travado });
+  } catch {
+    res.status(500).json({ error: 'Erro ao atualizar' });
+  }
+});
+
 export default router;
