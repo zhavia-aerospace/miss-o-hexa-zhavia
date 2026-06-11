@@ -157,7 +157,13 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
     <section className="tab-content">
       {/* Formulário de palpite */}
       <div className="cosmic-panel">
-        {palpitesTravados && !jaEnviou ? (
+        {palpitesTravados && jaEnviou ? (
+          <div style={{ background: 'rgba(255,51,51,0.08)', border: '2px solid #ff3333', borderRadius: 10, padding: '20px', textAlign: 'center' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: 10 }}>🔒</div>
+            <h3 style={{ color: '#ff5555', margin: '0 0 8px', fontSize: '1.2rem' }}>Fase de Palpites Encerrada</h3>
+            <p style={{ color: '#aaa', margin: 0, fontSize: '0.95rem' }}>Os palpites de grupos estão travados. A Copa já começou — boa sorte a todos! ⚽🇧🇷</p>
+          </div>
+        ) : palpitesTravados && !jaEnviou ? (
           <>
             <div style={{ background: 'rgba(255,51,51,0.08)', border: '2px solid #ff3333', borderRadius: 10, padding: '24px 20px', marginBottom: 24, textAlign: 'center' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: 10 }}>🔒</div>

@@ -516,6 +516,35 @@ export default function AbaAdmin() {
             ))}
           </div>
 
+          {/* Toggle palpites de grupos */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16, padding: '14px 18px', borderRadius: 8, border: `2px solid ${palpitesTravados ? '#ff3333' : 'var(--nebula-green)'}`, background: palpitesTravados ? 'rgba(255,51,51,0.05)' : 'rgba(0,255,102,0.05)' }}>
+            <span style={{ fontSize: '1.8rem' }}>{palpitesTravados ? '🔒' : '🔓'}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 'bold', color: palpitesTravados ? '#ff3333' : 'var(--nebula-green)' }}>
+                Aba 1 (Palpites de Grupos) — {palpitesTravados ? 'TRAVADA (novos palpites bloqueados)' : 'ABERTA para envio'}
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#888', marginTop: 3 }}>
+                {palpitesTravados ? 'Participantes veem aviso de encerramento.' : 'Participantes podem enviar palpites agora.'}
+              </div>
+            </div>
+            <button
+              onClick={handleTogglePalpites}
+              style={{
+                padding: '9px 20px',
+                borderRadius: 20,
+                border: `2px solid ${palpitesTravados ? 'var(--nebula-green)' : '#ff3333'}`,
+                background: 'transparent',
+                color: palpitesTravados ? 'var(--nebula-green)' : '#ff3333',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {palpitesTravados ? '🔓 Reabrir' : '🔒 Travar'}
+            </button>
+          </div>
+
           {/* Toggle liberação do pódio */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 28, padding: '14px 18px', borderRadius: 8, border: `2px solid ${podioLiberado ? 'var(--nebula-green)' : '#ff3333'}`, background: podioLiberado ? 'rgba(0,255,102,0.05)' : 'rgba(255,51,51,0.05)' }}>
             <span style={{ fontSize: '1.8rem' }}>{podioLiberado ? '🔓' : '🔒'}</span>
