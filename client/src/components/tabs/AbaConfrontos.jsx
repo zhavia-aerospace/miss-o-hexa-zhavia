@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 
+const BASE = import.meta.env.VITE_API_URL ?? '';
+
 export default function AbaConfrontos() {
   const [confrontos, setConfrontos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -7,7 +9,7 @@ export default function AbaConfrontos() {
   useEffect(() => {
     const fetchConfrontos = async () => {
       try {
-        const response = await fetch('http://localhost:3002/api/confrontos');
+        const response = await fetch(`${BASE}/api/confrontos`);
         const data = await response.json();
         setConfrontos(data);
       } catch (error) {
