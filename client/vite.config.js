@@ -8,7 +8,7 @@ export default defineConfig({
     // Em dev, redireciona chamadas /api para o backend local
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:3002',
         changeOrigin: true,
       },
     },

@@ -7,7 +7,7 @@ export default function AbaConfrontos() {
   useEffect(() => {
     const fetchConfrontos = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/confrontos');
+        const response = await fetch('http://localhost:3002/api/confrontos');
         const data = await response.json();
         setConfrontos(data);
       } catch (error) {

@@ -1,38 +1,63 @@
 import { useEffect, useState } from 'react';
-import { timesPodio } from '../../data/times.js';
-import { postPodio } from '../../services/api.js';
+import { postPodio, getPodios, getNomesPalpites } from '../../services/api.js';
 import { useAlerta } from '../../context/AlertContext.jsx';
+import AutocompleteNome from '../AutocompleteNome.jsx';
+import AvatarNome from '../AvatarNome.jsx';
 
-const JA_ENVIOU_PODIO_KEY = 'bolao_podio_enviado';
-
-export default function AbaPodio() {
+export default function AbaPodio({ meuNome, onIdentificar }) {
   const { mostrarAlerta } = useAlerta();
   const [podioLiberado, setPodioLiberado] = useState(false);
   const [carregando, setCarregando] = useState(true);
-  const [nome, setNome] = useState('');
+  const [classificados, setClassificados] = useState([]);
+  const [nomesExistentes, setNomesExistentes] = useState([]);
+
+  // Identificação — passo único antes de poder chutar
+  const [nomeInput, setNomeInput] = useState('');
+
+  // Formulário de chute (só aparece após identificar)
   const [p1, setP1] = useState('');
   const [p2, setP2] = useState('');
   const [p3, setP3] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [msgEnvio, setMsgEnvio] = useState('');
 
+  // Radar de pódios da tripulação
+  const [podios, setPodios] = useState([]);
+  const [filtro, setFiltro] = useState('');
+
+  const identificado = meuNome.trim().length > 0;
+
   useEffect(() => {
     fetch((import.meta.env.VITE_API_URL ?? '') + '/api/gabarito')
       .then((r) => r.json())
-      .then((d) => setPodioLiberado(d.podioLiberado === true))
+      .then((d) => {
+        setPodioLiberado(d.podioLiberado === true);
+        const times = Array.from(
+          new Set(Object.values(d.grupos ?? {}).flat().filter(Boolean))
+        ).sort();
+        setClassificados(times);
+      })
       .catch(() => {})
       .finally(() => setCarregando(false));
+    getPodios().then(setPodios).catch(() => {});
+    getNomesPalpites().then(setNomesExistentes).catch(() => {});
   }, []);
 
+  const temPodio = podios.some((p) => p.nome.trim().toLowerCase() === meuNome.trim().toLowerCase());
+  const meuPodio = podios.find((p) => p.nome.trim().toLowerCase() === meuNome.trim().toLowerCase());
+  const podiosFiltrados = podios.filter((p) =>
+    p.nome.toLowerCase().includes(filtro.toLowerCase())
+  );
+
+  function handleIdentificar() {
+    if (!nomeInput.trim()) {
+      mostrarAlerta('Digite seu nome para continuar.', '🛸 Identificação Necessária');
+      return;
+    }
+    onIdentificar(nomeInput.trim());
+  }
+
   async function enviarPodio() {
-    if (localStorage.getItem(JA_ENVIOU_PODIO_KEY) === 'true') {
-      mostrarAlerta('Sua telemetria de campeões já foi transmitida!', '🛰️ Pódio Já Registrado');
-      return;
-    }
-    if (!nome.trim()) {
-      mostrarAlerta('Identifique-se com seu nome de astronauta!', '🛸 Identificação Necessária');
-      return;
-    }
     if (!p1 || !p2 || !p3) {
       mostrarAlerta('Selecione os três colocados do pódio!', '👑 Pódio Incompleto');
       return;
@@ -45,15 +70,14 @@ export default function AbaPodio() {
     setEnviando(true);
     setMsgEnvio('');
     try {
-      await postPodio(nome.trim(), p1, p2, p3);
-      localStorage.setItem(JA_ENVIOU_PODIO_KEY, 'true');
-      setMsgEnvio(`👑 Sucesso! O pódio do astronauta ${nome.trim()} foi eternizado!`);
-      setNome('');
-      setP1('');
-      setP2('');
-      setP3('');
+      await postPodio(meuNome, p1, p2, p3);
+      getPodios().then(setPodios).catch(() => {});
     } catch (err) {
-      setMsgEnvio(`❌ ${err.message}`);
+      if (err.message === 'Já existe um pódio com este nome') {
+        getPodios().then(setPodios).catch(() => {});
+      } else {
+        setMsgEnvio(`❌ ${err.message}`);
+      }
     } finally {
       setEnviando(false);
     }
@@ -71,22 +95,84 @@ export default function AbaPodio() {
             A simulação dos três primeiros colocados da Copa do Mundo está desativada no momento. Esta seção será liberada manualmente pelo comando da <strong>Zhavia Aerospace</strong> assim que os confrontos das Oitavas de Final forem decididos.
           </p>
         </div>
+      ) : !identificado ? (
+        <div className="cosmic-panel" style={{ borderColor: 'var(--galaxy-gold)' }}>
+          <h2>🛸 Identifique-se, Astronauta</h2>
+          <p style={{ color: '#aaa', marginBottom: 20 }}>
+            Confirme seu nome para chutar o pódio — ou para ver seu chute, caso já tenha enviado.
+          </p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            <AutocompleteNome
+              value={nomeInput}
+              onChange={setNomeInput}
+              onEnter={handleIdentificar}
+              sugestoes={Array.from(new Set([...nomesExistentes, ...podios.map((p) => p.nome)]))}
+              placeholder="Digite seu nome completo..."
+            />
+            <button
+              onClick={handleIdentificar}
+              style={{ background: 'var(--cosmic-blue)', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 6, cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem', whiteSpace: 'nowrap' }}
+            >
+              Confirmar 🚀
+            </button>
+          </div>
+        </div>
+      ) : temPodio ? (
+        <div className="cosmic-panel" style={{ borderColor: 'var(--galaxy-gold)' }}>
+          <h2>👑 Seu Pódio Supremo</h2>
+          {meuPodio && (
+            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', margin: '16px 0 24px', padding: '14px 18px', borderRadius: 8, border: '1px solid rgba(255,204,0,0.3)', background: 'rgba(255,204,0,0.05)' }}>
+              <span style={{ color: 'var(--galaxy-gold)', fontWeight: 'bold' }}>🥇 {meuPodio.p1}</span>
+              <span style={{ color: '#d1d1d1', fontWeight: 'bold' }}>🥈 {meuPodio.p2}</span>
+              <span style={{ color: '#cd7f32', fontWeight: 'bold' }}>🥉 {meuPodio.p3}</span>
+            </div>
+          )}
+
+          <h3 style={{ color: 'var(--nebula-green)', marginBottom: 12, fontSize: '1.05rem' }}>🛰️ Pódio da Tripulação</h3>
+          <div className="user-identity" style={{ margin: '0 0 15px' }}>
+            <input
+              type="text"
+              value={filtro}
+              onChange={(e) => setFiltro(e.target.value)}
+              placeholder="🔍 Rastrear por nome do colega..."
+            />
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="ranking-table">
+              <thead>
+                <tr>
+                  <th>Astronauta</th>
+                  <th>🥇 1º Lugar</th>
+                  <th>🥈 2º Lugar</th>
+                  <th>🥉 3º Lugar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {podiosFiltrados.length === 0 ? (
+                  <tr><td colSpan={4} style={{ textAlign: 'center', color: '#aaa' }}>Nenhum pódio encontrado.</td></tr>
+                ) : (
+                  podiosFiltrados.map((item) => (
+                    <tr key={item._id}>
+                      <td style={{ fontWeight: 'bold', color: '#fff' }}>
+                        <AvatarNome nome={item.nome} />
+                      </td>
+                      <td>{item.p1}</td>
+                      <td>{item.p2}</td>
+                      <td>{item.p3}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       ) : (
         <div className="cosmic-panel" style={{ borderColor: 'var(--galaxy-gold)' }}>
           <h2>👑 Configuração do Pódio Supremo</h2>
+          <p style={{ color: '#aaa', marginBottom: 8 }}>
+            Astronauta: <strong style={{ color: 'var(--nebula-green)' }}>{meuNome}</strong>
+          </p>
           <p style={{ color: '#aaa', marginBottom: 20 }}>Aponte quem terminará no topo imperial do campeonato:</p>
-
-          <div className="user-identity" style={{ marginBottom: 25 }}>
-            <label htmlFor="username-podio">Nome do Astronauta:</label>
-            <input
-              id="username-podio"
-              type="text"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              placeholder="Digite seu nome completo"
-              autoComplete="off"
-            />
-          </div>
 
           <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBottom: 25 }}>
             {[
@@ -103,7 +189,7 @@ export default function AbaPodio() {
                   onChange={(e) => set(e.target.value)}
                 >
                   <option value="">{placeholder}</option>
-                  {timesPodio
+                  {classificados
                     .filter((t) => !outros.includes(t))
                     .map((t) => (
                       <option key={t} value={t}>{t}</option>

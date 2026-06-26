@@ -3,6 +3,18 @@ import Podio from '../models/Podio.js';
 
 const router = Router();
 
+// GET /api/podio/existe?nome=... — Verifica se um nome já enviou pódio
+router.get('/existe', async (req, res) => {
+  const nome = req.query.nome?.trim();
+  if (!nome) return res.status(400).json({ error: 'Nome obrigatório' });
+  try {
+    const existe = await Podio.exists({ nome: { $regex: `^${nome}$`, $options: 'i' } });
+    res.json({ existe: !!existe });
+  } catch {
+    res.status(500).json({ error: 'Erro ao verificar nome' });
+  }
+});
+
 // GET /api/podio — Retorna todos os pódios
 router.get('/', async (_req, res) => {
   try {
@@ -36,6 +48,17 @@ router.post('/', async (req, res) => {
       return res.status(409).json({ error: 'Já existe um pódio com este nome' });
     }
     res.status(500).json({ error: 'Erro ao salvar pódio' });
+  }
+});
+
+// DELETE /api/podio/:id — remove o pódio de um astronauta
+router.delete('/:id', async (req, res) => {
+  try {
+    const deletado = await Podio.findByIdAndDelete(req.params.id);
+    if (!deletado) return res.status(404).json({ error: 'Pódio não encontrado' });
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ error: 'Erro ao deletar pódio' });
   }
 });
 

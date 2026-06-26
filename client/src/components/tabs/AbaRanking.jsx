@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getRanking, getPalpites } from '../../services/api.js';
+import { getRanking, getPalpites, getPodios } from '../../services/api.js';
 import AvatarNome from '../AvatarNome.jsx';
 import DetalhesAstronauta from '../DetalhesAstronauta.jsx';
 
@@ -8,7 +8,9 @@ export default function AbaRanking() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [palpites, setPalpites] = useState([]);
+  const [podios, setPodios] = useState([]);
   const [astronautaSelecionado, setAstronautaSelecionado] = useState(null);
+  const [podioSelecionado, setPodioSelecionado] = useState(null);
 
   useEffect(() => {
     getRanking()
@@ -16,13 +18,16 @@ export default function AbaRanking() {
       .catch(() => setErro('❌ Falha na conexão com o satélite de pontuação.'))
       .finally(() => setCarregando(false));
     getPalpites().then(setPalpites).catch(() => {});
+    getPodios().then(setPodios).catch(() => {});
   }, []);
 
   function abrirTelemetria(nomeAstronauta) {
-    const palpite = palpites.find(
-      (p) => p.nome.trim().toLowerCase() === nomeAstronauta.trim().toLowerCase()
-    );
-    if (palpite) setAstronautaSelecionado(palpite);
+    const nomeNorm = nomeAstronauta.trim().toLowerCase();
+    const palpite = palpites.find((p) => p.nome.trim().toLowerCase() === nomeNorm);
+    if (palpite) {
+      setAstronautaSelecionado(palpite);
+      setPodioSelecionado(podios.find((p) => p.nome.trim().toLowerCase() === nomeNorm) ?? null);
+    }
   }
 
   const CLASSE_PODIO = { 1: 'podio-1', 2: 'podio-2', 3: 'podio-3' };
@@ -80,7 +85,11 @@ export default function AbaRanking() {
       {astronautaSelecionado && (
         <DetalhesAstronauta
           palpite={astronautaSelecionado}
-          onFechar={() => setAstronautaSelecionado(null)}
+          podio={podioSelecionado}
+          onFechar={() => {
+            setAstronautaSelecionado(null);
+            setPodioSelecionado(null);
+          }}
         />
       )}
     </section>

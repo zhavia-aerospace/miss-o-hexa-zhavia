@@ -8,15 +8,12 @@ import AutocompleteNome from '../AutocompleteNome.jsx';
 
 const BASE = import.meta.env.VITE_API_URL ?? '';
 
-const JA_ENVIOU_KEY = 'bolao_hexa_enviado';
-
-export default function AbaPalpites({ onPalpiteEnviado }) {
+export default function AbaPalpites({ meuNome, onIdentificar }) {
   const { mostrarAlerta } = useAlerta();
   const [nome, setNome] = useState('');
   const [escolhas, setEscolhas] = useState(escolhasIniciais);
   const [enviando, setEnviando] = useState(false);
   const [msgEnvio, setMsgEnvio] = useState('');
-  const [jaEnviou, setJaEnviou] = useState(() => localStorage.getItem(JA_ENVIOU_KEY) === 'true');
   const [palpites, setPalpites] = useState([]);
   const [filtro, setFiltro] = useState('');
   const [astronautaSelecionado, setAstronautaSelecionado] = useState(null);
@@ -26,7 +23,10 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
   const [nomesExistentes, setNomesExistentes] = useState([]);
   const [mostrarLogin, setMostrarLogin] = useState(false);
   const [palpitesTravados, setPalpitesTravados] = useState(false);
+  const [carregandoConfig, setCarregandoConfig] = useState(true);
   const gridRef = useRef(null);
+
+  const identificado = meuNome.trim().length > 0;
 
   const carregarPalpites = useCallback(async () => {
     try {
@@ -38,21 +38,22 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
   }, []);
 
   useEffect(() => {
-    if (jaEnviou) carregarPalpites();
-  }, [jaEnviou, carregarPalpites]);
-
-  useEffect(() => {
-    if (!jaEnviou) {
-      getNomesPalpites().then(setNomesExistentes).catch(() => {});
-    }
-  }, [jaEnviou]);
+    carregarPalpites();
+    getNomesPalpites().then(setNomesExistentes).catch(() => {});
+  }, [carregarPalpites]);
 
   useEffect(() => {
     fetch(`${BASE}/api/gabarito`)
       .then((r) => r.json())
       .then((gab) => setPalpitesTravados(gab.palpitesTravados === true))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setCarregandoConfig(false));
   }, []);
+
+  // Pré-preenche o nome se a pessoa já se identificou em outra aba
+  useEffect(() => {
+    if (identificado && !nome) setNome(meuNome);
+  }, [identificado, meuNome, nome]);
 
   // Aplica Twemoji no grid quando as escolhas mudam
   useEffect(() => {
@@ -60,6 +61,10 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
       window.twemoji.parse(gridRef.current);
     }
   }, [escolhas]);
+
+  const temPalpite = palpites.some(
+    (p) => p.nome.trim().toLowerCase() === meuNome.trim().toLowerCase()
+  );
 
   function selecionarTime(letra, time) {
     setEscolhas((prev) => {
@@ -78,9 +83,9 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
   }
 
   async function enviarPalpite() {
-    if (localStorage.getItem(JA_ENVIOU_KEY) === 'true') {
+    if (temPalpite) {
       mostrarAlerta(
-        'Sua telemetria já foi transmitida para a base! Não é permitido enviar múltiplos palpites do mesmo dispositivo.',
+        'Sua telemetria já foi transmitida para a base! Não é permitido enviar múltiplos palpites com o mesmo nome.',
         '🛰️ Missão Já Registrada'
       );
       return;
@@ -102,18 +107,12 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
     setMsgEnvio('');
     try {
       await postPalpite(nome.trim(), escolhas);
-      localStorage.setItem(JA_ENVIOU_KEY, 'true');
-      setJaEnviou(true);
-      onPalpiteEnviado?.();
+      onIdentificar(nome.trim());
       setMsgEnvio(`🚀 Sucesso, ${nome.trim()}! Seus palpites foram computados!`);
-      setNome('');
-      setEscolhas(escolhasIniciais());
       carregarPalpites();
     } catch (err) {
       if (err.message === 'Já existe um palpite com este nome') {
-        localStorage.setItem(JA_ENVIOU_KEY, 'true');
-        setJaEnviou(true);
-        onPalpiteEnviado?.();
+        onIdentificar(nome.trim());
         carregarPalpites();
         setMsgEnvio(`✅ Identificamos que "${nome.trim()}" já enviou os palpites! Ranking liberado.`);
       } else {
@@ -138,10 +137,7 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
     try {
       const { existe } = await checkNomeExiste(nomeLogin.trim());
       if (existe) {
-        localStorage.setItem(JA_ENVIOU_KEY, 'true');
-        setJaEnviou(true);
-        onPalpiteEnviado?.();
-        carregarPalpites();
+        onIdentificar(nomeLogin.trim());
         setMostrarLogin(false);
       } else {
         setMsgLogin('❌ Nenhum palpite encontrado com esse nome. Verifique a grafia ou envie seus classificados acima.');
@@ -153,47 +149,59 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
     }
   }
 
+  if (carregandoConfig) {
+    return (
+      <section className="tab-content">
+        <div className="cosmic-panel" style={{ textAlign: 'center', color: '#aaa' }}>
+          🛰️ Sincronizando com a base...
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="tab-content">
       {/* Formulário de palpite */}
       <div className="cosmic-panel">
-        {palpitesTravados && jaEnviou ? (
+        {palpitesTravados && temPalpite ? (
           <div style={{ background: 'rgba(255,51,51,0.08)', border: '2px solid #ff3333', borderRadius: 10, padding: '20px', textAlign: 'center' }}>
             <div style={{ fontSize: '2.5rem', marginBottom: 10 }}>🔒</div>
             <h3 style={{ color: '#ff5555', margin: '0 0 8px', fontSize: '1.2rem' }}>Fase de Palpites Encerrada</h3>
             <p style={{ color: '#aaa', margin: 0, fontSize: '0.95rem' }}>Os palpites de grupos estão travados. A Copa já começou — boa sorte a todos! ⚽🇧🇷</p>
           </div>
-        ) : palpitesTravados && !jaEnviou ? (
+        ) : palpitesTravados && !temPalpite ? (
           <>
             <div style={{ background: 'rgba(255,51,51,0.08)', border: '2px solid #ff3333', borderRadius: 10, padding: '24px 20px', marginBottom: 24, textAlign: 'center' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: 10 }}>🔒</div>
               <h3 style={{ color: '#ff5555', margin: '0 0 8px', fontSize: '1.2rem' }}>Fase de Palpites Encerrada</h3>
               <p style={{ color: '#aaa', margin: 0, fontSize: '0.95rem' }}>Os palpites de grupos estão travados. A Copa já começou — boa sorte a todos! ⚽🇧🇷</p>
             </div>
-            <div style={{ padding: '16px', border: '1px solid rgba(0,102,255,0.35)', borderRadius: 8, background: 'rgba(0,102,255,0.06)' }}>
-              <p style={{ color: '#aaa', marginBottom: 10, fontSize: '0.9rem' }}>Confirme seu nome para ver os palpites da tripulação:</p>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                <AutocompleteNome
-                  value={nomeLogin}
-                  onChange={(v) => { setNomeLogin(v); setMsgLogin(''); }}
-                  onEnter={handleLogin}
-                  sugestoes={nomesExistentes}
-                  placeholder="Seu nome..."
-                />
-                <button
-                  onClick={handleLogin}
-                  disabled={verificando}
-                  style={{ background: 'var(--cosmic-blue)', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 6, cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem', opacity: verificando ? 0.6 : 1, whiteSpace: 'nowrap' }}
-                >
-                  {verificando ? 'Verificando...' : 'Confirmar 🚀'}
-                </button>
+            {!identificado && (
+              <div style={{ padding: '16px', border: '1px solid rgba(0,102,255,0.35)', borderRadius: 8, background: 'rgba(0,102,255,0.06)' }}>
+                <p style={{ color: '#aaa', marginBottom: 10, fontSize: '0.9rem' }}>Confirme seu nome para ver os palpites da tripulação:</p>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                  <AutocompleteNome
+                    value={nomeLogin}
+                    onChange={(v) => { setNomeLogin(v); setMsgLogin(''); }}
+                    onEnter={handleLogin}
+                    sugestoes={nomesExistentes}
+                    placeholder="Seu nome..."
+                  />
+                  <button
+                    onClick={handleLogin}
+                    disabled={verificando}
+                    style={{ background: 'var(--cosmic-blue)', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 6, cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem', opacity: verificando ? 0.6 : 1, whiteSpace: 'nowrap' }}
+                  >
+                    {verificando ? 'Verificando...' : 'Confirmar 🚀'}
+                  </button>
+                </div>
+                {msgLogin && (
+                  <p style={{ marginTop: 8, fontSize: '0.88rem', color: msgLogin.startsWith('❌') || msgLogin.startsWith('⚠️') ? '#ff6666' : 'var(--nebula-green)' }}>
+                    {msgLogin}
+                  </p>
+                )}
               </div>
-              {msgLogin && (
-                <p style={{ marginTop: 8, fontSize: '0.88rem', color: msgLogin.startsWith('❌') || msgLogin.startsWith('⚠️') ? '#ff6666' : 'var(--nebula-green)' }}>
-                  {msgLogin}
-                </p>
-              )}
-            </div>
+            )}
           </>
         ) : (
           <>
@@ -204,7 +212,7 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
 
             <h2 style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               🔮 Simulador de Classificados da Fase de Grupos
-              {!jaEnviou && (
+              {!identificado && (
                 <button
                   onClick={() => { setMostrarLogin((v) => !v); setMsgLogin(''); }}
                   style={{ fontSize: '0.8rem', padding: '5px 14px', borderRadius: 20, border: '1px solid var(--cosmic-blue)', background: mostrarLogin ? 'var(--cosmic-blue)' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}
@@ -214,7 +222,7 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
               )}
             </h2>
 
-            {!jaEnviou && mostrarLogin && (
+            {!identificado && mostrarLogin && (
               <div style={{ margin: '14px 0 20px', padding: '16px', border: '1px solid rgba(0,102,255,0.35)', borderRadius: 8, background: 'rgba(0,102,255,0.06)' }}>
                 <p style={{ color: '#aaa', marginBottom: 10, fontSize: '0.9rem' }}>Já enviou seus palpites? Confirme seu nome para desbloquear o ranking:</p>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
@@ -321,7 +329,7 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
       <div className="cosmic-panel">
         <h2>🏆 Radar de Grupos da Tripulação</h2>
 
-        {!jaEnviou ? (
+        {!identificado ? (
           <div style={{ marginTop: 15 }}>
             <div style={{ textAlign: 'center', padding: '24px 10px', border: '1px dashed #ffcc00', background: 'rgba(255,204,0,0.03)', borderRadius: 8 }}>
               <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: 10 }}>👁️‍🗨️</span>
@@ -333,7 +341,7 @@ export default function AbaPalpites({ onPalpiteEnviado }) {
 
             <div style={{ marginTop: 20, padding: '20px', border: '1px solid rgba(0,102,255,0.3)', borderRadius: 8, background: 'rgba(0,102,255,0.05)' }}>
               <p style={{ color: '#aaa', marginBottom: 12, fontSize: '0.95rem' }}>
-                🔑 <strong style={{ color: '#fff' }}>Já enviei meus palpites</strong> — confirme seu nome para desbloquear:
+                🔑 <strong style={{ color: '#fff' }}>Já me identifiquei antes</strong> — confirme seu nome para desbloquear:
               </p>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
                 <AutocompleteNome

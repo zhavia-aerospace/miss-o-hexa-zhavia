@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { LETRAS_GRUPOS, definicaoGrupos } from '../data/grupos.js';
-import { timesPodio } from '../data/times.js';
 import AvatarNome from './AvatarNome.jsx';
 
 const BASE = import.meta.env.VITE_API_URL ?? '';
@@ -36,6 +35,11 @@ async function zerarTodosPalpites() {
 
 async function deletarPalpite(id) {
   const r = await fetch(`${BASE}/api/admin/palpites/${id}`, { method: 'DELETE' });
+  return r.json();
+}
+
+async function deletarPodio(id) {
+  const r = await fetch(`${BASE}/api/podio/${id}`, { method: 'DELETE' });
   return r.json();
 }
 
@@ -270,6 +274,10 @@ export default function AbaAdmin() {
     return dados.palpites.find(p => p.nome.toLowerCase() === nome.toLowerCase());
   }
 
+  function getPodioPessoa(nome) {
+    return dados.podios.find(p => p.nome.toLowerCase() === nome.toLowerCase());
+  }
+
   async function handleSalvarRanking() {
     const validas = linhasRanking.filter((l) => l.astronauta.trim() && l.pontuacao !== '');
     if (validas.length === 0) return;
@@ -295,6 +303,11 @@ export default function AbaAdmin() {
   );
   const podiosFiltrados = dados.podios.filter((p) =>
     p.nome.toLowerCase().includes(filtroPodio.toLowerCase())
+  );
+
+  // Times classificados pelos grupos definidos no gabarito acima (1º e 2º de cada grupo)
+  const classificados = Array.from(
+    new Set(LETRAS_GRUPOS.flatMap((l) => gabGrupos[l].filter(Boolean)))
   );
 
   // === LÓGICA DE AGRUPAMENTO DOS CONFRONTOS ===
@@ -520,6 +533,7 @@ export default function AbaAdmin() {
                   <th style={{ ...thStyle, color: '#d1d1d1' }}>🥈 2º Lugar</th>
                   <th style={{ ...thStyle, color: '#cd7f32' }}>🥉 3º Lugar</th>
                   <th style={thStyle}>Enviado em</th>
+                  <th style={thStyle}></th>
                 </tr>
               </thead>
               <tbody>
@@ -531,6 +545,18 @@ export default function AbaAdmin() {
                     <td style={tdStyle}>{p.p3}</td>
                     <td style={{ ...tdStyle, color: '#667', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                       {new Date(p.createdAt).toLocaleString('pt-BR')}
+                    </td>
+                    <td style={tdStyle}>
+                      <button
+                        onClick={async () => {
+                          if (!window.confirm(`Remover o pódio de "${p.nome}"?`)) return;
+                          const res = await deletarPodio(p._id);
+                          if (res.success) setDados((d) => ({ ...d, podios: d.podios.filter((x) => x._id !== p._id) }));
+                        }}
+                        style={{ background: '#3a0000', border: '1px solid #900', color: '#ff6666', padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        🗑️
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -663,7 +689,10 @@ export default function AbaAdmin() {
           </div>
 
           {/* Pódio */}
-          <h3 style={{ color: 'var(--nebula-green)', marginBottom: 16, fontSize: '1rem' }}>👑 Pódio Final (opcional)</h3>
+          <h3 style={{ color: 'var(--nebula-green)', marginBottom: 6, fontSize: '1rem' }}>👑 Pódio Final (opcional)</h3>
+          <p style={{ color: '#666', fontSize: '0.8rem', marginBottom: 16 }}>
+            Só aparecem aqui os times classificados nos grupos acima (1º e 2º de cada grupo).
+          </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 24 }}>
             {[
               { key: 'p1', label: '🥇 1º Lugar (Campeão)', cor: 'var(--galaxy-gold)' },
@@ -678,7 +707,7 @@ export default function AbaAdmin() {
                   style={selectStyle}
                 >
                   <option value="">-- Selecione --</option>
-                  {timesPodio.map((t) => <option key={t} value={t}>{t}</option>)}
+                  {classificados.map((t) => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
             ))}
@@ -774,6 +803,8 @@ export default function AbaAdmin() {
               <tbody>
                 {linhasRanking.map((linha, i) => {
                   const palpiteEncontrado = getPalpitePessoa(linha.astronauta);
+                  const podioEncontrado = getPodioPessoa(linha.astronauta);
+                  const temDetalhes = Boolean(palpiteEncontrado || podioEncontrado);
                   const estaAberto = selecionadoRanking === i;
 
                   return (
@@ -782,13 +813,13 @@ export default function AbaAdmin() {
                         style={{
                           borderBottom: estaAberto ? 'none' : '1px solid rgba(255,255,255,0.04)',
                           background: estaAberto ? 'rgba(0,102,255,0.1)' : 'transparent',
-                          cursor: palpiteEncontrado ? 'pointer' : 'default',
+                          cursor: temDetalhes ? 'pointer' : 'default',
                         }}
-                        onClick={() => palpiteEncontrado && setSelecionadoRanking(estaAberto ? null : i)}
+                        onClick={() => temDetalhes && setSelecionadoRanking(estaAberto ? null : i)}
                       >
                         <td style={{ ...tdStyle, color: '#667', textAlign: 'center' }}>{i + 1}</td>
-                        <td style={{ ...tdStyle, fontWeight: palpiteEncontrado ? 'bold' : 'normal' }}>
-                          {palpiteEncontrado && <span style={{ color: 'var(--nebula-green)', marginRight: 5, cursor: 'pointer' }}>👁️</span>}
+                        <td style={{ ...tdStyle, fontWeight: temDetalhes ? 'bold' : 'normal' }}>
+                          {temDetalhes && <span style={{ color: 'var(--nebula-green)', marginRight: 5, cursor: 'pointer' }}>👁️</span>}
                           <input
                             value={linha.astronauta}
                             onChange={(e) => editarLinha(i, 'astronauta', e.target.value)}
@@ -814,26 +845,40 @@ export default function AbaAdmin() {
                         </td>
                       </tr>
 
-                      {estaAberto && palpiteEncontrado && (
+                      {estaAberto && temDetalhes && (
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'rgba(0,102,255,0.08)' }}>
                           <td colSpan="4" style={{ padding: '16px 12px' }}>
-                            <div style={{ color: '#ccc', fontSize: '0.85rem' }}>
-                              <div style={{ color: 'var(--nebula-green)', fontWeight: 'bold', marginBottom: 10 }}>📋 Palpites de Grupos:</div>
-                              {LETRAS_GRUPOS.map((l) => (
-                                <div key={l} style={{ marginBottom: 8, paddingLeft: 12 }}>
-                                  <span style={{ color: 'var(--galaxy-gold)', fontWeight: 'bold' }}>Grupo {l}:</span>
-                                  {palpiteEncontrado.grupos?.[l] ? (
-                                    <>
-                                      <span style={{ color: 'var(--galaxy-gold)' }}> 1º {palpiteEncontrado.grupos[l][0]}</span>
-                                      {' • '}
-                                      <span style={{ color: 'var(--nebula-green)' }}>2º {palpiteEncontrado.grupos[l][1]}</span>
-                                    </>
-                                  ) : (
-                                    <span style={{ color: '#666' }}> (sem palpite)</span>
-                                  )}
+                            <div style={{ color: '#ccc', fontSize: '0.85rem', marginBottom: 16 }}>
+                              <div style={{ color: 'var(--galaxy-gold)', fontWeight: 'bold', marginBottom: 10 }}>👑 Pódio Chutado:</div>
+                              {podioEncontrado ? (
+                                <div style={{ display: 'flex', gap: 14, paddingLeft: 12 }}>
+                                  <span style={{ color: 'var(--galaxy-gold)' }}>🥇 {podioEncontrado.p1}</span>
+                                  <span style={{ color: '#d1d1d1' }}>🥈 {podioEncontrado.p2}</span>
+                                  <span style={{ color: '#cd7f32' }}>🥉 {podioEncontrado.p3}</span>
                                 </div>
-                              ))}
+                              ) : (
+                                <span style={{ color: '#666', paddingLeft: 12 }}>(sem pódio enviado)</span>
+                              )}
                             </div>
+                            {palpiteEncontrado && (
+                              <div style={{ color: '#ccc', fontSize: '0.85rem' }}>
+                                <div style={{ color: 'var(--nebula-green)', fontWeight: 'bold', marginBottom: 10 }}>📋 Palpites de Grupos:</div>
+                                {LETRAS_GRUPOS.map((l) => (
+                                  <div key={l} style={{ marginBottom: 8, paddingLeft: 12 }}>
+                                    <span style={{ color: 'var(--galaxy-gold)', fontWeight: 'bold' }}>Grupo {l}:</span>
+                                    {palpiteEncontrado.grupos?.[l] ? (
+                                      <>
+                                        <span style={{ color: 'var(--galaxy-gold)' }}> 1º {palpiteEncontrado.grupos[l][0]}</span>
+                                        {' • '}
+                                        <span style={{ color: 'var(--nebula-green)' }}>2º {palpiteEncontrado.grupos[l][1]}</span>
+                                      </>
+                                    ) : (
+                                      <span style={{ color: '#666' }}> (sem palpite)</span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </td>
                         </tr>
                       )}

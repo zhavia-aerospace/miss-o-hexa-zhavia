@@ -26,11 +26,13 @@ export const postPalpite = (nome, grupos) =>
 
 // --- Pódio ---
 export const getPodios = () => request('/api/podio');
+export const checkPodioExiste = (nome) => request(`/api/podio/existe?nome=${encodeURIComponent(nome)}`);
 export const postPodio = (nome, p1, p2, p3) =>
   request('/api/podio', {
     method: 'POST',
     body: JSON.stringify({ nome, p1, p2, p3 }),
   });
+export const deletarPodio = (id) => request(`/api/podio/${id}`, { method: 'DELETE' });
 
 // --- Ranking ---
 export const getRanking = () => request('/api/ranking');
@@ -44,3 +46,6 @@ export const consultarOraculo = (pergunta) =>
 
 // --- Jogos ao vivo ---
 export const getJogos = () => request('/api/jogos');
+
+// --- Grupos reais ---
+export const getGruposReais = () => request('/api/grupos-reais');
