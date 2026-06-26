@@ -48,8 +48,8 @@ async function salvarRanking(ranking) {
   return r.json();
 }
 
-const ABA_LABELS = ['palpites', 'podio', 'gabarito', 'ranking'];
-const ABA_ICONS = { palpites: '🔮', podio: '👑', gabarito: '📋', ranking: '🏆' };
+const ABA_LABELS = ['palpites', 'podio', 'gabarito', 'ranking', 'confrontos'];
+const ABA_ICONS = { palpites: '🔮', podio: '👑', gabarito: '📋', ranking: '🏆', confrontos: '⚔️' };
 
 export default function AbaAdmin() {
   const [aba, setAba] = useState('palpites');
@@ -81,7 +81,54 @@ export default function AbaAdmin() {
   const [resultadoCalculo, setResultadoCalculo] = useState(null);
   const [msgCalculo, setMsgCalculo] = useState('');
 
+  // === ESTADOS DOS CONFRONTOS & MODAL ===
+  const [confrontos, setConfrontos] = useState([]);
+  const [carregandoConfrontos, setCarregandoConfrontos] = useState(false);
+  const [modalConfirmacao, setModalConfirmacao] = useState({ aberto: false, titulo: '', mensagem: '', acao: null, executando: false });
+
+  async function fetchConfrontos() {
+    setCarregandoConfrontos(true);
+    try {
+      const r = await fetch(`${BASE}/api/confrontos`);
+      const data = await r.json();
+      setConfrontos(data);
+    } catch (e) {
+      console.error('Erro ao buscar confrontos:', e);
+    } finally {
+      setCarregandoConfrontos(false);
+    }
+  }
+
+  // Define um vencedor disparando via API
+  async function executarDefinirVencedor(idJogo, vencedor, proximoJogoId) {
+    try {
+      const r = await fetch(`${BASE}/api/confrontos/${idJogo}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vencedor, proximoJogoId })
+      });
+      if (r.ok) fetchConfrontos();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // Reverte um vencedor disparando via API
+  async function executarReverterVencedor(idJogo, vencedor, proximoJogoId) {
+    try {
+      const r = await fetch(`${BASE}/api/confrontos/${idJogo}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vencedor, proximoJogoId, reverter: true })
+      });
+      if (r.ok) fetchConfrontos();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   useEffect(() => {
+    fetchConfrontos();
     Promise.all([getAdmin(), getGabarito()])
       .then(([d, gab]) => {
         setDados(d);
@@ -152,6 +199,7 @@ export default function AbaAdmin() {
 
   function recarregar() {
     setCarregando(true);
+    fetchConfrontos();
     Promise.all([getAdmin(), getGabarito()])
       .then(([d, gab]) => {
         setDados(d);
@@ -249,6 +297,14 @@ export default function AbaAdmin() {
     p.nome.toLowerCase().includes(filtroPodio.toLowerCase())
   );
 
+  // === LÓGICA DE AGRUPAMENTO DOS CONFRONTOS ===
+  const fasesOrdem = ['Fase 1', 'Oitavas', 'Quartas', 'Semifinal', 'Final'];
+  const confrontosAgrupados = confrontos.reduce((acc, jogo) => {
+    if (!acc[jogo.fase]) acc[jogo.fase] = [];
+    acc[jogo.fase].push(jogo);
+    return acc;
+  }, {});
+
   if (carregando) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--space-dark)' }}>
@@ -258,7 +314,38 @@ export default function AbaAdmin() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--space-dark)', padding: '30px 20px', maxWidth: 1100, margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--space-dark)', padding: '30px 20px', maxWidth: 1100, margin: '0 auto', position: 'relative' }}>
+      
+      {/* === MODAL CUSTOMIZADO (ALERTA BONITO) === */}
+      {modalConfirmacao.aberto && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ background: '#0b0f19', padding: '30px', borderRadius: '12px', border: '1px solid var(--cosmic-blue)', maxWidth: '420px', width: '90%', textAlign: 'center', boxShadow: '0 10px 25px rgba(0, 102, 255, 0.2)' }}>
+            <h2 style={{ color: 'var(--galaxy-gold)', margin: '0 0 15px 0', fontSize: '1.5rem' }}>{modalConfirmacao.titulo}</h2>
+            <p style={{ color: '#ccc', marginBottom: '25px', fontSize: '1.05rem', lineHeight: 1.4 }}>{modalConfirmacao.mensagem}</p>
+            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+              <button
+                onClick={() => setModalConfirmacao({ aberto: false, titulo: '', mensagem: '', acao: null, executando: false })}
+                style={{ background: 'transparent', border: '1px solid #555', color: '#bbb', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                disabled={modalConfirmacao.executando}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  setModalConfirmacao(prev => ({ ...prev, executando: true }));
+                  await modalConfirmacao.acao();
+                  setModalConfirmacao({ aberto: false, titulo: '', mensagem: '', acao: null, executando: false });
+                }}
+                style={{ background: 'var(--cosmic-blue)', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                disabled={modalConfirmacao.executando}
+              >
+                {modalConfirmacao.executando ? 'Processando...' : 'Confirmar 🚀'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 30 }}>
         <div style={{ color: 'var(--cosmic-blue)', fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: 4, textTransform: 'uppercase', marginBottom: 6 }}>
@@ -284,7 +371,7 @@ export default function AbaAdmin() {
       </div>
 
       {/* Navegação de abas */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20, borderBottom: '1px solid rgba(0,102,255,0.2)', paddingBottom: 10 }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20, borderBottom: '1px solid rgba(0,102,255,0.2)', paddingBottom: 10, overflowX: 'auto' }}>
         {ABA_LABELS.map((id) => (
           <button
             key={id}
@@ -299,6 +386,7 @@ export default function AbaAdmin() {
               fontWeight: 'bold',
               fontSize: '0.9rem',
               transition: 'all 0.2s',
+              whiteSpace: 'nowrap'
             }}
           >
             {ABA_ICONS[id]} {id.charAt(0).toUpperCase() + id.slice(1)}
@@ -306,7 +394,7 @@ export default function AbaAdmin() {
         ))}
         <button
           onClick={recarregar}
-          style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #333', color: '#667', padding: '8px 16px', borderRadius: 20, cursor: 'pointer', fontSize: '0.85rem' }}
+          style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #333', color: '#667', padding: '8px 16px', borderRadius: 20, cursor: 'pointer', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
         >
           🔄 Atualizar
         </button>
@@ -776,6 +864,111 @@ export default function AbaAdmin() {
           </div>
         </div>
       )}
+
+      {/* ABA: CONFRONTOS (COM NOVO LAYOUT DE FASES DIVIDIDAS) */}
+      {aba === 'confrontos' && (
+        <div className="cosmic-panel" style={{ margin: 0 }}>
+          <h2 style={{ margin: '0 0 6px' }}>⚔️ Gerenciar Vencedores</h2>
+          <p style={{ color: '#888', fontSize: '0.9rem', marginBottom: 20 }}>
+            Defina quem venceu os duelos ou desfaça resultados incorretos. O sistema avançará o ganhador automaticamente.
+          </p>
+
+          {carregandoConfrontos ? (
+            <p style={{ color: 'var(--nebula-green)', padding: 20, textAlign: 'center' }}>Carregando a chave do torneio...</p>
+          ) : (
+            fasesOrdem.map(fase => {
+              const jogosDaFase = confrontosAgrupados[fase];
+              // Se não houver jogos para essa fase, não renderiza nada
+              if (!jogosDaFase || jogosDaFase.length === 0) return null;
+
+              return (
+                <div key={fase} style={{ marginBottom: '40px' }}>
+                  
+                  {/* === CABEÇALHO DIVISOR DA FASE === */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
+                    <h3 style={{ margin: 0, color: 'var(--galaxy-gold)', fontSize: '1.4rem', whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                      {fase}
+                    </h3>
+                    <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(255,204,0,0.5) 0%, transparent 100%)' }}></div>
+                  </div>
+
+                  {/* === GRID DE JOGOS DESSA FASE === */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 15 }}>
+                    {jogosDaFase.map(jogo => (
+                      <div key={jogo.idJogo} style={{ 
+                        border: jogo.vencedor ? '1px solid rgba(0,255,102,0.3)' : '1px solid rgba(0,102,255,0.2)', 
+                        padding: '16px', borderRadius: '8px', 
+                        background: jogo.vencedor ? 'rgba(0,255,102,0.05)' : 'rgba(0,0,0,0.3)' 
+                      }}>
+                        <p style={{ margin: '0 0 12px 0', color: 'var(--cosmic-blue)', fontSize: '13px', fontWeight: 'bold' }}>
+                          Jogo {jogo.idJogo}
+                          {jogo.proximoJogoId ? <span style={{ color: '#888', fontWeight: 'normal' }}> (Avança p/ {jogo.proximoJogoId})</span> : <span style={{ color: 'var(--galaxy-gold)', fontWeight: 'normal' }}> (Grande Final)</span>}
+                        </p>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <button 
+                            onClick={() => setModalConfirmacao({
+                              aberto: true, titulo: '✅ Confirmar Vitória',
+                              mensagem: `Deseja cravar ${jogo.jogador1} como grande vencedor do Jogo ${jogo.idJogo}?`,
+                              acao: () => executarDefinirVencedor(jogo.idJogo, jogo.jogador1, jogo.proximoJogoId)
+                            })}
+                            disabled={!jogo.jogador1 || jogo.vencedor}
+                            style={{
+                              padding: '10px 14px', cursor: (!jogo.jogador1 || jogo.vencedor) ? 'not-allowed' : 'pointer',
+                              background: jogo.vencedor === jogo.jogador1 ? 'rgba(0,255,102,0.15)' : 'transparent', 
+                              color: jogo.vencedor === jogo.jogador1 ? 'var(--nebula-green)' : (jogo.jogador1 ? '#fff' : '#666'), 
+                              border: `1px solid ${jogo.vencedor === jogo.jogador1 ? 'var(--nebula-green)' : '#444'}`, 
+                              borderRadius: '6px', fontWeight: 'bold', textAlign: 'left', display: 'flex', justifyContent: 'space-between'
+                            }}
+                          >
+                            <span>{jogo.jogador1 || 'Aguardando...'}</span>
+                            {jogo.vencedor === jogo.jogador1 && <span>🏆</span>}
+                          </button>
+
+                          <button 
+                            onClick={() => setModalConfirmacao({
+                              aberto: true, titulo: '✅ Confirmar Vitória',
+                              mensagem: `Deseja cravar ${jogo.jogador2} como grande vencedor do Jogo ${jogo.idJogo}?`,
+                              acao: () => executarDefinirVencedor(jogo.idJogo, jogo.jogador2, jogo.proximoJogoId)
+                            })}
+                            disabled={!jogo.jogador2 || jogo.vencedor}
+                            style={{
+                              padding: '10px 14px', cursor: (!jogo.jogador2 || jogo.vencedor) ? 'not-allowed' : 'pointer',
+                              background: jogo.vencedor === jogo.jogador2 ? 'rgba(0,255,102,0.15)' : 'transparent', 
+                              color: jogo.vencedor === jogo.jogador2 ? 'var(--nebula-green)' : (jogo.jogador2 ? '#fff' : '#666'), 
+                              border: `1px solid ${jogo.vencedor === jogo.jogador2 ? 'var(--nebula-green)' : '#444'}`, 
+                              borderRadius: '6px', fontWeight: 'bold', textAlign: 'left', display: 'flex', justifyContent: 'space-between'
+                            }}
+                          >
+                            <span>{jogo.jogador2 || 'Aguardando...'}</span>
+                            {jogo.vencedor === jogo.jogador2 && <span>🏆</span>}
+                          </button>
+
+                          {jogo.vencedor && (
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                              <button
+                                onClick={() => setModalConfirmacao({
+                                  aberto: true, titulo: '⏪ Desfazer Resultado',
+                                  mensagem: `Tem certeza? Isso removerá a vitória de ${jogo.vencedor} do Jogo ${jogo.idJogo} e apagará ele da próxima fase.`,
+                                  acao: () => executarReverterVencedor(jogo.idJogo, jogo.vencedor, jogo.proximoJogoId)
+                                })}
+                                style={{ background: 'transparent', color: '#ff4444', border: '1px solid #ff4444', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
+                              >
+                                ⏪ Desfazer Jogo {jogo.idJogo}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
     </div>
   );
 }

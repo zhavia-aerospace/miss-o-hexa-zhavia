@@ -4,6 +4,7 @@ export default function Header({ abaAtiva, onMudarAba, jaEnviou }) {
     { id: 'palpites', label: '🔮 2. Classificados' },
     { id: 'podio', label: '👑 3. Pódio Final' },
     { id: 'ranking', label: '🏆 4. Classificação', bloqueada: !jaEnviou },
+    { id: 'confrontos', label: '⚔️ 5. Confrontos' }, 
   ];
 
   return (

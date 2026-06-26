@@ -8,6 +8,7 @@ import AbaHome from './components/tabs/AbaHome.jsx';
 import AbaPalpites from './components/tabs/AbaPalpites.jsx';
 import AbaPodio from './components/tabs/AbaPodio.jsx';
 import AbaRanking from './components/tabs/AbaRanking.jsx';
+import AbaConfrontos from './components/tabs/AbaConfrontos.jsx'; // <-- 1. IMPORTAMOS A ABA AQUI
 import AbaAdmin from './components/AbaAdmin.jsx';
 
 const IS_ADMIN = window.location.pathname === '/adminrafael';
@@ -42,6 +43,7 @@ export default function App() {
         {abaAtiva === 'palpites' && <AbaPalpites onPalpiteEnviado={() => setJaEnviou(true)} />}
         {abaAtiva === 'podio' && <AbaPodio />}
         {abaAtiva === 'ranking' && jaEnviou && <AbaRanking />}
+        {abaAtiva === 'confrontos' && <AbaConfrontos />} {/* <-- 2. EXIBIMOS A ABA AQUI */}
       </main>
 
       <PainelLateralJogos />

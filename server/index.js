@@ -11,6 +11,7 @@ import jogosRouter from './routes/jogos.js';
 import adminRouter from './routes/admin.js';
 import gabaritoRouter from './routes/gabarito.js';
 import calcularRouter from './routes/calcular.js';
+import confrontosRouter from './routes/confrontos.js';
 
 dotenv.config();
 
@@ -33,7 +34,7 @@ app.use(cors({
     if (allowedOrigins.includes(origin)) return callback(null, true);
     callback(new Error(`CORS bloqueado: ${origin}`));
   },
-  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
 }));
 
 app.use(express.json());
@@ -47,6 +48,7 @@ app.use('/api/jogos', jogosRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/gabarito', gabaritoRouter);
 app.use('/api/calcular', calcularRouter);
+app.use('/api/confrontos', confrontosRouter);
 
 // Health check (útil para Render / Railway)
 app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date() }));
