@@ -97,10 +97,10 @@ export default function AbaConfrontos() {
 
     const hasParents = phase !== 'Fase 1';
     const hasChildren = phase !== 'Final';
-    const needsVertical = hasChildren && totalItems > 1; // Só desenha linha vertical se for ligar dupla
+    const needsVertical = hasChildren && totalItems > 1;
 
-    const colorOff = 'rgba(96, 165, 250, 0.25)'; // Azul apagado
-    const colorOn = 'var(--galaxy-gold, #fbbf24)'; // Dourado (Acende quando avança!)
+    const colorOff = 'rgba(96, 165, 250, 0.25)';
+    const colorOn = 'var(--galaxy-gold, #fbbf24)';
 
     const outGold = jogo?.vencedor || jogo?.isBye ? colorOn : colorOff;
     const inGold = (jogo?.jogador1 || jogo?.jogador2) ? colorOn : colorOff;
@@ -119,10 +119,22 @@ export default function AbaConfrontos() {
 
         {/* CONTAINER DO CARD COM A TAÇA FLUTUANTE AUMENTADA */}
         <div style={{ position: 'relative', width: '100%', zIndex: 10 }}>
-          {/* 🏆 A TAÇA SÓ APARECE NO CENTRO DA GRANDE FINAL, AGORA MAIOR */}
+          
+          {/* 🏆 A TAÇA SÓ APARECE NO CENTRO DA GRANDE FINAL */}
           {isCenter && (
-            <div className="floating-trophy-large">🏆</div>
+            <div className="floating-trophy-large">
+              
+              {/* === NOME DO CAMPEÃO BRILHANDO JUNTO COM A TAÇA === */}
+              {jogo?.vencedor && (
+                <div className="champion-label">
+                  ⭐ {jogo.vencedor} ⭐
+                </div>
+              )}
+              
+              🏆
+            </div>
           )}
+          
           <MatchCard jogo={jogo} isFinal={isCenter} />
         </div>
 
@@ -148,7 +160,7 @@ export default function AbaConfrontos() {
   return (
     <div className="bracket-full-width-container">
       
-      {/* === CSS MILIMÉTRICO DAS LINHAS E ANIMAÇÃO DA TAÇA GRANDE === */}
+      {/* === CSS MILIMÉTRICO DAS LINHAS E ANIMAÇÕES === */}
       <style>{`
         .bracket-full-width-container {
           width: 100vw; position: relative; left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw;
@@ -163,7 +175,7 @@ export default function AbaConfrontos() {
         }
         .bracket-cell {
           flex: 1; display: flex; flex-direction: column; justify-content: center; position: relative;
-          padding: 5px 20px; /* Esse padding exato cria o espaço paras as linhas */
+          padding: 5px 20px;
         }
         .column-title {
           text-align: center; color: var(--cosmic-blue, #60a5fa); font-weight: bold; text-transform: uppercase;
@@ -185,15 +197,31 @@ export default function AbaConfrontos() {
         .final-card { border-color: var(--galaxy-gold, #fbbf24); background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); transform: scale(1.1); }
         .final-card:hover { transform: scale(1.15); box-shadow: 0 0 15px rgba(251, 191, 36, 0.2); }
 
-        /* === 🏆 ESTILO E ANIMAÇÃO DA TAÇA GRANDE FLUTUANTE === */
+        /* === 🏆 ESTILO DA TAÇA E DO NOME DO CAMPEÃO === */
         .floating-trophy-large {
           position: absolute;
-          top: -210px; /* Joga a taça mais pra cima no espaço vazio */
+          top: -210px;
           left: 50%;
-          font-size: 9rem; /* Taça grandona */
-          pointer-events: none; /* Pra não atrapalhar o clique no card de baixo */
-          animation: floatTrophyLarge 3.5s ease-in-out infinite; /* Efeito de levitação infinito */
+          font-size: 9rem;
+          pointer-events: none; 
+          animation: floatTrophyLarge 3.5s ease-in-out infinite; 
           z-index: 0;
+          /* Mantém o texto dentro do escudo alinhado */
+          display: flex;
+          justify-content: center;
+        }
+
+        .champion-label {
+          position: absolute;
+          top: -30px; /* Posiciona logo acima da taça grandona */
+          font-size: 1.8rem;
+          font-weight: 900;
+          color: #fff;
+          white-space: nowrap;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          text-shadow: 0 0 10px rgba(251, 191, 36, 0.8), 0 0 20px rgba(251, 191, 36, 1), 0 0 40px rgba(251, 191, 36, 1);
+          line-height: 1;
         }
 
         @keyframes floatTrophyLarge {
@@ -202,9 +230,8 @@ export default function AbaConfrontos() {
             filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.4)); 
           }
           50% { 
-            transform: translate(-50%, -25px) scale(1.1); /* Movimento e pulsação maiores */
-            filter: drop-shadow(0 0 45px rgba(251, 191, 36, 1)); /* Brilho super intenso */
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.6); 
+            transform: translate(-50%, -25px) scale(1.1); 
+            filter: drop-shadow(0 0 45px rgba(251, 191, 36, 1)); 
           }
           100% { 
             transform: translate(-50%, 0px) scale(1); 
@@ -249,7 +276,6 @@ export default function AbaConfrontos() {
 
         {/* ================= O CENTRO (FINAL) ================= */}
         <div className="bracket-column" style={{ flex: 1.2 }}>
-          {/* Brilho no título também para combinar */}
           <div className="column-title" style={{ color: 'var(--galaxy-gold, #fbbf24)', textShadow: '0 0 10px rgba(251, 191, 36, 0.4)' }}>Grande Final</div>
           <BracketCell jogo={final} side="center" phase="Final" index={0} totalItems={1} />
         </div>
