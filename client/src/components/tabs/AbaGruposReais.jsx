@@ -161,10 +161,14 @@ export default function AbaGruposReais() {
             {/* Título fantasma pulsando */}
             <div style={{ width: '250px', height: '24px', backgroundColor: '#1e293b', borderRadius: '4px', marginBottom: '20px', animation: 'pulseSearch 2s infinite ease-in-out' }} />
             
-            {/* Grid com 8 cards fantasmas (Skeletons) */}
-            <div className="matches-grid">
+            {/* AQUI ESTÁ A MÁGICA: Usamos a classe grid-grupos-bolao para organizar os cards */}
+            <div className="grid-grupos-bolao">
               {Array.from({ length: 8 }).map((_, index) => (
-                <div key={index} className="skeleton-card" />
+                <div 
+                  key={index} 
+                  className="skeleton-card" 
+                  style={{ height: '220px' }} /* Altura simulando a tabela real com 4 times */ 
+                />
               ))}
             </div>
           </div>
