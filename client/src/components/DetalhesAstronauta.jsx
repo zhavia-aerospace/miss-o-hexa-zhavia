@@ -4,8 +4,15 @@ export default function DetalhesAstronauta({ palpite, podio, onFechar }) {
   if (!palpite) return null;
 
   return (
-    <div className="modal-detalhes-astronauta">
-      <div className="modal-detalhes-content" style={{ maxHeight: '85vh', overflowY: 'auto' }}>
+    // 1. Adicionamos o onClick={onFechar} na div de fora (o fundo escuro)
+    <div className="modal-detalhes-astronauta" onClick={onFechar}>
+      
+      {/* 2. Adicionamos o stopPropagation na div de dentro (o cartão do modal) */}
+      <div 
+        className="modal-detalhes-content" 
+        style={{ maxHeight: '85vh', overflowY: 'auto' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button className="modal-detalhes-fechar" onClick={onFechar}>✕</button>
         <h3 style={{ color: 'var(--galaxy-gold)', marginBottom: 15, fontSize: '1.25rem' }}>
           📊 Telemetria de Palpites: {palpite.nome}
@@ -27,6 +34,7 @@ export default function DetalhesAstronauta({ palpite, podio, onFechar }) {
         </div>
 
         <hr style={{ border: 0, borderTop: '1px solid rgba(255,255,255,0.05)', margin: '12px 0 10px' }} />
+        
         <strong style={{ color: 'var(--galaxy-gold)', display: 'block', marginBottom: 8, fontSize: '0.9rem' }}>
           📋 Palpites Grupos
         </strong>

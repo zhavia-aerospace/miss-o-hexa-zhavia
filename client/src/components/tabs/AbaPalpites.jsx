@@ -62,6 +62,33 @@ export default function AbaPalpites({ meuNome, onIdentificar }) {
     }
   }, [escolhas]);
 
+  // ==========================================
+  // MÁGICA DO TRAVAMENTO DO SCROLL (FORÇA BRUTA JS)
+  // ==========================================
+  useEffect(() => {
+    if (astronautaSelecionado) {
+      // Injeta o travamento direto no HTML, no Body e no Root do React
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      const root = document.getElementById('root');
+      if (root) root.style.overflow = 'hidden';
+    } else {
+      // Limpa as travas quando o modal fechar
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      const root = document.getElementById('root');
+      if (root) root.style.overflow = '';
+    }
+    
+    // Limpeza de segurança
+    return () => {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      const root = document.getElementById('root');
+      if (root) root.style.overflow = '';
+    };
+  }, [astronautaSelecionado]);
+
   const temPalpite = palpites.some(
     (p) => p.nome.trim().toLowerCase() === meuNome.trim().toLowerCase()
   );

@@ -613,14 +613,19 @@ footer {
   animation: fadeInSlide 0.4s ease-out forwards;
 }
 
+/* --- 🎭 ANIMAÇÃO DE TRANSIÇÃO DE ABAS --- */
+.tab-content {
+  animation: fadeInSlide 0.4s ease-out forwards;
+}
+
 @keyframes fadeInSlide {
   0% {
     opacity: 0;
-    transform: translateY(10px); /* Começa 10px mais abaixo */
+    margin-top: 15px; /* Usar margin em vez de transform liberta o modal! */
   }
   100% {
     opacity: 1;
-    transform: translateY(0); /* Sobe para a posição original */
+    margin-top: 0;
   }
 }
 /* --- 💀 ESTILOS PARA O LOADING SKELETON --- */
