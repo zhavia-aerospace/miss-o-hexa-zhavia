@@ -608,3 +608,53 @@ footer {
     grid-template-columns: 1fr !important;
   }
 }
+/* --- 🎭 ANIMAÇÃO DE TRANSIÇÃO DE ABAS --- */
+.tab-content {
+  animation: fadeInSlide 0.4s ease-out forwards;
+}
+
+@keyframes fadeInSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(10px); /* Começa 10px mais abaixo */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0); /* Sobe para a posição original */
+  }
+}
+/* --- 💀 ESTILOS PARA O LOADING SKELETON --- */
+.skeleton-card {
+  background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+  border: 1px solid #334155;
+  border-radius: 10px;
+  height: 115px; /* Altura exata dos seus cards do Mata-Mata */
+  position: relative;
+  overflow: hidden;
+}
+
+/* O feixe de luz que passa da esquerda para a direita */
+.skeleton-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(255, 255, 255, 0.1) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+* { font-family: 'Exo 2', sans-serif !important; }

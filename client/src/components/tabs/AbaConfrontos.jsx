@@ -23,7 +23,14 @@ export default function AbaConfrontos() {
   }, []);
 
   if (loading) {
-    return <div style={{ color: 'var(--nebula-green)', textAlign: 'center', marginTop: '40px' }}>Carregando radar de confrontos... 🚀</div>;
+    return (
+      <div className="bracket-full-width-container" style={{ display: 'flex', gap: '20px', justifyContent: 'center', padding: '40px 20px' }}>
+        {/* Desenhamos 3 skeletons lado a lado para simular o chaveamento carregando */}
+        <div className="skeleton-card" style={{ width: '250px' }}></div>
+        <div className="skeleton-card" style={{ width: '250px', transform: 'scale(1.1)' }}></div>
+        <div className="skeleton-card" style={{ width: '250px' }}></div>
+      </div>
+    );
   }
 
   // === SEPARAÇÃO EXATA DOS LADOS ===

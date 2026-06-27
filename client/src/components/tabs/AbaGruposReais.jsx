@@ -157,7 +157,17 @@ export default function AbaGruposReais() {
         </p>
 
         {carregando ? (
-          <p style={{ color: 'var(--nebula-green)', textAlign: 'center', padding: 30 }}>🛰️ Sincronizando com a base...</p>
+          <div style={{ padding: '20px 0' }}>
+            {/* Título fantasma pulsando */}
+            <div style={{ width: '250px', height: '24px', backgroundColor: '#1e293b', borderRadius: '4px', marginBottom: '20px', animation: 'pulseSearch 2s infinite ease-in-out' }} />
+            
+            {/* Grid com 8 cards fantasmas (Skeletons) */}
+            <div className="matches-grid">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div key={index} className="skeleton-card" />
+              ))}
+            </div>
+          </div>
         ) : erro ? (
           <p style={{ color: '#ff6666', textAlign: 'center', padding: 30 }}>{erro}</p>
         ) : grupos.length === 0 ? (
