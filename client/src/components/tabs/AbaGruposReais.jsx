@@ -306,6 +306,7 @@ export default function AbaGruposReais() {
                         CONFRONTO {index + 1}
                       </div>
                       
+                      {/* === TIME DA CASA (HOME) === */}
                       <div className={`team-row ${venceuHome ? 'winner' : ''}`}>
                         <div className="team-info">
                           {jogo.home?.escudo ? (
@@ -316,13 +317,22 @@ export default function AbaGruposReais() {
                           <span className={!homeNome ? 'empty-team' : ''}>{homeNome ?? 'Vaga em aberto'}</span>
                         </div>
                         <div className="score-info">
+                          {/* 🏆 Taça movida para antes do placar */}
+                          {venceuHome && <span style={{ marginRight: '8px' }}>🏆</span>}
+                          
                           {jogo.placarHome ?? '-'}
-                          {venceuHome && '🏆'}
+                          
+                          {jogo.penaltisHome != null && (
+                            <span style={{ fontSize: '0.85rem', color: 'var(--galaxy-gold)', marginLeft: '6px', fontWeight: 'bold' }}>
+                              ({jogo.penaltisHome})
+                            </span>
+                          )}
                         </div>
                       </div>
                       
                       <div className="match-divider" />
                       
+                      {/* === TIME VISITANTE (AWAY) === */}
                       <div className={`team-row ${venceuAway ? 'winner' : ''}`}>
                         <div className="team-info">
                           {jogo.away?.escudo ? (
@@ -333,10 +343,30 @@ export default function AbaGruposReais() {
                           <span className={!awayNome ? 'empty-team' : ''}>{awayNome ?? 'Vaga em aberto'}</span>
                         </div>
                         <div className="score-info">
+                          {/* 🏆 Taça movida para antes do placar */}
+                          {venceuAway && <span style={{ marginRight: '8px' }}>🏆</span>}
+                          
                           {jogo.placarAway ?? '-'}
-                          {venceuAway && '🏆'}
+                          
+                          {jogo.penaltisAway != null && (
+                            <span style={{ fontSize: '0.85rem', color: 'var(--galaxy-gold)', marginLeft: '6px', fontWeight: 'bold' }}>
+                              ({jogo.penaltisAway})
+                            </span>
+                          )}
                         </div>
                       </div>
+                    {/* 👇 AQUI ESTÁ A CORREÇÃO: trocamos para jogo.data 👇 */}
+                      <div className="match-date-footer">
+                        📅 {jogo.data 
+                             ? new Date(jogo.data).toLocaleString('pt-BR', { 
+                                 day: '2-digit', 
+                                 month: '2-digit', 
+                                 hour: '2-digit', 
+                                 minute: '2-digit' 
+                               }) 
+                             : 'Data a confirmar'}
+                      </div>
+                      
                     </div>
                   );
                 })}

@@ -663,3 +663,26 @@ footer {
   }
 }
 * { font-family: 'Exo 2', sans-serif !important; }
+
+/* --- 📅 RODAPÉ DE DATA DO CONFRONTO --- */
+.match-date-footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #888; /* Cinza sutil para não roubar a atenção dos times */
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  padding-top: 8px;
+  margin-top: 10px;
+  letter-spacing: 0.5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Um efeitinho para ficar azul claro quando passar o mouse no card */
+.card-grupo-space:hover .match-date-footer,
+.match-card:hover .match-date-footer {
+  color: var(--cosmic-blue);
+  border-top-color: rgba(0, 102, 255, 0.3);
+  transition: all 0.3s ease;
+}
