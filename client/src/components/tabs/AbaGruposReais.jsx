@@ -15,32 +15,48 @@ function RealMatchCard({ jogo, isFinal, isThird }) {
   const awayNome = jogo.away?.nome;
   const venceuHome = jogo.vencedor && jogo.vencedor === homeNome;
   const venceuAway = jogo.vencedor && jogo.vencedor === awayNome;
-  // Verifica se a partida já acabou
   const isDecided = !!jogo.vencedor;
 
   return (
     <div className={`match-card ${isFinal ? 'final-card' : ''} ${isThird ? 'third-place-card' : ''} ${isDecided ? 'decided-card' : ''}`}>
+      {/* TIME DA CASA */}
       <div className={`player-row ${venceuHome ? 'winner' : ''}`}>
-        <span className="player-name" title={homeNome}>
-          {jogo.home?.escudo && <img src={jogo.home.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />}
-          {homeNome ?? 'A definir...'}
+        <span className="player-name" title={homeNome ?? 'A definir...'}>
+          {jogo.home?.escudo ? (
+            <img src={jogo.home.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />
+          ) : (
+            <div className="placeholder-flag-blink">?</div>
+          )}
+          <span style={{ opacity: homeNome ? 1 : 0.6 }}>
+            {homeNome ?? 'A definir...'}
+          </span>
         </span>
         <span>
           {jogo.placarHome ?? ''}
           {jogo.penaltisHome != null && <span style={{ color: 'var(--galaxy-gold)', fontWeight: 'bold' }}> ({jogo.penaltisHome})</span>}
         </span>
       </div>
+      
       <div className="divider" style={isFinal ? { backgroundColor: 'rgba(251, 191, 36, 0.2)' } : {}}></div>
+      
+      {/* TIME VISITANTE */}
       <div className={`player-row ${venceuAway ? 'winner' : ''}`}>
-        <span className="player-name" title={awayNome}>
-          {jogo.away?.escudo && <img src={jogo.away.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />}
-          {awayNome ?? 'A definir...'}
+        <span className="player-name" title={awayNome ?? 'A definir...'}>
+          {jogo.away?.escudo ? (
+            <img src={jogo.away.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />
+          ) : (
+            <div className="placeholder-flag-blink">?</div>
+          )}
+          <span style={{ opacity: awayNome ? 1 : 0.6 }}>
+            {awayNome ?? 'A definir...'}
+          </span>
         </span>
         <span>
           {jogo.placarAway ?? ''}
           {jogo.penaltisAway != null && <span style={{ color: 'var(--galaxy-gold)', fontWeight: 'bold' }}> ({jogo.penaltisAway})</span>}
         </span>
       </div>
+      
       <div className="match-date-footer">
         📅 {jogo.data
           ? new Date(jogo.data).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })

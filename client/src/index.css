@@ -814,3 +814,25 @@ footer {
   border-right: 2px dashed rgba(255, 255, 255, 0.2);
   border-radius: 0 0 12px 0;
 }
+/* === BANDEIRA PISCANTE PARA JOGOS A DEFINIR === */
+.placeholder-flag-blink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 12px;
+  background: #1e293b;
+  border: 1px solid #64748b;
+  border-radius: 2px;
+  font-size: 0.65rem;
+  font-weight: bold;
+  color: #64748b;
+  margin-right: 6px;
+  vertical-align: middle;
+  animation: flagPulseBlink 1.5s infinite ease-in-out;
+}
+
+@keyframes flagPulseBlink {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; border-color: var(--cosmic-blue); color: var(--cosmic-blue); }
+}

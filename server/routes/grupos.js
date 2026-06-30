@@ -53,6 +53,13 @@ function normalizarTime(time) {
 }
 
 function normalizarJogo(match) {
+  if (match.homeTeam?.name === 'Norway' || match.awayTeam?.name === 'Norway') {
+    console.log("=====================================");
+    console.log("🕵️ JOGO DA NORUEGA ENCONTRADO!");
+    console.log("Status da API:", match.status);
+    console.log("Vencedor na API:", match.score?.winner);
+    console.log("=====================================");
+  }
   const home = normalizarTime(match.homeTeam);
   const away = normalizarTime(match.awayTeam);
   
@@ -100,36 +107,68 @@ function ordenarPorId(jogos) {
 // têm nenhum vencedor com o que sobrou. Se fosse tudo em uma passagem só, um par totalmente indefinido
 // processado antes de um par já decidido podia "roubar" no fallback o jogo real que pertencia ao par
 // decidido (foi exatamente esse bug que apareceu com o Brasil antes dessa correção).
+// Constrói a fase seguinte alinhada aos pares da fase anterior (já ordenada por id).
 function construirFaseSeguinte(faseAnteriorOrdenada, faseSeguinteBruta) {
   const usados = new Set();
   const totalPares = faseAnteriorOrdenada.length / 2;
   const resultado = new Array(totalPares).fill(null);
 
+  // Helper interno para resgatar o escudo do time vencedor da rodada anterior
+  const getEscudo = (jogo, nomeVencedor) => {
+    if (jogo?.home?.nome === nomeVencedor) return jogo.home.escudo;
+    if (jogo?.away?.nome === nomeVencedor) return jogo.away.escudo;
+    return '';
+  };
+
   for (let p = 0; p < totalPares; p++) {
     const a = faseAnteriorOrdenada[2 * p];
     const b = faseAnteriorOrdenada[2 * p + 1];
-    const nomes = [a?.vencedor, b?.vencedor].filter(Boolean);
+    
+    const vencedorA = a?.vencedor;
+    const vencedorB = b?.vencedor;
+    const nomesOriginais = [vencedorA, vencedorB].filter(Boolean);
 
-    for (const nome of nomes) {
-      const achado = faseSeguinteBruta.find(
+    let achado = null;
+    for (const nome of nomesOriginais) {
+      achado = faseSeguinteBruta.find(
         (j) => j && !usados.has(j) && (j.home?.nome === nome || j.away?.nome === nome)
       );
-      if (achado) {
-        usados.add(achado);
-        resultado[p] = achado;
-        break;
+      if (achado) break;
+    }
+
+    if (!achado) {
+      let i = 0;
+      while (i < faseSeguinteBruta.length && usados.has(faseSeguinteBruta[i])) i++;
+      if (i < faseSeguinteBruta.length) {
+        achado = faseSeguinteBruta[i];
       }
     }
-  }
 
-  let i = 0;
-  for (let p = 0; p < totalPares; p++) {
-    if (resultado[p]) continue;
-    while (i < faseSeguinteBruta.length && usados.has(faseSeguinteBruta[i])) i++;
-    if (i < faseSeguinteBruta.length) {
-      resultado[p] = faseSeguinteBruta[i];
-      usados.add(faseSeguinteBruta[i]);
-      i++;
+    if (achado) {
+      usados.add(achado);
+      
+      // 🚀 A MÁGICA ENTRA AQUI: Clonamos o jogo para injetar os times que a API está atrasada
+      const jogoAtualizado = { ...achado };
+
+      // Força a entrada do Vencedor da chave de cima (A) se a API ainda não colocou
+      if (vencedorA && jogoAtualizado.home?.nome !== vencedorA && jogoAtualizado.away?.nome !== vencedorA) {
+        if (!jogoAtualizado.home?.nome) {
+          jogoAtualizado.home = { nome: vencedorA, escudo: getEscudo(a, vencedorA) };
+        } else if (!jogoAtualizado.away?.nome) {
+          jogoAtualizado.away = { nome: vencedorA, escudo: getEscudo(a, vencedorA) };
+        }
+      }
+
+      // Força a entrada do Vencedor da chave de baixo (B) se a API ainda não colocou
+      if (vencedorB && jogoAtualizado.home?.nome !== vencedorB && jogoAtualizado.away?.nome !== vencedorB) {
+        if (!jogoAtualizado.away?.nome) {
+          jogoAtualizado.away = { nome: vencedorB, escudo: getEscudo(b, vencedorB) };
+        } else if (!jogoAtualizado.home?.nome) {
+          jogoAtualizado.home = { nome: vencedorB, escudo: getEscudo(b, vencedorB) };
+        }
+      }
+
+      resultado[p] = jogoAtualizado;
     }
   }
 
