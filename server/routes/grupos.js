@@ -6,14 +6,7 @@ const router = Router();
 let cache = { data: null, timestamp: 0 };
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutos
 
-const FASES_MATA_MATA = [
-  { codigo: 'LAST_32', nome: 'Rodada de 32' },
-  { codigo: 'LAST_16', nome: 'Oitavas de Final' },
-  { codigo: 'QUARTER_FINALS', nome: 'Quartas de Final' },
-  { codigo: 'SEMI_FINALS', nome: 'Semifinal' },
-  { codigo: 'THIRD_PLACE', nome: 'Disputa de 3º Lugar' },
-  { codigo: 'FINAL', nome: 'Final' },
-];
+const CODIGOS_MATA_MATA = ['LAST_32', 'LAST_16', 'QUARTER_FINALS', 'SEMI_FINALS', 'THIRD_PLACE', 'FINAL'];
 
 function normalizarGrupo(standing) {
   const letra = standing.group?.replace('Group ', '') ?? '?';
@@ -71,6 +64,58 @@ function normalizarJogo(match) {
   };
 }
 
+// O `id` de cada jogo reflete a ordem real do chaveamento da fonte de dados: ordenando uma fase
+// por id e juntando de 2 em 2, os pares batem com os confrontos oficiais (confirmado contra fatos
+// conhecidos: Canadá x Marrocos nas oitavas, e Brasil aguardando o vencedor de Costa do Marfim x
+// Noruega — ambos batem exatamente com essa ordenação).
+function ordenarPorId(jogos) {
+  return [...jogos].sort((a, b) => a.id - b.id);
+}
+
+// Constrói a fase seguinte alinhada aos pares da fase anterior (já ordenada por id).
+//
+// Duas passagens, de propósito: na primeira, resolve só os pares que já têm vencedor definido em
+// algum dos dois jogos, achando o jogo real correspondente pelo nome do time (cada time só está em
+// um jogo por rodada, busca exata). Só depois, na segunda passagem, preenche os pares que ainda não
+// têm nenhum vencedor com o que sobrou. Se fosse tudo em uma passagem só, um par totalmente indefinido
+// processado antes de um par já decidido podia "roubar" no fallback o jogo real que pertencia ao par
+// decidido (foi exatamente esse bug que apareceu com o Brasil antes dessa correção).
+function construirFaseSeguinte(faseAnteriorOrdenada, faseSeguinteBruta) {
+  const usados = new Set();
+  const totalPares = faseAnteriorOrdenada.length / 2;
+  const resultado = new Array(totalPares).fill(null);
+
+  for (let p = 0; p < totalPares; p++) {
+    const a = faseAnteriorOrdenada[2 * p];
+    const b = faseAnteriorOrdenada[2 * p + 1];
+    const nomes = [a?.vencedor, b?.vencedor].filter(Boolean);
+
+    for (const nome of nomes) {
+      const achado = faseSeguinteBruta.find(
+        (j) => j && !usados.has(j) && (j.home?.nome === nome || j.away?.nome === nome)
+      );
+      if (achado) {
+        usados.add(achado);
+        resultado[p] = achado;
+        break;
+      }
+    }
+  }
+
+  let i = 0;
+  for (let p = 0; p < totalPares; p++) {
+    if (resultado[p]) continue;
+    while (i < faseSeguinteBruta.length && usados.has(faseSeguinteBruta[i])) i++;
+    if (i < faseSeguinteBruta.length) {
+      resultado[p] = faseSeguinteBruta[i];
+      usados.add(faseSeguinteBruta[i]);
+      i++;
+    }
+  }
+
+  return resultado;
+}
+
 // GET /api/grupos-reais — tabela real de grupos, ranking dos 3º colocados e chaveamento do mata-mata
 router.get('/', async (_req, res) => {
   const agora = Date.now();
@@ -113,11 +158,33 @@ router.get('/', async (_req, res) => {
         .filter(Boolean)
         .sort((a, b) => b.pontos - a.pontos || b.saldoGols - a.saldoGols || b.golsMarcados - a.golsMarcados);
 
-      const mataMata = FASES_MATA_MATA
-        .map(({ codigo, nome }) => ({
-          fase: nome,
-          jogos: matches.filter((m) => m.stage === codigo).map(normalizarJogo),
-        }))
+      const jogosPorCodigo = Object.fromEntries(
+        CODIGOS_MATA_MATA.map((codigo) => [
+          codigo,
+          matches.filter((m) => m.stage === codigo).map(normalizarJogo),
+        ])
+      );
+
+      // Reordena em cascata da Rodada de 32 até a Final, par a par (ver ordenarPorId e
+      // construirFaseSeguinte). THIRD_PLACE fica de fora — não faz parte da árvore principal
+      // (é alimentada pelos perdedores da semifinal, não pelos vencedores).
+      const rodada32 = ordenarPorId(jogosPorCodigo.LAST_32 ?? []);
+      const oitavas = construirFaseSeguinte(rodada32, jogosPorCodigo.LAST_16 ?? []);
+      const quartas = construirFaseSeguinte(oitavas, jogosPorCodigo.QUARTER_FINALS ?? []);
+      const semifinal = construirFaseSeguinte(quartas, jogosPorCodigo.SEMI_FINALS ?? []);
+      const final = construirFaseSeguinte(semifinal, jogosPorCodigo.FINAL ?? []);
+
+      const fasesOrdenadas = [
+        { codigo: 'LAST_32', nome: 'Rodada de 32', jogos: rodada32 },
+        { codigo: 'LAST_16', nome: 'Oitavas de Final', jogos: oitavas },
+        { codigo: 'QUARTER_FINALS', nome: 'Quartas de Final', jogos: quartas },
+        { codigo: 'SEMI_FINALS', nome: 'Semifinal', jogos: semifinal },
+        { codigo: 'THIRD_PLACE', nome: 'Disputa de 3º Lugar', jogos: jogosPorCodigo.THIRD_PLACE ?? [] },
+        { codigo: 'FINAL', nome: 'Final', jogos: final },
+      ];
+
+      const mataMata = fasesOrdenadas
+        .map(({ nome, jogos }) => ({ fase: nome, jogos }))
         .filter((f) => f.jogos.length > 0);
 
       const resultado = { grupos, terceiros, mataMata };

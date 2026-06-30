@@ -15,7 +15,6 @@ function RealMatchCard({ jogo, isFinal }) {
   const awayNome = jogo.away?.nome;
   const venceuHome = jogo.vencedor && jogo.vencedor === homeNome;
   const venceuAway = jogo.vencedor && jogo.vencedor === awayNome;
-  const temPenaltis = jogo.penaltisHome != null || jogo.penaltisAway != null;
 
   return (
     <div className={`match-card ${isFinal ? 'final-card' : ''}`}>
@@ -24,7 +23,10 @@ function RealMatchCard({ jogo, isFinal }) {
           {jogo.home?.escudo && <img src={jogo.home.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />}
           {homeNome ?? 'A definir...'}
         </span>
-        <span>{jogo.placarHome ?? ''}{venceuHome && ' 🏆'}</span>
+        <span>
+          {jogo.placarHome ?? ''}
+          {jogo.penaltisHome != null && <span style={{ color: 'var(--galaxy-gold)', fontWeight: 'bold' }}> ({jogo.penaltisHome})</span>}
+        </span>
       </div>
       <div className="divider" style={isFinal ? { backgroundColor: 'rgba(251, 191, 36, 0.2)' } : {}}></div>
       <div className={`player-row ${venceuAway ? 'winner' : ''}`}>
@@ -32,13 +34,16 @@ function RealMatchCard({ jogo, isFinal }) {
           {jogo.away?.escudo && <img src={jogo.away.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />}
           {awayNome ?? 'A definir...'}
         </span>
-        <span>{jogo.placarAway ?? ''}{venceuAway && ' 🏆'}</span>
+        <span>
+          {jogo.placarAway ?? ''}
+          {jogo.penaltisAway != null && <span style={{ color: 'var(--galaxy-gold)', fontWeight: 'bold' }}> ({jogo.penaltisAway})</span>}
+        </span>
       </div>
-      {temPenaltis && (
-        <div style={{ textAlign: 'center', fontSize: '0.65rem', color: 'var(--galaxy-gold)', marginTop: 4, fontWeight: 'bold' }}>
-          🥅 Pênaltis: {jogo.penaltisHome ?? 0} x {jogo.penaltisAway ?? 0}
-        </div>
-      )}
+      <div className="match-date-footer">
+        📅 {jogo.data
+          ? new Date(jogo.data).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+          : 'Data a confirmar'}
+      </div>
     </div>
   );
 }
