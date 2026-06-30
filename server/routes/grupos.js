@@ -42,9 +42,20 @@ function normalizarTime(time) {
 function normalizarJogo(match) {
   const home = normalizarTime(match.homeTeam);
   const away = normalizarTime(match.awayTeam);
+  
   const vencedor = match.score?.winner === 'HOME_TEAM' ? home
     : match.score?.winner === 'AWAY_TEAM' ? away
     : null;
+
+  let penaltisHome = match.score?.penalties?.home;
+  let penaltisAway = match.score?.penalties?.away;
+
+  // A ordem oficial de prioridade para pegar o placar de bola rolando:
+  // 1º Tenta pegar o tempo regulamentar (90 min)
+  // 2º Tenta pegar a prorrogação (120 min)
+  // 3º Em último caso, usa o fullTime (Placar Final)
+  let placarHome = match.score?.regularTime?.home ?? match.score?.extraTime?.home ?? match.score?.fullTime?.home;
+  let placarAway = match.score?.regularTime?.away ?? match.score?.extraTime?.away ?? match.score?.fullTime?.away;
 
   return {
     id: match.id,
@@ -52,8 +63,10 @@ function normalizarJogo(match) {
     status: match.status,
     home,
     away,
-    placarHome: match.score?.fullTime?.home ?? null,
-    placarAway: match.score?.fullTime?.away ?? null,
+    placarHome: placarHome ?? null,
+    placarAway: placarAway ?? null,
+    penaltisHome: penaltisHome ?? null,
+    penaltisAway: penaltisAway ?? null,
     vencedor: vencedor ? vencedor.nome : null,
   };
 }

@@ -294,6 +294,7 @@ export default function AbaGruposReais() {
               {/* === AQUI MUDAMOS PARA O NOSSO NOVO CONTAINER CENTRALIZADO === */}
               <div className="matches-grid">
                 {jogos.map((jogo, index) => {
+                  console.log(`🔎 Dados do Confronto ${index + 1}:`, jogo);
                   const homeNome = jogo.home?.nome;
                   const awayNome = jogo.away?.nome;
                   const isFinished = !!jogo.vencedor;
