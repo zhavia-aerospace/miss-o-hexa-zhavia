@@ -721,7 +721,7 @@ footer {
 .match-header { font-size: 0.65rem; color: #94a3b8; text-align: center; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
 .player-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; padding: 3px 4px; border-radius: 4px; color: #cbd5e1; }
 .player-row.winner { background-color: rgba(21, 128, 61, 0.2); color: var(--nebula-green, #4ade80); font-weight: bold; }
-.player-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; }
+.player-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 115px; }
 .divider { height: 1px; background-color: #1e293b; margin: 4px 0; }
 .final-card { border-color: var(--galaxy-gold, #fbbf24); background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); transform: scale(1.1); }
 .final-card:hover { transform: scale(1.15); box-shadow: 0 0 15px rgba(251, 191, 36, 0.2); }

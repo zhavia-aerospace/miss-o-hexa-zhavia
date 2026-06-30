@@ -8,12 +8,32 @@ const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutos
 
 const CODIGOS_MATA_MATA = ['LAST_32', 'LAST_16', 'QUARTER_FINALS', 'SEMI_FINALS', 'THIRD_PLACE', 'FINAL'];
 
+// Tradução dos nomes dos times (chave = código de 3 letras da seleção, igual em toda a Copa).
+// Nomes curtos ficam por extenso; só os realmente longos (ex: Bósnia-Herzegovina) ficam abreviados,
+// pra não estourar o card.
+const TRADUCOES_TIMES = {
+  ALG: 'Argélia', ARG: 'Argentina', AUS: 'Austrália', AUT: 'Áustria', BEL: 'Bélgica',
+  BIH: 'Bósnia-Herz.', BRA: 'Brasil', CAN: 'Canadá', CPV: 'Cabo Verde', COL: 'Colômbia',
+  COD: 'RD Congo', CRO: 'Croácia', CUW: 'Curaçau', CZE: 'República Tcheca', ECU: 'Equador',
+  EGY: 'Egito', ENG: 'Inglaterra', FRA: 'França', GER: 'Alemanha', GHA: 'Gana',
+  HAI: 'Haiti', IRN: 'Irã', IRQ: 'Iraque', CIV: 'Costa do Marfim', JPN: 'Japão',
+  JOR: 'Jordânia', KOR: 'Coreia do Sul', MEX: 'México', MAR: 'Marrocos', NED: 'Holanda',
+  NZL: 'Nova Zelândia', NOR: 'Noruega', PAN: 'Panamá', PAR: 'Paraguai', POR: 'Portugal',
+  QAT: 'Catar', KSA: 'Arábia Saudita', SCO: 'Escócia', SEN: 'Senegal', RSA: 'África do Sul',
+  ESP: 'Espanha', SWE: 'Suécia', SUI: 'Suíça', TUN: 'Tunísia', TUR: 'Turquia',
+  USA: 'Estados Unidos', URU: 'Uruguai', UZB: 'Uzbequistão',
+};
+
+function traduzirNome(time) {
+  return TRADUCOES_TIMES[time.tla] ?? (time.shortName ?? time.name);
+}
+
 function normalizarGrupo(standing) {
   const letra = standing.group?.replace('Group ', '') ?? '?';
   const tabela = standing.table.map((linha) => ({
     posicao: linha.position,
     time: {
-      nome: linha.team.shortName ?? linha.team.name,
+      nome: traduzirNome(linha.team),
       escudo: linha.team.crest ?? '',
     },
     pontos: linha.points,
@@ -29,7 +49,7 @@ function normalizarGrupo(standing) {
 
 function normalizarTime(time) {
   if (!time?.name) return null;
-  return { nome: time.shortName ?? time.name, escudo: time.crest ?? '' };
+  return { nome: traduzirNome(time), escudo: time.crest ?? '' };
 }
 
 function normalizarJogo(match) {
