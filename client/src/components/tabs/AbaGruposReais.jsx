@@ -8,16 +8,18 @@ function preencher(jogos, inicio, fim) {
 }
 
 // === CARD DE JOGO REAL ===
-function RealMatchCard({ jogo, isFinal }) {
+function RealMatchCard({ jogo, isFinal, isThird }) {
   if (!jogo) return <div className="match-card empty" style={{ opacity: 0.3 }}>A definir</div>;
 
   const homeNome = jogo.home?.nome;
   const awayNome = jogo.away?.nome;
   const venceuHome = jogo.vencedor && jogo.vencedor === homeNome;
   const venceuAway = jogo.vencedor && jogo.vencedor === awayNome;
+  // Verifica se a partida já acabou
+  const isDecided = !!jogo.vencedor;
 
   return (
-    <div className={`match-card ${isFinal ? 'final-card' : ''}`}>
+    <div className={`match-card ${isFinal ? 'final-card' : ''} ${isThird ? 'third-place-card' : ''} ${isDecided ? 'decided-card' : ''}`}>
       <div className={`player-row ${venceuHome ? 'winner' : ''}`}>
         <span className="player-name" title={homeNome}>
           {jogo.home?.escudo && <img src={jogo.home.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />}
@@ -48,15 +50,14 @@ function RealMatchCard({ jogo, isFinal }) {
   );
 }
 
-// === CÉLULA DO CHAVEAMENTO REAL (mesma mecânica de linhas da aba Confrontos) ===
+// === CÉLULA DO CHAVEAMENTO REAL (Apenas Oitavas, Quartas e Semis) ===
 function RealBracketCell({ jogo, side, phase, index, totalItems }) {
   const isLeft = side === 'left';
   const isRight = side === 'right';
-  const isCenter = side === 'center';
 
   const hasParents = phase !== 'Rodada de 32';
-  const hasChildren = phase !== 'Final';
-  const needsVertical = hasChildren && totalItems > 1;
+  const hasChildren = true; // Todas essas fases agora têm filhos
+  const needsVertical = totalItems > 1;
 
   const colorOff = 'rgba(96, 165, 250, 0.25)';
   const colorOn = 'var(--galaxy-gold, #fbbf24)';
@@ -68,21 +69,9 @@ function RealBracketCell({ jogo, side, phase, index, totalItems }) {
     <div className="bracket-cell">
       {hasParents && isLeft && <div className="line-h line-in-left" style={{ backgroundColor: inGold }}></div>}
       {hasParents && isRight && <div className="line-h line-in-right" style={{ backgroundColor: inGold }}></div>}
-      {isCenter && (
-        <>
-          <div className="line-h line-in-left" style={{ backgroundColor: jogo?.home?.nome ? colorOn : colorOff }}></div>
-          <div className="line-h line-in-right" style={{ backgroundColor: jogo?.away?.nome ? colorOn : colorOff }}></div>
-        </>
-      )}
 
       <div style={{ position: 'relative', width: '100%', zIndex: 10 }}>
-        {isCenter && (
-          <div className="floating-trophy-large">
-            {jogo?.vencedor && <div className="champion-label">⭐ {jogo.vencedor} ⭐</div>}
-            🏆
-          </div>
-        )}
-        <RealMatchCard jogo={jogo} isFinal={isCenter} />
+        <RealMatchCard jogo={jogo} isFinal={false} />
       </div>
 
       {hasChildren && isLeft && (
@@ -152,6 +141,8 @@ export default function AbaGruposReais() {
 
           <div className="bracket-full-width-container">
             <div className="bracket-wrapper">
+              
+              {/* LADO ESQUERDO */}
               <div className="bracket-column">
                 <div className="column-title">Rodada de 32</div>
                 {preencher(rodada32, 0, 8).map((jogo, i) => <RealBracketCell key={`l-32-${i}`} jogo={jogo} side="left" phase="Rodada de 32" index={i} totalItems={8} />)}
@@ -169,11 +160,46 @@ export default function AbaGruposReais() {
                 {preencher(semifinal, 0, 1).map((jogo, i) => <RealBracketCell key={`l-sem-${i}`} jogo={jogo} side="left" phase="Semifinal" index={i} totalItems={1} />)}
               </div>
 
-              <div className="bracket-column" style={{ flex: 1.2 }}>
-                <div className="column-title" style={{ color: 'var(--galaxy-gold, #fbbf24)', textShadow: '0 0 10px rgba(251, 191, 36, 0.4)' }}>Grande Final</div>
-                <RealBracketCell jogo={final} side="center" phase="Final" index={0} totalItems={1} />
+              {/* === COLUNA CENTRAL MAGISTRAL (FINAL E 3º LUGAR) === */}
+              <div className="bracket-column" style={{ flex: 1.5, position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '0 20px' }}>
+
+                {/* CONTAINER QUE EMPILHA A FINAL E O 3º LUGAR E DESENHA AS LINHAS */}
+                <div style={{ width: '100%', position: 'relative', display: 'flex', flexDirection: 'column', gap: '50px' }}>
+
+                  {/* --- AS LINHAS DO LADO ESQUERDO --- */}
+                  <div style={{
+                    position: 'absolute', left: '-20px', top: '85px', bottom: '55px', width: '20px',
+                    borderLeft: '2px solid rgba(96, 165, 250, 0.3)', borderTop: '2px solid rgba(96, 165, 250, 0.3)', borderBottom: '2px solid rgba(96, 165, 250, 0.3)', zIndex: 1
+                  }}></div>
+
+                  {/* --- AS LINHAS DO LADO DIREITO --- */}
+                  <div style={{
+                    position: 'absolute', right: '-20px', top: '85px', bottom: '55px', width: '20px',
+                    borderRight: '2px solid rgba(96, 165, 250, 0.3)', borderTop: '2px solid rgba(96, 165, 250, 0.3)', borderBottom: '2px solid rgba(96, 165, 250, 0.3)', zIndex: 1
+                  }}></div>
+
+                  {/* GRANDE FINAL */}
+                  <div style={{ position: 'relative', zIndex: 10 }}>
+                    <div className="floating-trophy-large">
+                      {final?.vencedor && <div className="champion-label">⭐ {final.vencedor} ⭐</div>}
+                      🏆
+                    </div>
+                    <div className="column-title" style={{ color: 'var(--galaxy-gold, #fbbf24)', textShadow: '0 0 10px rgba(251, 191, 36, 0.4)' }}>Grande Final</div>
+                    <RealMatchCard jogo={final} isFinal={true} />
+                  </div>
+
+                  {/* DISPUTA DE 3º LUGAR */}
+                  {terceiroLugar && (
+                    <div style={{ position: 'relative', zIndex: 10 }}>
+                      <div className="column-title" style={{ color: '#cd7f32', textShadow: '0 0 10px rgba(205, 127, 50, 0.4)' }}>Disputa de 3º Lugar</div>
+                      <RealMatchCard jogo={terceiroLugar} isThird={true} />
+                    </div>
+                  )}
+
+                </div>
               </div>
 
+              {/* LADO DIREITO */}
               <div className="bracket-column">
                 <div className="column-title">Semifinal</div>
                 {preencher(semifinal, 1, 2).map((jogo, i) => <RealBracketCell key={`r-sem-${i}`} jogo={jogo} side="right" phase="Semifinal" index={i} totalItems={1} />)}
@@ -192,15 +218,6 @@ export default function AbaGruposReais() {
               </div>
             </div>
           </div>
-
-          {terceiroLugar && (
-            <div style={{ display: 'flex', justifyContent: 'center', margin: '0 0 30px' }}>
-              <div style={{ width: 220 }}>
-                <div className="column-title">🥉 Disputa de 3º Lugar</div>
-                <RealMatchCard jogo={terceiroLugar} />
-              </div>
-            </div>
-          )}
         </>
       )}
 
