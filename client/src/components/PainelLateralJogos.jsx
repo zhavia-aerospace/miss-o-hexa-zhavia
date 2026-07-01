@@ -4,6 +4,80 @@ import { getJogos } from '../services/api.js';
 const BASE = import.meta.env.VITE_API_URL ?? '';
 const POLL_INTERVAL = 15 * 60 * 1000; // sincronizado com cache do servidor
 
+// 1. DICIONÁRIO DE TRADUÇÃO DAS 48 SELEÇÕES DA SUPERCOPA ZHAVIA
+const TRADUCOES_FRONT = {
+  // AMÉRICAS (CONCACAF e CONMEBOL)
+  "Canada": "Canadá",
+  "United States": "Estados Unidos",
+  "USA": "Estados Unidos",
+  "Mexico": "México",
+  "Argentina": "Argentina",
+  "Brazil": "Brasil",
+  "Colombia": "Colômbia",
+  "Ecuador": "Equador",
+  "Paraguay": "Paraguai",
+  "Uruguay": "Uruguai",
+  "Curaçao": "Curaçau",
+  "Curacao": "Curaçau",
+  "Haiti": "Haiti",
+  "Panama": "Panamá",
+
+  // EUROPA (UEFA)
+  "Germany": "Alemanha",
+  "Austria": "Áustria",
+  "Belgium": "Bélgica",
+  "Bosnia-Herzegovina": "Bósnia e Herzegovina",
+  "Bosnia and Herzegovina": "Bósnia e Herzegovina",
+  "Croatia": "Croácia",
+  "Scotland": "Escócia",
+  "Spain": "Espanha",
+  "France": "França",
+  "Netherlands": "Holanda",
+  "Holland": "Holanda",
+  "England": "Inglaterra",
+  "Norway": "Noruega",
+  "Portugal": "Portugal",
+  "Czech Republic": "República Tcheca",
+  "Czechia": "República Tcheca",
+  "Sweden": "Suécia",
+  "Switzerland": "Suíça",
+  "Turkey": "Turquia",
+  "Türkiye": "Turquia",
+
+  // ÁFRICA (CAF)
+  "South Africa": "África do Sul",
+  "Algeria": "Argélia",
+  "Cape Verde": "Cabo Verde",
+  "Ivory Coast": "Costa do Marfim",
+  "Côte d'Ivoire": "Costa do Marfim",
+  "Egypt": "Egito",
+  "Ghana": "Gana",
+  "Morocco": "Marrocos",
+  "Congo DR": "RD Congo",
+  "DR Congo": "RD Congo",
+  "Democratic Republic of the Congo": "RD Congo",
+  "Senegal": "Senegal",
+  "Tunisia": "Tunísia",
+
+  // ÁSIA E OCEANIA (AFC e OFC)
+  "Saudi Arabia": "Arábia Saudita",
+  "Australia": "Austrália",
+  "Qatar": "Catar",
+  "South Korea": "Coreia do Sul",
+  "Korea Republic": "Coreia do Sul",
+  "Iran": "Irã",
+  "Iraq": "Iraque",
+  "Japan": "Japão",
+  "Jordan": "Jordânia",
+  "Uzbekistan": "Uzbequistão",
+  "New Zealand": "Nova Zelândia"
+};
+
+// Função para traduzir o nome, se não achar no dicionário, mantém o original
+function traduzir(nomeIngles) {
+  return TRADUCOES_FRONT[nomeIngles] || nomeIngles;
+}
+
 export default function PainelLateralJogos() {
   const [aberto, setAberto] = useState(false);
   const [jogos, setJogos] = useState([]);
@@ -24,9 +98,15 @@ export default function PainelLateralJogos() {
     return () => clearInterval(id);
   }, []);
 
-  const jogosOrdenados = [...jogos].sort(
-    (a, b) => new Date(a.fixture.date) - new Date(b.fixture.date)
-  );
+  // 2. LÓGICA DE ORDENAÇÃO DINÂMICA
+  const jogosOrdenados = [...jogos].sort((a, b) => {
+    if (subAba === 'hist') {
+      // Aba Resultados: do mais recente (novo) para o mais antigo
+      return new Date(b.fixture.date) - new Date(a.fixture.date);
+    }
+    // Aba Ao Vivo / Hoje: cronológico normal (próximos jogos primeiro)
+    return new Date(a.fixture.date) - new Date(b.fixture.date);
+  });
 
   const jogosFiltrados = jogosOrdenados.filter(({ fixture }) => {
     const s = fixture.status.short;
@@ -107,7 +187,8 @@ export default function PainelLateralJogos() {
             </div>
 
             {/* Lista de jogos */}
-            <div style={{ maxHeight: subAba === 'hist' ? 250 : 'none', overflowY: 'auto' }}>
+            
+<div className="lista-jogos-lateral">
               {jogosFiltrados.length === 0 ? (
                 <p style={{ color: '#666', textAlign: 'center', fontSize: '0.8rem', padding: 10 }}>
                   {subAba === 'live' ? 'Nenhum jogo rolando ou agendado para hoje.' : 'Nenhum resultado computado ainda.'}
@@ -132,7 +213,8 @@ export default function PainelLateralJogos() {
                       {[{ t: teams.home, g: goals.home }, { t: teams.away, g: goals.away }].map(({ t, g }) => (
                         <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
                           <span style={{ color: '#fff', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <img src={t.logo} alt="" style={{ width: 14, height: 14 }} /> {t.name}
+                            {/* 3. CHAMANDO A FUNÇÃO DE TRADUÇÃO AQUI */}
+                            <img src={t.logo} alt="" style={{ width: 14, height: 14 }} /> {traduzir(t.name)}
                           </span>
                           <strong style={{ color: 'var(--galaxy-gold)', fontSize: '1rem' }}>{g ?? '-'}</strong>
                         </div>

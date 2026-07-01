@@ -836,3 +836,40 @@ footer {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 1; border-color: var(--cosmic-blue); color: var(--cosmic-blue); }
 }
+/* === ESTILIZAÇÃO DO SCROLL DO PAINEL LATERAL === */
+.painel-lateral-expandido::-webkit-scrollbar {
+  width: 6px; /* Barra bem fininha e moderna */
+}
+
+.painel-lateral-expandido::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3); /* Fundo escuro */
+  border-radius: 10px;
+}
+
+.painel-lateral-expandido::-webkit-scrollbar-thumb {
+  background: var(--cosmic-blue); /* Cor azul espacial do tema */
+  border-radius: 10px;
+}
+
+.painel-lateral-expandido::-webkit-scrollbar-thumb:hover {
+  background: var(--nebula-green); /* Fica verde ao passar o mouse! */
+}
+
+/* === ESTILIZAÇÃO GLOBAL DA BARRA DE ROLAGEM (SCROLL) === */
+::-webkit-scrollbar {
+  width: 8px;  /* Largura do scroll vertical (um pouquinho maior que o do painel para facilitar o clique) */
+  height: 8px; /* Altura do scroll horizontal (para as tabelas e chaves) */
+}
+
+::-webkit-scrollbar-track {
+  background: var(--space-dark); /* Fundo acompanhando a cor do site */
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--cosmic-blue); /* Cor azul espacial */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--nebula-green); /* Fica verde ao passar o mouse */
+}
