@@ -81,7 +81,7 @@ export default function AbaConfrontos() {
     const venceu2 = jogo.vencedor && jogo.vencedor === jogo.jogador2;
 
     return (
-      <div className={`match-card ${isFinal ? 'final-card' : ''}`}>
+      <div className={`match-card ${isFinal ? 'final-card' : ''} ${jogo.vencedor ? 'decided-card' : ''}`}>
         <div className="match-header" style={isFinal ? { color: 'var(--galaxy-gold, #fbbf24)' } : {}}>Jogo {jogo.idJogo}</div>
         <div className={`player-row ${venceu1 ? 'winner' : ''}`}>
           <span className="player-name" title={jogo.jogador1}>{jogo.jogador1 || 'A definir...'}</span>

@@ -773,10 +773,11 @@ footer {
 .line-v-down-left { left: 0; top: calc(50% - 1px); bottom: 0; }
 .line-v-up-left { left: 0; top: 0; height: calc(50% + 1px); }
 
-/* === CAIXINHA DE JOGO DECIDIDO (Borda Dourada) === */
+/* === CAIXINHA AMARELA PARA JOGOS CONCLUÍDOS === */
 .match-card.decided-card {
-  border-color: var(--galaxy-gold);
-  box-shadow: 0 0 10px rgba(251, 191, 36, 0.15);
+  border-color: var(--galaxy-gold, #fbbf24);
+  /* Opcional: um brilhinho muito sutil para dar um charme */
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.15); 
 }
 
 /* === CARD DO 3º LUGAR === */
