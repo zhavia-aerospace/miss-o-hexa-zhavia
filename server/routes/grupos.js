@@ -63,12 +63,22 @@ function normalizarJogo(match) {
   let penaltisHome = match.score?.penalties?.home;
   let penaltisAway = match.score?.penalties?.away;
 
-  // A ordem oficial de prioridade para pegar o placar da partida:
-// 1º Tenta pegar o fullTime (Placar Final - inclui prorrogação)
-// 2º Tenta pegar a prorrogação (extraTime)
-// 3º Em último caso, usa o tempo regulamentar (regularTime - 90 min)
-let placarHome = match.score?.fullTime?.home ?? match.score?.extraTime?.home ?? match.score?.regularTime?.home;
-let placarAway = match.score?.fullTime?.away ?? match.score?.extraTime?.away ?? match.score?.regularTime?.away;
+  // Pega o placar final oficial da API (que por padrão soma até os pênaltis)
+  let placarHome = match.score?.fullTime?.home;
+  let placarAway = match.score?.fullTime?.away;
+
+  // A MÁGICA: Subtrai os pênaltis matematicamente do placar final.
+  // Assim, sobra apenas o placar da bola rolando (90 min + prorrogação).
+  if (penaltisHome != null && placarHome >= penaltisHome) {
+    placarHome -= penaltisHome;
+  }
+  if (penaltisAway != null && placarAway >= penaltisAway) {
+    placarAway -= penaltisAway;
+  }
+
+  // Fallback de segurança: se não vier fullTime, tenta extraTime ou regularTime
+  placarHome = placarHome ?? match.score?.extraTime?.home ?? match.score?.regularTime?.home;
+  placarAway = placarAway ?? match.score?.extraTime?.away ?? match.score?.regularTime?.away;
 
   return {
     id: match.id,
