@@ -2,6 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { LETRAS_GRUPOS, definicaoGrupos } from '../data/grupos.js';
 import AvatarNome from './AvatarNome.jsx';
 
+const _allBolaoNamesAdmin = Object.values(definicaoGrupos).flat();
+function toBolaoNameAdmin(realNome) {
+  return _allBolaoNamesAdmin.find((b) => b.startsWith(realNome)) ?? realNome;
+}
+
 const BASE = import.meta.env.VITE_API_URL ?? '';
 
 async function getAdmin() {
@@ -85,6 +90,10 @@ export default function AbaAdmin() {
   const [resultadoCalculo, setResultadoCalculo] = useState(null);
   const [msgCalculo, setMsgCalculo] = useState('');
 
+  // Times classificados reais (API football-data.org): top-2 por grupo + top-8 terceiros
+  const [gruposReais, setGruposReais] = useState([]);
+  const [terceirosReais, setTerceirosReais] = useState([]);
+
   // === ESTADOS DOS CONFRONTOS & MODAL ===
   const [confrontos, setConfrontos] = useState([]);
   const [carregandoConfrontos, setCarregandoConfrontos] = useState(false);
@@ -133,6 +142,13 @@ export default function AbaAdmin() {
 
   useEffect(() => {
     fetchConfrontos();
+    fetch(`${BASE}/api/grupos-reais`)
+      .then((r) => r.json())
+      .then((res) => {
+        setGruposReais(res.data?.grupos ?? []);
+        setTerceirosReais(res.data?.terceiros ?? []);
+      })
+      .catch(() => {});
     Promise.all([getAdmin(), getGabarito()])
       .then(([d, gab]) => {
         setDados(d);
@@ -305,10 +321,13 @@ export default function AbaAdmin() {
     p.nome.toLowerCase().includes(filtroPodio.toLowerCase())
   );
 
-  // Times classificados pelos grupos definidos no gabarito acima (1º e 2º de cada grupo)
-  const classificados = Array.from(
-    new Set(LETRAS_GRUPOS.flatMap((l) => gabGrupos[l].filter(Boolean)))
-  );
+  // Times classificados: top-2 de cada grupo + top-8 terceiros da API real
+  const classificados = Array.from(new Set([
+    ...gruposReais.flatMap((g) =>
+      g.tabela.filter((l) => l.posicao <= 2).map((l) => toBolaoNameAdmin(l.time.nome))
+    ),
+    ...terceirosReais.slice(0, 8).map((t) => toBolaoNameAdmin(t.time.nome)),
+  ])).sort();
 
   // === LÓGICA DE AGRUPAMENTO DOS CONFRONTOS ===
   const fasesOrdem = ['Fase 1', 'Oitavas', 'Quartas', 'Semifinal', 'Final'];
@@ -691,7 +710,7 @@ export default function AbaAdmin() {
           {/* Pódio */}
           <h3 style={{ color: 'var(--nebula-green)', marginBottom: 6, fontSize: '1rem' }}>👑 Pódio Final (opcional)</h3>
           <p style={{ color: '#666', fontSize: '0.8rem', marginBottom: 16 }}>
-            Só aparecem aqui os times classificados nos grupos acima (1º e 2º de cada grupo).
+            Só aparecem aqui os times classificados na Copa real (top-2 de cada grupo + top-8 terceiros).
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 24 }}>
             {[

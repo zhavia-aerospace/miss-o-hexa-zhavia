@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
-import { postPodio, getPodios, getNomesPalpites } from '../../services/api.js';
+import { postPodio, getPodios, getNomesPalpites, getGruposReais } from '../../services/api.js';
 import { useAlerta } from '../../context/AlertContext.jsx';
 import AutocompleteNome from '../AutocompleteNome.jsx';
 import AvatarNome from '../AvatarNome.jsx';
+import { definicaoGrupos } from '../../data/grupos.js';
+
+const _allBolaoNames = Object.values(definicaoGrupos).flat();
+function toBolaoName(realNome) {
+  return _allBolaoNames.find((b) => b.startsWith(realNome)) ?? realNome;
+}
 
 export default function AbaPodio({ meuNome, onIdentificar }) {
   const { mostrarAlerta } = useAlerta();
@@ -28,17 +34,26 @@ export default function AbaPodio({ meuNome, onIdentificar }) {
   const identificado = meuNome.trim().length > 0;
 
   useEffect(() => {
+    // podioLiberado ainda vem do gabarito
     fetch((import.meta.env.VITE_API_URL ?? '') + '/api/gabarito')
       .then((r) => r.json())
-      .then((d) => {
-        setPodioLiberado(d.podioLiberado === true);
-        const times = Array.from(
-          new Set(Object.values(d.grupos ?? {}).flat().filter(Boolean))
-        ).sort();
-        setClassificados(times);
-      })
+      .then((d) => setPodioLiberado(d.podioLiberado === true))
       .catch(() => {})
       .finally(() => setCarregando(false));
+
+    // classificados vêm da API real: top-2 de cada grupo + top-8 terceiros
+    getGruposReais()
+      .then((res) => {
+        const grupos = res.data?.grupos ?? [];
+        const terceiros = res.data?.terceiros ?? [];
+        const top2 = grupos.flatMap((g) =>
+          g.tabela.filter((l) => l.posicao <= 2).map((l) => toBolaoName(l.time.nome))
+        );
+        const top8 = terceiros.slice(0, 8).map((t) => toBolaoName(t.time.nome));
+        setClassificados(Array.from(new Set([...top2, ...top8])).sort());
+      })
+      .catch(() => {});
+
     getPodios().then(setPodios).catch(() => {});
     getNomesPalpites().then(setNomesExistentes).catch(() => {});
   }, []);

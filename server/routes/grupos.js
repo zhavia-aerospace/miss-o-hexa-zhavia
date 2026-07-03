@@ -13,8 +13,8 @@ const CODIGOS_MATA_MATA = ['LAST_32', 'LAST_16', 'QUARTER_FINALS', 'SEMI_FINALS'
 // pra não estourar o card.
 const TRADUCOES_TIMES = {
   ALG: 'Argélia', ARG: 'Argentina', AUS: 'Austrália', AUT: 'Áustria', BEL: 'Bélgica',
-  BIH: 'Bósnia-Herz.', BRA: 'Brasil', CAN: 'Canadá', CPV: 'Cabo Verde', COL: 'Colômbia',
-  COD: 'RD Congo', CRO: 'Croácia', CUW: 'Curaçau', CZE: 'República Tcheca', ECU: 'Equador',
+  BIH: 'Bósnia e Herzegovina', BRA: 'Brasil', CAN: 'Canadá', CPV: 'Cabo Verde', COL: 'Colômbia',
+  COD: 'RD do Congo', CRO: 'Croácia', CUW: 'Curaçau', CZE: 'República Tcheca', ECU: 'Equador',
   EGY: 'Egito', ENG: 'Inglaterra', FRA: 'França', GER: 'Alemanha', GHA: 'Gana',
   HAI: 'Haiti', IRN: 'Irã', IRQ: 'Iraque', CIV: 'Costa do Marfim', JPN: 'Japão',
   JOR: 'Jordânia', KOR: 'Coreia do Sul', MEX: 'México', MAR: 'Marrocos', NED: 'Holanda',
