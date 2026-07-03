@@ -48,6 +48,7 @@ const TRADUCOES_FRONT = {
   "South Africa": "África do Sul",
   "Algeria": "Argélia",
   "Cape Verde": "Cabo Verde",
+  "Cape Verde Islands": "Cabo Verde",
   "Ivory Coast": "Costa do Marfim",
   "Côte d'Ivoire": "Costa do Marfim",
   "Egypt": "Egito",

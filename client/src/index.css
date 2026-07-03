@@ -885,3 +885,78 @@ footer {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--nebula-green); /* Fica verde ao passar o mouse */
 }
+/* =============================================
+   AJUSTES VISUAIS: GRUPOS E TERCEIROS LADO A LADO
+   ============================================= */
+
+/* 1. Alinhamento perfeito da Tabela (Fim do zigue-zague) */
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Força as colunas a terem tamanhos definidos */
+}
+
+.ranking-table th, 
+.ranking-table td {
+  text-align: center; /* Centraliza os números (P, J, V, E, D, SG) */
+  padding: 8px 4px;
+}
+
+/* A coluna da Seleção (Geralmente a 2ª) precisa ser alinhada à esquerda e ser maior */
+.ranking-table th:nth-child(2),
+.ranking-table td:nth-child(2) {
+  text-align: left;
+  width: 55%; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 2. Layout Lado a Lado (Grupos + 3º Colocados) - TELA INTEIRA */
+/* Atualize a classe no seu index.css */
+.container-fase-grupos {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  display: flex;
+  gap: 30px;
+  align-items: stretch; /* A MÁGICA ESTÁ AQUI: força as colunas a terem a mesma altura! */
+  margin-top: 20px;
+  padding: 0 4vw;
+  box-sizing: border-box;
+}
+
+.coluna-grupos {
+  flex: 3.5; /* Ocupa a maior parte da tela */
+}
+
+.coluna-terceiros {
+  flex: 1; /* Ocupa o restante da tela */
+  min-width: 320px;
+  /* position: sticky; (REMOVIDO: agora ele desce junto com a tela) */
+  /* top: 20px; (REMOVIDO) */
+}
+
+/* 3. Forçar Grupos na linha (Ajustado para tela cheia) */
+.grid-grupos-bolao {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) !important; /* Mudei para 4 por linha para preencher bem a tela cheia! */
+  gap: 15px;
+  margin-top: 15px;
+}
+
+/* Responsividade (Para não quebrar no celular ou telas menores) */
+@media (max-width: 1300px) {
+  .grid-grupos-bolao { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (max-width: 1000px) {
+  .container-fase-grupos { flex-direction: column; padding: 0 20px; }
+  .grid-grupos-bolao { grid-template-columns: repeat(2, 1fr) !important; }
+  .coluna-terceiros { width: 100%; }
+}
+@media (max-width: 650px) {
+  .grid-grupos-bolao { grid-template-columns: 1fr !important; }
+}

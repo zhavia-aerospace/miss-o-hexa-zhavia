@@ -66,13 +66,13 @@ function RealMatchCard({ jogo, isFinal, isThird }) {
   );
 }
 
-// === CÉLULA DO CHAVEAMENTO REAL (Apenas Oitavas, Quartas e Semis) ===
+// === CÉLULA DO CHAVEAMENTO REAL ===
 function RealBracketCell({ jogo, side, phase, index, totalItems }) {
   const isLeft = side === 'left';
   const isRight = side === 'right';
 
   const hasParents = phase !== 'Rodada de 32';
-  const hasChildren = true; // Todas essas fases agora têm filhos
+  const hasChildren = true;
   const needsVertical = totalItems > 1;
 
   const colorOff = 'rgba(96, 165, 250, 0.25)';
@@ -176,25 +176,13 @@ export default function AbaGruposReais() {
                 {preencher(semifinal, 0, 1).map((jogo, i) => <RealBracketCell key={`l-sem-${i}`} jogo={jogo} side="left" phase="Semifinal" index={i} totalItems={1} />)}
               </div>
 
-              {/* === COLUNA CENTRAL MAGISTRAL (FINAL E 3º LUGAR) === */}
+              {/* COLUNA CENTRAL */}
               <div className="bracket-column" style={{ flex: 1.5, position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '0 20px' }}>
-
-                {/* CONTAINER QUE EMPILHA A FINAL E O 3º LUGAR E DESENHA AS LINHAS */}
                 <div style={{ width: '100%', position: 'relative', display: 'flex', flexDirection: 'column', gap: '50px' }}>
+                  <div style={{ position: 'absolute', left: '-20px', top: '85px', bottom: '55px', width: '20px', borderLeft: '2px solid rgba(96, 165, 250, 0.3)', borderTop: '2px solid rgba(96, 165, 250, 0.3)', borderBottom: '2px solid rgba(96, 165, 250, 0.3)', zIndex: 1 }}></div>
+                  <div style={{ position: 'absolute', right: '-20px', top: '85px', bottom: '55px', width: '20px', borderRight: '2px solid rgba(96, 165, 250, 0.3)', borderTop: '2px solid rgba(96, 165, 250, 0.3)', borderBottom: '2px solid rgba(96, 165, 250, 0.3)', zIndex: 1 }}></div>
 
-                  {/* --- AS LINHAS DO LADO ESQUERDO --- */}
-                  <div style={{
-                    position: 'absolute', left: '-20px', top: '85px', bottom: '55px', width: '20px',
-                    borderLeft: '2px solid rgba(96, 165, 250, 0.3)', borderTop: '2px solid rgba(96, 165, 250, 0.3)', borderBottom: '2px solid rgba(96, 165, 250, 0.3)', zIndex: 1
-                  }}></div>
-
-                  {/* --- AS LINHAS DO LADO DIREITO --- */}
-                  <div style={{
-                    position: 'absolute', right: '-20px', top: '85px', bottom: '55px', width: '20px',
-                    borderRight: '2px solid rgba(96, 165, 250, 0.3)', borderTop: '2px solid rgba(96, 165, 250, 0.3)', borderBottom: '2px solid rgba(96, 165, 250, 0.3)', zIndex: 1
-                  }}></div>
-
-                  {/* GRANDE FINAL */}
+                  {/* FINAL */}
                   <div style={{ position: 'relative', zIndex: 10 }}>
                     <div className="floating-trophy-large">
                       {final?.vencedor && <div className="champion-label">⭐ {final.vencedor} ⭐</div>}
@@ -204,14 +192,13 @@ export default function AbaGruposReais() {
                     <RealMatchCard jogo={final} isFinal={true} />
                   </div>
 
-                  {/* DISPUTA DE 3º LUGAR */}
+                  {/* 3º LUGAR */}
                   {terceiroLugar && (
                     <div style={{ position: 'relative', zIndex: 10 }}>
                       <div className="column-title" style={{ color: '#cd7f32', textShadow: '0 0 10px rgba(205, 127, 50, 0.4)' }}>Disputa de 3º Lugar</div>
                       <RealMatchCard jogo={terceiroLugar} isThird={true} />
                     </div>
                   )}
-
                 </div>
               </div>
 
@@ -237,123 +224,124 @@ export default function AbaGruposReais() {
         </>
       )}
 
-      {/* === FASE DE GRUPOS === */}
-      <div className="cosmic-panel">
-        <h2>📊 Fase de Grupos — Tabela Real</h2>
-        <p style={{ color: '#aaa', marginBottom: 20 }}>
-          Classificação real da Copa do Mundo, atualizada direto da fonte oficial.
-        </p>
-
-        {carregando ? (
-          <div style={{ padding: '20px 0' }}>
-            <div style={{ width: '250px', height: '24px', backgroundColor: '#1e293b', borderRadius: '4px', marginBottom: '20px' }} />
+      {/* =========================================================
+          A MÁGICA ACONTECE AQUI: GRUPOS E TERCEIROS LADO A LADO
+          ========================================================= */}
+      <div className="container-fase-grupos cosmic-panel" style={{ padding: '20px', background: 'transparent', border: 'none', boxShadow: 'none' }}>
+        
+        {/* COLUNA ESQUERDA: FASE DE GRUPOS */}
+        <div className="coluna-grupos">
+          <h2>📊 Fase de Grupos — Tabela Real</h2>
+          
+          {carregando ? (
+            <p>Carregando...</p>
+          ) : erro ? (
+            <p style={{ color: '#ff6666' }}>{erro}</p>
+          ) : grupos.length === 0 ? (
+            <p style={{ color: '#888' }}>Nenhum dado disponível ainda.</p>
+          ) : (
             <div className="grid-grupos-bolao">
-              {Array.from({ length: 8 }).map((_, index) => (
-                <div key={index} className="skeleton-card" style={{ height: '220px' }} />
+              {grupos.map((g) => (
+                <div key={g.grupo} style={{ border: '1px solid rgba(0,102,255,0.2)', borderRadius: 8, overflow: 'hidden', background: 'var(--space-panel)' }}>
+                  <div style={{ background: 'rgba(0,102,255,0.1)', padding: '10px 14px' }}>
+                    <strong style={{ color: 'var(--galaxy-gold)' }}>Grupo {g.grupo}</strong>
+                  </div>
+                  <div>
+                    <table className="ranking-table" style={{ fontSize: '0.85rem' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: '#888' }}>
+                          <th>#</th>
+                          <th>Seleção</th>
+                          <th>P</th>
+                          <th>J</th>
+                          <th>V</th>
+                          <th>E</th>
+                          <th>D</th>
+                          <th>SG</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {g.tabela.map((linha) => (
+                          <tr key={linha.time.nome} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                            <td style={{ fontWeight: 'bold', color: corPosicao(linha.posicao, linha.time.nome) }}>{linha.posicao}º</td>
+                            <td style={{ color: '#fff' }}>
+                              {linha.time.escudo && <img src={linha.time.escudo} alt="" style={{ width: 14, height: 14, marginRight: 6, verticalAlign: 'middle' }} />}
+                              {linha.time.nome}
+                            </td>
+                            <td style={{ fontWeight: 'bold', color: '#fff' }}>{linha.pontos}</td>
+                            <td style={{ color: '#aaa' }}>{linha.jogos}</td>
+                            <td style={{ color: '#aaa' }}>{linha.vitorias}</td>
+                            <td style={{ color: '#aaa' }}>{linha.empates}</td>
+                            <td style={{ color: '#aaa' }}>{linha.derrotas}</td>
+                            <td style={{ color: '#aaa' }}>{linha.saldoGols}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               ))}
             </div>
-          </div>
-        ) : erro ? (
-          <p style={{ color: '#ff6666', textAlign: 'center', padding: 30 }}>{erro}</p>
-        ) : grupos.length === 0 ? (
-          <p style={{ color: '#888', textAlign: 'center', padding: 30 }}>Nenhum dado disponível ainda.</p>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))', gap: 20 }}>
-            {grupos.map((g) => (
-              <div key={g.grupo} style={{ border: '1px solid rgba(0,102,255,0.2)', borderRadius: 8, overflow: 'hidden' }}>
-                <div style={{ background: 'rgba(0,102,255,0.1)', padding: '10px 14px' }}>
-                  <strong style={{ color: 'var(--galaxy-gold)' }}>Grupo {g.grupo}</strong>
-                </div>
-                <div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: '#888' }}>
-                        <th style={{ padding: '8px 10px', textAlign: 'left' }}>#</th>
-                        <th style={{ padding: '8px 10px', textAlign: 'left' }}>Seleção</th>
-                        <th style={{ padding: '8px 6px' }}>P</th>
-                        <th style={{ padding: '8px 6px' }}>J</th>
-                        <th style={{ padding: '8px 6px' }}>V</th>
-                        <th style={{ padding: '8px 6px' }}>E</th>
-                        <th style={{ padding: '8px 6px' }}>D</th>
-                        <th style={{ padding: '8px 6px' }}>SG</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {g.tabela.map((linha) => (
-                        <tr key={linha.time.nome} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                          <td style={{ padding: '8px 10px', fontWeight: 'bold', color: corPosicao(linha.posicao, linha.time.nome) }}>{linha.posicao}º</td>
-                          <td style={{ padding: '8px 10px', color: '#fff', whiteSpace: 'nowrap' }}>
-                            {linha.time.escudo && <img src={linha.time.escudo} alt="" style={{ width: 14, height: 14, marginRight: 6, verticalAlign: 'middle' }} />}
-                            {linha.time.nome}
-                          </td>
-                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 'bold', color: '#fff' }}>{linha.pontos}</td>
-                          <td style={{ padding: '8px 6px', textAlign: 'center', color: '#aaa' }}>{linha.jogos}</td>
-                          <td style={{ padding: '8px 6px', textAlign: 'center', color: '#aaa' }}>{linha.vitorias}</td>
-                          <td style={{ padding: '8px 6px', textAlign: 'center', color: '#aaa' }}>{linha.empates}</td>
-                          <td style={{ padding: '8px 6px', textAlign: 'center', color: '#aaa' }}>{linha.derrotas}</td>
-                          <td style={{ padding: '8px 6px', textAlign: 'center', color: '#aaa' }}>{linha.saldoGols}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ))}
+          )}
+        </div>
+
+        {/* COLUNA DIREITA: RANKING DOS 3º COLOCADOS */}
+        {!carregando && !erro && terceiros.length > 0 && (
+          <div 
+            className="coluna-terceiros cosmic-panel" 
+            style={{ 
+              padding: '15px', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              margin: 0 /* A MÁGICA DO ALINHAMENTO: tira a margem padrão que estava encurtando o painel */
+            }}
+          >
+            <div style={{ background: 'rgba(0,102,255,0.1)', padding: '10px 14px', borderRadius: '6px', borderBottom: '1px solid rgba(0,102,255,0.2)', marginBottom: '15px' }}>
+  <h3 style={{ color: 'var(--galaxy-gold)', margin: 0, fontSize: '1.1rem', textAlign: 'center' }}>
+    🏆 Ranking dos 3º Colocados
+  </h3>
+</div>
+            
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <table className="ranking-table" style={{ height: '100%', marginBottom: 0 }}>
+                <thead>
+                  <tr>
+                    <th style={{ width: '12%', textAlign: 'center' }}>RNK</th>
+                    <th style={{ width: '46%', textAlign: 'left' }}>Seleção</th>
+                    <th style={{ width: '14%', textAlign: 'center' }}>GRP</th> {/* NOVA COLUNA DE GRUPO */}
+                    <th style={{ width: '14%', textAlign: 'center' }}>PTS</th>
+                    <th style={{ width: '14%', textAlign: 'center' }}>SG</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {terceiros.map((t, i) => (
+                    <tr 
+                      key={t.grupo}
+                      style={{
+                        backgroundColor: i < CLASSIFICADOS_3OS ? 'rgba(0, 255, 102, 0.12)' : 'rgba(255, 51, 51, 0.12)',
+                      }}
+                    >
+                      <td style={{ fontWeight: 'bold', color: 'var(--galaxy-gold)', borderBottom: '1px solid rgba(0,0,0,0.2)', textAlign: 'center' }}>{i + 1}º</td>
+                      <td style={{ fontWeight: 'bold', color: '#fff', borderBottom: '1px solid rgba(0,0,0,0.2)', whiteSpace: 'nowrap', textAlign: 'left' }}>
+                        {t.time.escudo && <img src={t.time.escudo} alt="" style={{ width: 14, height: 14, marginRight: 6, verticalAlign: 'middle' }} />}
+                        {t.time.nome}
+                      </td>
+                      <td style={{ borderBottom: '1px solid rgba(0,0,0,0.2)', textAlign: 'center', color: '#ccc', fontWeight: 'bold' }}>{t.grupo}</td>
+                      <td style={{ borderBottom: '1px solid rgba(0,0,0,0.2)', textAlign: 'center' }}>{t.pontos}</td>
+                      <td style={{ borderBottom: '1px solid rgba(0,0,0,0.2)', textAlign: 'center' }}>{t.saldoGols}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            <div style={{ marginTop: '15px', textAlign: 'center', fontSize: '0.75rem', color: '#aaa' }}>
+              *Top {CLASSIFICADOS_3OS} avançam para a fase eliminatória.
+            </div>
           </div>
         )}
-      </div>
 
-      {/* === RANKING TERCEIROS === */}
-      {!carregando && !erro && terceiros.length > 0 && (
-        <div className="cosmic-panel">
-          <h2>🏆 Ranking dos 3º Colocados</h2>
-          <p style={{ color: '#aaa', marginBottom: 20 }}>
-            Os {CLASSIFICADOS_3OS} melhores terceiros colocados garantem vaga na fase de mata-mata.
-          </p>
-          <div style={{ overflowX: 'auto' }}>
-            <table className="ranking-table">
-              <thead>
-                <tr>
-                  <th>RNK</th>
-                  <th>Seleção</th>
-                  <th>Grupo</th>
-                  <th>PTS</th>
-                  <th>SG</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {terceiros.map((t, i) => (
-                  <tr key={t.grupo}>
-                    <td style={{ fontWeight: 'bold', color: 'var(--galaxy-gold)' }}>{i + 1}º</td>
-                    <td style={{ fontWeight: 'bold', color: '#fff' }}>
-                      {t.time.escudo && <img src={t.time.escudo} alt="" style={{ width: 14, height: 14, marginRight: 6, verticalAlign: 'middle' }} />}
-                      {t.time.nome}
-                    </td>
-                    <td>Grupo {t.grupo}</td>
-                    <td>{t.pontos}</td>
-                    <td>{t.saldoGols}</td>
-                    <td>
-                      <span
-                        style={{
-                          padding: '3px 10px',
-                          borderRadius: 12,
-                          fontSize: '0.75rem',
-                          fontWeight: 'bold',
-                          background: i < CLASSIFICADOS_3OS ? 'rgba(0,255,102,0.15)' : 'rgba(255,51,51,0.15)',
-                          color: i < CLASSIFICADOS_3OS ? 'var(--nebula-green)' : '#ff5555',
-                        }}
-                      >
-                        {i < CLASSIFICADOS_3OS ? 'CLASSIFICADO' : 'ELIMINADO'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      </div>
     </section>
   );
 }
