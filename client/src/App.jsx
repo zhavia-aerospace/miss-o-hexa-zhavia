@@ -61,7 +61,7 @@ export default function App() {
         {abaAtiva === 'home' && <AbaHome />}
         {abaAtiva === 'palpites' && <AbaPalpites meuNome={meuNome} onIdentificar={identificar} />}
         {abaAtiva === 'podio' && <AbaPodio meuNome={meuNome} onIdentificar={identificar} />}
-        {abaAtiva === 'ranking' && identificado && <AbaRanking />}
+        {abaAtiva === 'ranking' && identificado && <AbaRanking meuNome={meuNome} />}
         {abaAtiva === 'confrontos' && <AbaConfrontos />} {/* <-- 2. EXIBIMOS A ABA AQUI */}
         {abaAtiva === 'gruposreais' && <AbaGruposReais />}
       </main>

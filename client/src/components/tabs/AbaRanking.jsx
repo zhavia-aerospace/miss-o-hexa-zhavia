@@ -3,7 +3,7 @@ import { getRanking, getPalpites, getPodios } from '../../services/api.js';
 import AvatarNome from '../AvatarNome.jsx';
 import DetalhesAstronauta from '../DetalhesAstronauta.jsx';
 
-export default function AbaRanking() {
+export default function AbaRanking({ meuNome }) {
   const [ranking, setRanking] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
@@ -113,6 +113,8 @@ export default function AbaRanking() {
         <DetalhesAstronauta
           palpite={astronautaSelecionado}
           podio={podioSelecionado}
+          meuNome={meuNome}
+          listaPodios={podios}
           onFechar={() => {
             setAstronautaSelecionado(null);
             setPodioSelecionado(null);

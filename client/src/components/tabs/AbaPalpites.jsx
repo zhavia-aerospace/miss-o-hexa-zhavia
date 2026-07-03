@@ -459,6 +459,8 @@ export default function AbaPalpites({ meuNome, onIdentificar }) {
         <DetalhesAstronauta
           palpite={astronautaSelecionado}
           podio={listaPodios.find(p => p.nome.trim().toLowerCase() === astronautaSelecionado.nome.trim().toLowerCase())}
+          meuNome={meuNome}
+          listaPodios={listaPodios}
           onFechar={() => setAstronautaSelecionado(null)}
         />
       )}
