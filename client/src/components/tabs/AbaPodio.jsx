@@ -41,16 +41,11 @@ export default function AbaPodio({ meuNome, onIdentificar }) {
       .catch(() => {})
       .finally(() => setCarregando(false));
 
-    // classificados vêm da API real: top-2 de cada grupo + top-8 terceiros
+    // classificados vêm da API real: apenas times ainda vivos no torneio
     getGruposReais()
       .then((res) => {
-        const grupos = res.data?.grupos ?? [];
-        const terceiros = res.data?.terceiros ?? [];
-        const top2 = grupos.flatMap((g) =>
-          g.tabela.filter((l) => l.posicao <= 2).map((l) => toBolaoName(l.time.nome))
-        );
-        const top8 = terceiros.slice(0, 8).map((t) => toBolaoName(t.time.nome));
-        setClassificados(Array.from(new Set([...top2, ...top8])).sort());
+        const ativos = res.data?.classificadosAtivos ?? [];
+        setClassificados(ativos.map(toBolaoName).sort());
       })
       .catch(() => {});
 

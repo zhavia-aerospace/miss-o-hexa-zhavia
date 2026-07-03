@@ -240,7 +240,24 @@ router.get('/', async (_req, res) => {
         .map(({ nome, jogos }) => ({ fase: nome, jogos }))
         .filter((f) => f.jogos.length > 0);
 
-      const resultado = { grupos, terceiros, mataMata };
+      // Times ainda vivos no pódio: quem perdeu em qualquer fase é eliminado,
+      // EXCETO perdedores da semifinal (jogam pelo 3º lugar) e da final (ficam em 2º).
+      const eliminados = new Set();
+      for (const { nome, jogos } of fasesOrdenadas) {
+        if (nome === 'Semifinal' || nome === 'Final') continue;
+        for (const j of jogos) {
+          if (!j.vencedor) continue;
+          if (j.home?.nome && j.home.nome !== j.vencedor) eliminados.add(j.home.nome);
+          if (j.away?.nome && j.away.nome !== j.vencedor) eliminados.add(j.away.nome);
+        }
+      }
+      const todosQualificados = [
+        ...grupos.flatMap((g) => g.tabela.filter((l) => l.posicao <= 2).map((l) => l.time.nome)),
+        ...terceiros.slice(0, 8).map((t) => t.time.nome),
+      ];
+      const classificadosAtivos = [...new Set(todosQualificados)].filter((n) => !eliminados.has(n));
+
+      const resultado = { grupos, terceiros, mataMata, classificadosAtivos };
       cache = { data: resultado, timestamp: agora };
       return res.json({ source: 'api', data: resultado });
     }

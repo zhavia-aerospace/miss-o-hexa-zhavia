@@ -90,9 +90,10 @@ export default function AbaAdmin() {
   const [resultadoCalculo, setResultadoCalculo] = useState(null);
   const [msgCalculo, setMsgCalculo] = useState('');
 
-  // Times classificados reais (API football-data.org): top-2 por grupo + top-8 terceiros
+  // Times classificados reais (API football-data.org): ainda vivos no torneio
   const [gruposReais, setGruposReais] = useState([]);
   const [terceirosReais, setTerceirosReais] = useState([]);
+  const [classificadosAtivos, setClassificadosAtivos] = useState([]);
 
   // === ESTADOS DOS CONFRONTOS & MODAL ===
   const [confrontos, setConfrontos] = useState([]);
@@ -147,6 +148,7 @@ export default function AbaAdmin() {
       .then((res) => {
         setGruposReais(res.data?.grupos ?? []);
         setTerceirosReais(res.data?.terceiros ?? []);
+        setClassificadosAtivos(res.data?.classificadosAtivos ?? []);
       })
       .catch(() => {});
     Promise.all([getAdmin(), getGabarito()])
@@ -321,13 +323,8 @@ export default function AbaAdmin() {
     p.nome.toLowerCase().includes(filtroPodio.toLowerCase())
   );
 
-  // Times classificados: top-2 de cada grupo + top-8 terceiros da API real
-  const classificados = Array.from(new Set([
-    ...gruposReais.flatMap((g) =>
-      g.tabela.filter((l) => l.posicao <= 2).map((l) => toBolaoNameAdmin(l.time.nome))
-    ),
-    ...terceirosReais.slice(0, 8).map((t) => toBolaoNameAdmin(t.time.nome)),
-  ])).sort();
+  // Times classificados: apenas os ainda vivos no torneio (API real)
+  const classificados = classificadosAtivos.map(toBolaoNameAdmin).sort();
 
   // === LÓGICA DE AGRUPAMENTO DOS CONFRONTOS ===
   const fasesOrdem = ['Fase 1', 'Oitavas', 'Quartas', 'Semifinal', 'Final'];
