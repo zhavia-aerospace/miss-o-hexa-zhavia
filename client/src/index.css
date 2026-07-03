@@ -889,22 +889,20 @@ footer {
    AJUSTES VISUAIS: GRUPOS E TERCEIROS LADO A LADO
    ============================================= */
 
-/* 1. Alinhamento perfeito da Tabela (Fim do zigue-zague) */
-.ranking-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed; /* Força as colunas a terem tamanhos definidos */
+/* 1. Alinhamento perfeito da Tabela APENAS para os Grupos Reais */
+.container-fase-grupos .ranking-table {
+  table-layout: fixed; /* Força as colunas a terem tamanhos definidos apenas aqui */
 }
 
-.ranking-table th, 
-.ranking-table td {
+.container-fase-grupos .ranking-table th, 
+.container-fase-grupos .ranking-table td {
   text-align: center; /* Centraliza os números (P, J, V, E, D, SG) */
   padding: 8px 4px;
 }
 
 /* A coluna da Seleção (Geralmente a 2ª) precisa ser alinhada à esquerda e ser maior */
-.ranking-table th:nth-child(2),
-.ranking-table td:nth-child(2) {
+.container-fase-grupos .ranking-table th:nth-child(2),
+.container-fase-grupos .ranking-table td:nth-child(2) {
   text-align: left;
   width: 55%; 
   white-space: nowrap;
