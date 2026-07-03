@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { definicaoGrupos, escolhasIniciais, LETRAS_GRUPOS } from '../../data/grupos.js';
-import { getPalpites, postPalpite, checkNomeExiste, getNomesPalpites } from '../../services/api.js';
+import { getPalpites, postPalpite, checkNomeExiste, getNomesPalpites, getPodios } from '../../services/api.js';
 import { useAlerta } from '../../context/AlertContext.jsx';
 import DetalhesAstronauta from '../DetalhesAstronauta.jsx';
 import AvatarNome from '../AvatarNome.jsx';
@@ -15,6 +15,7 @@ export default function AbaPalpites({ meuNome, onIdentificar }) {
   const [enviando, setEnviando] = useState(false);
   const [msgEnvio, setMsgEnvio] = useState('');
   const [palpites, setPalpites] = useState([]);
+  const [listaPodios, setListaPodios] = useState([]); // <-- ADICIONE ESTA LINHA
   const [filtro, setFiltro] = useState('');
   const [astronautaSelecionado, setAstronautaSelecionado] = useState(null);
   const [nomeLogin, setNomeLogin] = useState('');
@@ -32,6 +33,15 @@ export default function AbaPalpites({ meuNome, onIdentificar }) {
     try {
       const dados = await getPalpites();
       setPalpites(dados);
+      
+      // Busca os pódios e guarda na memória
+      try {
+        const dadosPodios = await getPodios();
+        setListaPodios(dadosPodios);
+      } catch (err) {
+        console.log("Aviso: Não foi possível carregar os pódios", err);
+      }
+      
     } catch {
       // silencia
     }
@@ -448,6 +458,7 @@ export default function AbaPalpites({ meuNome, onIdentificar }) {
       {astronautaSelecionado && (
         <DetalhesAstronauta
           palpite={astronautaSelecionado}
+          podio={listaPodios.find(p => p.nome.trim().toLowerCase() === astronautaSelecionado.nome.trim().toLowerCase())}
           onFechar={() => setAstronautaSelecionado(null)}
         />
       )}
