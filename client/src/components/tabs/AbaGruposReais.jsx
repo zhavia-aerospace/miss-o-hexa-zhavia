@@ -120,7 +120,51 @@ export default function AbaGruposReais() {
       .then((res) => {
         setGrupos(res.data?.grupos ?? []);
         setTerceiros(res.data?.terceiros ?? []);
-        setMataMata(res.data?.mataMata ?? []);
+        
+        // ==========================================
+        // 💉 VACINA ANTI-BUG DA API (Austrália x Egito)
+        // ==========================================
+        let mataMataLimpo = res.data?.mataMata ?? [];
+        
+        mataMataLimpo = mataMataLimpo.map(fase => {
+          return {
+            ...fase,
+            jogos: fase.jogos.map(jogo => {
+              
+              // 1. Corrige o placar e o vencedor na Rodada de 32
+              if (jogo.home?.nome === 'Austrália' && jogo.away?.nome === 'Egito') {
+                return {
+                  ...jogo,
+                  placarHome: 1,      
+                  placarAway: 1,      
+                  penaltisHome: 2,    
+                  penaltisAway: 4,    
+                  vencedor: 'Egito'   
+                };
+              }
+
+              // 2. Avança o Egito para as Oitavas de Final contra a Argentina
+              if (fase.fase === 'Oitavas de Final') {
+                if (jogo.home?.nome === 'Argentina' && !jogo.away?.nome) {
+                  return { 
+                    ...jogo, 
+                    away: { nome: 'Egito', escudo: 'https://crests.football-data.org/825.svg' } 
+                  };
+                }
+                if (jogo.away?.nome === 'Argentina' && !jogo.home?.nome) {
+                  return { 
+                    ...jogo, 
+                    home: { nome: 'Egito', escudo: 'https://crests.football-data.org/825.svg' } 
+                  };
+                }
+              }
+
+              return jogo;
+            })
+          };
+        });
+
+        setMataMata(mataMataLimpo);
       })
       .catch(() => setErro('❌ Falha ao buscar a tabela real da Copa.'))
       .finally(() => setCarregando(false));
