@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Confetti from 'react-confetti';
 
 const BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -166,6 +167,21 @@ export default function AbaConfrontos() {
 
   return (
     <div className="bracket-full-width-container">
+      {/* ========================================================= */}
+      {/* 🎉 MÁGICA DO GRANDE POUSO (CHUVA DE CONFETES) 🎉 */}
+      {/* ========================================================= */}
+      {final && final.vencedor && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 9999, pointerEvents: 'none' }}>
+          <Confetti 
+            width={window.innerWidth} 
+            height={window.innerHeight} 
+            recycle={false} 
+            numberOfPieces={800}
+            gravity={0.12}
+            colors={['#fbbf24', '#ffffff', '#0066ff', '#00ff66']}
+          />
+        </div>
+      )}
       <div className="bracket-wrapper">
         
         {/* ================= LADO ESQUERDO ================= */}
