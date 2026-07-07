@@ -15,7 +15,7 @@ export default function AbaPalpites({ meuNome, onIdentificar }) {
   const [enviando, setEnviando] = useState(false);
   const [msgEnvio, setMsgEnvio] = useState('');
   const [palpites, setPalpites] = useState([]);
-  const [listaPodios, setListaPodios] = useState([]); // <-- ADICIONE ESTA LINHA
+  const [listaPodios, setListaPodios] = useState([]);
   const [filtro, setFiltro] = useState('');
   const [astronautaSelecionado, setAstronautaSelecionado] = useState(null);
   const [nomeLogin, setNomeLogin] = useState('');
@@ -34,14 +34,12 @@ export default function AbaPalpites({ meuNome, onIdentificar }) {
       const dados = await getPalpites();
       setPalpites(dados);
       
-      // Busca os pódios e guarda na memória
       try {
         const dadosPodios = await getPodios();
         setListaPodios(dadosPodios);
       } catch (err) {
         console.log("Aviso: Não foi possível carregar os pódios", err);
       }
-      
     } catch {
       // silencia
     }
@@ -60,37 +58,33 @@ export default function AbaPalpites({ meuNome, onIdentificar }) {
       .finally(() => setCarregandoConfig(false));
   }, []);
 
-  // Pré-preenche o nome se a pessoa já se identificou em outra aba
   useEffect(() => {
     if (identificado && !nome) setNome(meuNome);
   }, [identificado, meuNome, nome]);
 
-  // Aplica Twemoji no grid quando as escolhas mudam
+  // Carregamento rápido das bandeirinhas
   useEffect(() => {
-    if (gridRef.current && window.twemoji) {
-      window.twemoji.parse(gridRef.current);
-    }
-  }, [escolhas]);
+    const timer = setTimeout(() => {
+      if (gridRef.current && window.twemoji) {
+        window.twemoji.parse(gridRef.current);
+      }
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [escolhas, carregandoConfig]);
 
-  // ==========================================
-  // MÁGICA DO TRAVAMENTO DO SCROLL (FORÇA BRUTA JS)
-  // ==========================================
   useEffect(() => {
     if (astronautaSelecionado) {
-      // Injeta o travamento direto no HTML, no Body e no Root do React
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
       const root = document.getElementById('root');
       if (root) root.style.overflow = 'hidden';
     } else {
-      // Limpa as travas quando o modal fechar
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
       const root = document.getElementById('root');
       if (root) root.style.overflow = '';
     }
     
-    // Limpeza de segurança
     return () => {
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
@@ -301,8 +295,27 @@ export default function AbaPalpites({ meuNome, onIdentificar }) {
               />
             </div>
 
-            {/* Grid de grupos */}
-            <div className="grid-grupos-bolao" ref={gridRef}>
+            {/* ========================================== */}
+            {/* RESOLUÇÃO DEFINITIVA: Driblando o CSS Global */}
+            {/* Criamos uma classe única e protegida para garantir as 3 colunas */}
+            {/* ========================================== */}
+            <style>{`
+              .grid-palpites-exclusivo {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                width: 100%;
+                box-sizing: border-box;
+              }
+              @media (max-width: 900px) {
+                .grid-palpites-exclusivo { grid-template-columns: repeat(2, 1fr); }
+              }
+              @media (max-width: 650px) {
+                .grid-palpites-exclusivo { grid-template-columns: 1fr; }
+              }
+            `}</style>
+            
+            <div className="grid-palpites-exclusivo" ref={gridRef}>
               {LETRAS_GRUPOS.map((letra) => {
                 const lista = escolhas[letra];
                 return (
@@ -314,7 +327,6 @@ export default function AbaPalpites({ meuNome, onIdentificar }) {
                     <h3>Grupo {letra}</h3>
                     {definicaoGrupos[letra].map((time) => {
                       const pos = lista.indexOf(time);
-                      const selecionado = pos !== -1;
                       return (
                         <div
                           key={time}
