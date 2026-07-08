@@ -1,6 +1,43 @@
 # 🚀 Supercopa Zhavia — Bolão da Copa do Mundo 2026
 
-Bolão espacial para a Copa do Mundo 2026. Participantes escolhem os classificados dos 12 grupos e o pódio final, acumulam pontos e disputam o ranking da tripulação.
+![Banner da Supercopa Zhavia](https://via.placeholder.com/800x200?text=Supercopa+Zhavia+-+Bol%C3%A3o+da+Copa+2026) <!-- Placeholder, pode ser substituído por um banner real -->
+
+Um bolão espacial intergalático para a Copa do Mundo 2026, onde participantes de toda a galáxia podem testar suas habilidades de predição e disputar o ranking da tripulação. Inspirado na tecnologia da Frota Estelar, este projeto integra inteligência artificial e uma experiência de usuário imersiva para recriar a emoção do maior evento de futebol do universo.
+
+---
+
+## ✨ Funcionalidades
+
+*   **Palpites de Grupos:** Escolha os 2 classificados de cada um dos 12 grupos da Copa do Mundo 2026.
+*   **Pódio Final:** Preveja os 3 primeiros colocados do torneio (campeão, vice e terceiro lugar).
+*   **Sistema de Pontuação:** Acumule pontos com base na precisão dos seus palpites.
+*   **Ranking Intergalático:** Dispute com outros participantes em um ranking dinâmico e atualizado.
+*   **Oráculo Espacial (Gemini AI):** Consulte a inteligência artificial Gemini para obter insights e previsões para seus palpites.
+*   **Atualização de Jogos:** Acompanhe os resultados e fixtures da Copa 2026 em tempo real (via API-Sports).
+*   **Administração Simplificada:** Ferramentas para administradores atualizarem o ranking e liberarem fases do bolão.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+Este projeto é construído como uma aplicação Full-Stack, utilizando as seguintes tecnologias:
+
+### Frontend (`client/`)
+
+*   **React 18:** Biblioteca JavaScript para construção de interfaces de usuário.
+*   **Vite:** Ferramenta de build rápida para desenvolvimento frontend.
+*   **CSS Puro:** Estilização sem a necessidade de frameworks UI complexos.
+*   **Axios:** Cliente HTTP para comunicação com a API do backend.
+*   **Context API:** Para gerenciamento de estado global no React (e.g., sistema de alertas).
+
+### Backend (`server/`)
+
+*   **Node.js 18+:** Ambiente de execução JavaScript no lado do servidor.
+*   **Express:** Framework web para Node.js, utilizado para construir a API RESTful.
+*   **Mongoose:** Biblioteca ODM (Object Data Modeling) para MongoDB.
+*   **MongoDB Atlas:** Banco de dados NoSQL baseado em nuvem para armazenamento de dados.
+*   **Google Gemini API:** Integração com inteligência artificial para o "Oráculo Espacial".
+*   **API-Sports:** Para obter dados de jogos e resultados da Copa do Mundo.
 
 ---
 
@@ -8,95 +45,161 @@ Bolão espacial para a Copa do Mundo 2026. Participantes escolhem os classificad
 
 ```
 miss-o-hexa-zhavia/
-├── client/          # Frontend React + Vite
-└── server/          # Backend Node.js + Express + MongoDB
+├── client/          # Aplicação frontend (React + Vite)
+│   ├── public/      # Ativos estáticos
+│   ├── src/         # Código fonte do frontend
+│   │   ├── components/ # Componentes React reutilizáveis
+│   │   ├── context/    # Contextos React para gerenciamento de estado
+│   │   ├── data/       # Dados estáticos ou mocks
+│   │   ├── services/   # Funções de serviço para chamadas de API
+│   │   └── tabs/       # Componentes de abas principais da aplicação
+│   ├── index.html   # HTML principal
+│   ├── package.json # Dependências e scripts do frontend
+│   ├── vercel.json  # Configuração de deploy para Vercel
+│   └── vite.config.js # Configuração do Vite
+└── server/          # Aplicação backend (Node.js + Express)
+    ├── copa_zhavia.json # Dados iniciais para o bolão
+    ├── models/      # Modelos de dados do Mongoose (MongoDB)
+    ├── routes/      # Rotas da API Express
+    ├── scripts/     # Scripts utilitários (e.g., importação de dados, seed)
+    ├── index.js     # Ponto de entrada do servidor
+    └── package.json # Dependências e scripts do backend
 ```
 
 ---
 
-## 🖥️ Backend — `server/`
+## 🚀 Como Rodar Localmente
 
-**Stack:** Node.js 18+ · Express · Mongoose · MongoDB Atlas
+Siga estes passos para configurar e executar a aplicação em seu ambiente de desenvolvimento.
 
-### Endpoints
+### Pré-requisitos
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| `GET` | `/api/palpites` | Lista todos os palpites de grupos |
-| `POST` | `/api/palpites` | Registra palpite de grupos (nome único) |
-| `GET` | `/api/podio` | Lista todos os pódios finais |
-| `POST` | `/api/podio` | Registra pódio final (nome único) |
-| `GET` | `/api/ranking` | Retorna ranking ordenado por posição |
-| `POST` | `/api/ranking` | Atualiza ranking completo (requer `X-Admin-Key`) |
-| `POST` | `/api/oracle` | Consulta o Oráculo Espacial via Gemini AI |
-| `GET` | `/api/jogos` | Fixtures da Copa 2026 via API-Sports (cache 15 min) |
-| `GET` | `/health` | Health check (útil para Render/Railway) |
+Certifique-se de ter as seguintes ferramentas instaladas:
 
-### Configuração
+*   **Node.js** (versão 18 ou superior)
+*   **npm** (gerenciador de pacotes do Node.js)
+*   Uma conta no **MongoDB Atlas** e um URI de conexão.
+*   Uma **chave de API para Google Gemini**.
+*   Uma **chave de API para API-Football** (ou serviço similar que você esteja usando para os dados dos jogos).
+
+### 1. Clonar o Repositório
+
+```bash
+git clone https://github.com/seu-usuario/miss-o-hexa-zhavia.git
+cd miss-o-hexa-zhavia
+```
+
+### 2. Configurar o Backend
+
+Navegue até o diretório `server` e instale as dependências:
 
 ```bash
 cd server
-cp .env.example .env   # preencha as variáveis
 npm install
-npm run dev            # node --watch (sem nodemon)
 ```
 
-### Variáveis de ambiente (`server/.env`)
+Crie um arquivo `.env` na pasta `server/` copiando o `.env.example` e preencha as variáveis de ambiente:
+
+```bash
+cp .env.example .env
+```
+
+Edite o arquivo `.env` com suas credenciais:
 
 ```env
-MONGODB_URI=mongodb+srv://usuario:senha@cluster.mongodb.net/supercopa-zhavia
+MONGODB_URI=mongodb+srv://usuario:senha@cluster.mongodb.net/supercopa-zhavia # Seu URI do MongoDB Atlas
 PORT=3001
 FRONTEND_URL=http://localhost:5173
-GEMINI_API_KEY=sua_chave_gemini
-FOOTBALL_API_KEY=sua_chave_api_sports
-ADMIN_KEY=chave_para_atualizar_ranking
+GEMINI_API_KEY=sua_chave_gemini           # Sua chave de API do Google Gemini
+FOOTBALL_API_KEY=sua_chave_api_sports     # Sua chave de API do API-Sports
+ADMIN_KEY=chave_secreta_para_admin        # Chave para acesso administrativo (ex: atualizar ranking)
 ```
 
----
+Inicie o servidor de desenvolvimento:
 
-## 🌐 Frontend — `client/`
+```bash
+npm run dev
+```
 
-**Stack:** React 18 · Vite · CSS puro (sem framework de UI)
+O backend estará disponível em `http://localhost:3001`.
 
-### Abas do app
+### 3. Configurar o Frontend
 
-| Aba | Conteúdo |
-|-----|----------|
-| 🛸 Diretrizes | Regras, sistema de pontuação e cotas máximas |
-| 🔮 Classificados | Seleção dos 2 classificados por grupo + tabela da tripulação |
-| 👑 Pódio Final | Seleção do pódio (liberado manualmente nas Oitavas) |
-| 🏆 Classificação | Ranking geral dos participantes |
-
-### Configuração
+Em um **novo terminal**, navegue até o diretório `client` e instale as dependências:
 
 ```bash
 cd client
-cp .env.example .env   # só necessário em produção
 npm install
-npm run dev            # Vite em http://localhost:5173
 ```
 
-### Variável de ambiente (`client/.env`) — só em produção
+Para desenvolvimento local, o Vite já está configurado para fazer proxy das requisições `/api` para o backend (`localhost:3001`), então você **não precisa** de um arquivo `.env` no frontend.
 
-```env
-VITE_API_URL=https://seu-backend.onrender.com
+Inicie a aplicação frontend:
+
+```bash
+npm run dev
 ```
 
-> Em desenvolvimento o Vite faz proxy automático de `/api` → `localhost:3001` (configurado em `vite.config.js`), nenhuma variável de ambiente é necessária.
+O frontend estará disponível em `http://localhost:5173`.
+
+### 4. Acessar a Aplicação
+
+Abra seu navegador e acesse:
+
+[http://localhost:5173](http://localhost:5173)
 
 ---
 
-## ▶️ Rodando localmente
+## ⚙️ Endpoints da API (Backend)
 
-```bash
-# Terminal 1 — backend
-cd server && npm run dev
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET` | `/api/palpites` | Lista todos os palpites de grupos registrados. |
+| `POST` | `/api/palpites` | Registra um novo palpite de grupos. Requer um nome único para o participante. |
+| `GET` | `/api/podio` | Lista todos os pódios finais registrados. |
+| `POST` | `/api/podio` | Registra um novo pódio final. Requer um nome único para o participante. |
+| `GET` | `/api/ranking` | Retorna o ranking geral dos participantes, ordenado por posição. |
+| `POST` | `/api/ranking` | Atualiza o ranking completo. **Requer `X-Admin-Key` no header.** |
+| `POST` | `/api/oracle` | Consulta o Oráculo Espacial para previsões (alimentado por Gemini AI). |
+| `GET` | `/api/jogos` | Retorna os fixtures da Copa 2026. Dados em cache por 15 minutos. |
+| `GET` | `/health` | Endpoint de verificação de saúde do servidor (útil para plataformas de deploy como Render/Railway). |
 
-# Terminal 2 — frontend
-cd client && npm run dev
-```
+---
 
-Acesse **http://localhost:5173**
+## 🌐 Abas do Aplicativo (Frontend)
+
+| Aba | Conteúdo |
+|-----|----------|
+| 🛸 Diretrizes | Detalha as regras do bolão, o sistema de pontuação e as cotas máximas para cada tipo de palpite. |
+| 🔮 Classificados | Interface para a seleção dos 2 times classificados por grupo e visualização da tabela de palpites da tripulação. |
+| 👑 Pódio Final | Seção para registrar os palpites do pódio (Campeão, Vice, 3º lugar), liberada manualmente pelos administradores nas Oitavas de Final. |
+| 🏆 Classificação | Exibe o ranking geral dos participantes, com suas pontuações e posições. |
+| 🛡️ Admin | (Apenas para administradores) Interface para gerenciar o bolão, como atualizar o ranking ou liberar o pódio. |
+
+---
+
+## 🤝 Contribuição
+
+Contribuições são bem-vindas! Se você deseja contribuir com o projeto, siga estes passos:
+
+1.  Faça um fork do repositório.
+2.  Crie uma nova branch (`git checkout -b feature/sua-feature`).
+3.  Faça suas alterações e commit-as (`git commit -m 'feat: Adiciona nova funcionalidade X'`).
+4.  Envie suas alterações para o fork (`git push origin feature/sua-feature`).
+5.  Abra um Pull Request detalhando suas modificações.
+
+---
+
+## 📄 Licença
+
+Este projeto está licenciado sob a Licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes. <!-- Assumindo que existe um arquivo LICENSE ou será criado -->
+
+---
+
+## 📞 Contato
+
+Para dúvidas, sugestões ou suporte, entre em contato com [rafael.inacio2012@hotmail.com](mailto:rafael.inacio2012@hotmail.com).
+
 
 ---
 
