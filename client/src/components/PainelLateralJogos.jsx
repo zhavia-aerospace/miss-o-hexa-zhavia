@@ -1,80 +1,21 @@
 import { useEffect, useState } from 'react';
-import { getJogos } from '../services/api.js';
+import { getJogos, getGruposReais } from '../services/api.js'; // <-- Importamos getGruposReais
 
 const BASE = import.meta.env.VITE_API_URL ?? '';
-const POLL_INTERVAL = 15 * 60 * 1000; // sincronizado com cache do servidor
+const POLL_INTERVAL = 15 * 60 * 1000;
 
 // 1. DICIONÁRIO DE TRADUÇÃO DAS 48 SELEÇÕES DA SUPERCOPA ZHAVIA
 const TRADUCOES_FRONT = {
-  // AMÉRICAS (CONCACAF e CONMEBOL)
-  "Canada": "Canadá",
-  "United States": "Estados Unidos",
-  "USA": "Estados Unidos",
-  "Mexico": "México",
-  "Argentina": "Argentina",
-  "Brazil": "Brasil",
-  "Colombia": "Colômbia",
-  "Ecuador": "Equador",
-  "Paraguay": "Paraguai",
-  "Uruguay": "Uruguai",
-  "Curaçao": "Curaçau",
-  "Curacao": "Curaçau",
-  "Haiti": "Haiti",
-  "Panama": "Panamá",
-
-  // EUROPA (UEFA)
-  "Germany": "Alemanha",
-  "Austria": "Áustria",
-  "Belgium": "Bélgica",
-  "Bosnia-Herzegovina": "Bósnia e Herzegovina",
-  "Bosnia and Herzegovina": "Bósnia e Herzegovina",
-  "Croatia": "Croácia",
-  "Scotland": "Escócia",
-  "Spain": "Espanha",
-  "France": "França",
-  "Netherlands": "Holanda",
-  "Holland": "Holanda",
-  "England": "Inglaterra",
-  "Norway": "Noruega",
-  "Portugal": "Portugal",
-  "Czech Republic": "República Tcheca",
-  "Czechia": "República Tcheca",
-  "Sweden": "Suécia",
-  "Switzerland": "Suíça",
-  "Turkey": "Turquia",
-  "Türkiye": "Turquia",
-
-  // ÁFRICA (CAF)
-  "South Africa": "África do Sul",
-  "Algeria": "Argélia",
-  "Cape Verde": "Cabo Verde",
-  "Cape Verde Islands": "Cabo Verde",
-  "Ivory Coast": "Costa do Marfim",
-  "Côte d'Ivoire": "Costa do Marfim",
-  "Egypt": "Egito",
-  "Ghana": "Gana",
-  "Morocco": "Marrocos",
-  "Congo DR": "RD Congo",
-  "DR Congo": "RD Congo",
-  "Democratic Republic of the Congo": "RD Congo",
-  "Senegal": "Senegal",
-  "Tunisia": "Tunísia",
-
-  // ÁSIA E OCEANIA (AFC e OFC)
-  "Saudi Arabia": "Arábia Saudita",
-  "Australia": "Austrália",
-  "Qatar": "Catar",
-  "South Korea": "Coreia do Sul",
-  "Korea Republic": "Coreia do Sul",
-  "Iran": "Irã",
-  "Iraq": "Iraque",
-  "Japan": "Japão",
-  "Jordan": "Jordânia",
-  "Uzbekistan": "Uzbequistão",
-  "New Zealand": "Nova Zelândia"
+  // AMÉRICAS
+  "Canada": "Canadá", "United States": "Estados Unidos", "USA": "Estados Unidos", "Mexico": "México", "Argentina": "Argentina", "Brazil": "Brasil", "Colombia": "Colômbia", "Ecuador": "Equador", "Paraguay": "Paraguai", "Uruguay": "Uruguai", "Curaçao": "Curaçau", "Curacao": "Curaçau", "Haiti": "Haiti", "Panama": "Panamá",
+  // EUROPA
+  "Germany": "Alemanha", "Austria": "Áustria", "Belgium": "Bélgica", "Bosnia-Herzegovina": "Bósnia e Herzegovina", "Bosnia and Herzegovina": "Bósnia e Herzegovina", "Croatia": "Croácia", "Scotland": "Escócia", "Spain": "Espanha", "France": "França", "Netherlands": "Holanda", "Holland": "Holanda", "England": "Inglaterra", "Norway": "Noruega", "Portugal": "Portugal", "Czech Republic": "República Tcheca", "Czechia": "República Tcheca", "Sweden": "Suécia", "Switzerland": "Suíça", "Turkey": "Turquia", "Türkiye": "Turquia",
+  // ÁFRICA
+  "South Africa": "África do Sul", "Algeria": "Argélia", "Cape Verde": "Cabo Verde", "Cape Verde Islands": "Cabo Verde", "Ivory Coast": "Costa do Marfim", "Côte d'Ivoire": "Costa do Marfim", "Egypt": "Egito", "Ghana": "Gana", "Morocco": "Marrocos", "Congo DR": "RD Congo", "DR Congo": "RD Congo", "Democratic Republic of the Congo": "RD Congo", "Senegal": "Senegal", "Tunisia": "Tunísia",
+  // ÁSIA E OCEANIA
+  "Saudi Arabia": "Arábia Saudita", "Australia": "Austrália", "Qatar": "Catar", "South Korea": "Coreia do Sul", "Korea Republic": "Coreia do Sul", "Iran": "Irã", "Iraq": "Iraque", "Japan": "Japão", "Jordan": "Jordânia", "Uzbekistan": "Uzbequistão", "New Zealand": "Nova Zelândia"
 };
 
-// Função para traduzir o nome, se não achar no dicionário, mantém o original
 function traduzir(nomeIngles) {
   return TRADUCOES_FRONT[nomeIngles] || nomeIngles;
 }
@@ -82,6 +23,7 @@ function traduzir(nomeIngles) {
 export default function PainelLateralJogos() {
   const [aberto, setAberto] = useState(false);
   const [jogos, setJogos] = useState([]);
+  const [mataMata, setMataMata] = useState([]); // <-- Guarda os dados reais do chaveamento
   const [subAba, setSubAba] = useState('live');
   const [youtubeVideoId, setYoutubeVideoId] = useState('');
 
@@ -93,26 +35,41 @@ export default function PainelLateralJogos() {
   }, []);
 
   useEffect(() => {
-    const carregar = () => getJogos().then((r) => setJogos(r.data ?? [])).catch(() => {});
+    const carregar = async () => {
+      try {
+        // 1. Puxa os jogos brutos da API para a barra lateral
+        const resJogos = await getJogos();
+        setJogos(resJogos.data ?? []);
+
+        // 2. Puxa a tabela do chaveamento real para cruzarmos os dados dos pênaltis
+        const resGrupos = await getGruposReais();
+        if (resGrupos.data && resGrupos.data.mataMata) {
+          const todosMataMata = resGrupos.data.mataMata.flatMap(f => f.jogos).map(jogo => {
+            // Vacina de segurança para alinhar com o front principal
+            if (jogo.home?.nome === 'Austrália' && jogo.away?.nome === 'Egito') {
+              return { ...jogo, placarHome: 1, placarAway: 1, penaltisHome: 2, penaltisAway: 4 };
+            }
+            return jogo;
+          });
+          setMataMata(todosMataMata);
+        }
+      } catch (e) {}
+    };
+
     carregar();
     const id = setInterval(carregar, POLL_INTERVAL);
     return () => clearInterval(id);
   }, []);
 
-  // 2. LÓGICA DE ORDENAÇÃO DINÂMICA
   const jogosOrdenados = [...jogos].sort((a, b) => {
-    if (subAba === 'hist') {
-      // Aba Resultados: do mais recente (novo) para o mais antigo
-      return new Date(b.fixture.date) - new Date(a.fixture.date);
-    }
-    // Aba Ao Vivo / Hoje: cronológico normal (próximos jogos primeiro)
+    if (subAba === 'hist') return new Date(b.fixture.date) - new Date(a.fixture.date);
     return new Date(a.fixture.date) - new Date(b.fixture.date);
   });
 
   const jogosFiltrados = jogosOrdenados.filter(({ fixture }) => {
     const s = fixture.status.short;
     if (subAba === 'live') return ['1H', '2H', 'HT', 'ET', 'P', 'NS'].includes(s);
-    return s === 'FT';
+    return ['FT', 'AET', 'PEN'].includes(s);
   });
 
   return (
@@ -133,7 +90,6 @@ export default function PainelLateralJogos() {
           </div>
 
           <div>
-            {/* Player YouTube */}
             <div style={{ marginBottom: 20 }}>
               {youtubeVideoId ? (
                 <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 6, border: '1px solid #1c233a' }}>
@@ -164,7 +120,6 @@ export default function PainelLateralJogos() {
               ⚽ Placar Orbital Live
             </h3>
 
-            {/* Sub-abas */}
             <div style={{ display: 'flex', gap: 5, marginBottom: 12, borderBottom: '1px solid rgba(0,102,255,0.2)', paddingBottom: 8 }}>
               {['live', 'hist'].map((tab) => (
                 <button
@@ -186,10 +141,8 @@ export default function PainelLateralJogos() {
                 </button>
               ))}
             </div>
-
-            {/* Lista de jogos */}
             
-<div className="lista-jogos-lateral">
+            <div className="lista-jogos-lateral">
               {jogosFiltrados.length === 0 ? (
                 <p style={{ color: '#666', textAlign: 'center', fontSize: '0.8rem', padding: 10 }}>
                   {subAba === 'live' ? 'Nenhum jogo rolando ou agendado para hoje.' : 'Nenhum resultado computado ainda.'}
@@ -200,10 +153,44 @@ export default function PainelLateralJogos() {
                   const ehLive = ['1H', '2H', 'HT', 'ET', 'P'].includes(s);
                   const tempo = ehLive
                     ? `LIVE • ${fixture.status.elapsed}'`
-                    : s === 'FT'
+                    : ['FT', 'AET', 'PEN'].includes(s)
                     ? 'Encerrado'
                     : new Date(fixture.date).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-                  const cor = ehLive ? 'var(--nebula-green)' : s === 'FT' ? '#667099' : '#aaa';
+                  const cor = ehLive ? 'var(--nebula-green)' : ['FT', 'AET', 'PEN'].includes(s) ? '#667099' : '#aaa';
+
+                  // ========================================================
+                  // SOLUÇÃO: Cruzamento de Dados (Barra Lateral x Chaveamento)
+                  // ========================================================
+                  const homeTr = traduzir(teams.home.name);
+                  const awayTr = traduzir(teams.away.name);
+
+                  // Busca esse exato jogo na nossa base de dados do Chaveamento Real
+                  const jogoBracket = mataMata.find(j => 
+                    (j.home?.nome === homeTr && j.away?.nome === awayTr) ||
+                    (j.home?.nome === awayTr && j.away?.nome === homeTr)
+                  );
+
+                  const getPlacarFinal = (isHome) => {
+                    const timeAtualTr = isHome ? homeTr : awayTr;
+                    const golBruto = isHome ? goals?.home : goals?.away;
+
+                    // Se encontrou o jogo no chaveamento e ele foi para os pênaltis
+                    if (jogoBracket && jogoBracket.penaltisHome != null && jogoBracket.penaltisAway != null) {
+                      const ehCasaNoBracket = jogoBracket.home?.nome === timeAtualTr;
+                      
+                      // Extrai o placar limpo (tempo normal) e os pênaltis separados
+                      const placarNormal = ehCasaNoBracket ? jogoBracket.placarHome : jogoBracket.placarAway;
+                      const penaltis = ehCasaNoBracket ? jogoBracket.penaltisHome : jogoBracket.penaltisAway;
+                      
+                      return { placar: placarNormal, pen: penaltis };
+                    }
+
+                    // Se não for jogo de mata-mata ou não teve pênaltis, usa o gol normal da API
+                    return { placar: golBruto, pen: null };
+                  };
+
+                  const homeScore = getPlacarFinal(true);
+                  const awayScore = getPlacarFinal(false);
 
                   return (
                     <div key={fixture.id} style={{ background: 'rgba(0,0,0,0.4)', padding: 10, borderRadius: 6, border: '1px solid rgba(255,255,255,0.03)', marginBottom: 8 }}>
@@ -211,13 +198,26 @@ export default function PainelLateralJogos() {
                         <span>🎯 {fixture.status.long}</span>
                         <span>{tempo}</span>
                       </div>
-                      {[{ t: teams.home, g: goals.home }, { t: teams.away, g: goals.away }].map(({ t, g }) => (
+                      {[
+                        { t: teams.home, ...homeScore },
+                        { t: teams.away, ...awayScore }
+                      ].map(({ t, placar, pen }) => (
                         <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
                           <span style={{ color: '#fff', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6 }}>
-                            {/* 3. CHAMANDO A FUNÇÃO DE TRADUÇÃO AQUI */}
                             <img src={t.logo} alt="" style={{ width: 14, height: 14 }} /> {traduzir(t.name)}
                           </span>
-                          <strong style={{ color: 'var(--galaxy-gold)', fontSize: '1rem' }}>{g ?? '-'}</strong>
+                          <strong style={{ color: 'var(--galaxy-gold)', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            {placar ?? '-'}
+                            {pen !== null && pen !== undefined && (
+                              <span style={{ 
+                                fontSize: '0.85rem', 
+                                color: '#ffffff', /* Branco puro para dar contraste com o dourado */
+                                fontWeight: 'normal'
+                              }}>
+                                ({pen})
+                              </span>
+                            )}
+                          </strong>
                         </div>
                       ))}
                     </div>

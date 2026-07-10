@@ -26,7 +26,6 @@ export default function AbaConfrontos() {
   if (loading) {
     return (
       <div className="bracket-full-width-container" style={{ display: 'flex', gap: '20px', justifyContent: 'center', padding: '40px 20px' }}>
-        {/* Desenhamos 3 skeletons lado a lado para simular o chaveamento carregando */}
         <div className="skeleton-card" style={{ width: '250px' }}></div>
         <div className="skeleton-card" style={{ width: '250px', transform: 'scale(1.1)' }}></div>
         <div className="skeleton-card" style={{ width: '250px' }}></div>
@@ -60,13 +59,12 @@ export default function AbaConfrontos() {
   const leftSemi = [confrontos.find(j => j.idJogo === 27)];
   const rightSemi = [confrontos.find(j => j.idJogo === 28)];
 
-  const final = confrontos.find(j => j.fase === 'Final');
+  const final = confrontos.find(j => j.fase === 'Final' || j.idJogo === 29);
 
-  // === CARD DE JOGO ===
+  // === CARD DE JOGO COM LÓGICA DE POSICIONAMENTO ===
   const MatchCard = ({ jogo, isFinal }) => {
     if (!jogo) return <div className="match-card empty" style={{ opacity: 0.3 }}>A definir</div>;
     
-    // Card Elegante para o Leo e Kahoe
     if (jogo.isBye) {
       return (
         <div className="match-card" style={{ borderColor: 'var(--galaxy-gold, #fbbf24)' }}>
@@ -78,20 +76,85 @@ export default function AbaConfrontos() {
       );
     }
 
-    const venceu1 = jogo.vencedor && jogo.vencedor === jogo.jogador1;
-    const venceu2 = jogo.vencedor && jogo.vencedor === jogo.jogador2;
+    let playerTop = jogo.jogador1;
+    let playerBottom = jogo.jogador2;
+
+    // =========================================================================
+    // REGRA 1: FASE 1 (Jogos 1 ao 14) - Ordem Alfabética Rigorosa
+    // Garante que nomes como Jeni x Kriss fiquem sempre na mesma ordem
+    // =========================================================================
+    if (typeof jogo.idJogo === 'number' && jogo.idJogo >= 1 && jogo.idJogo <= 14) {
+      const arrayOrdenado = [jogo.jogador1, jogo.jogador2].sort((a, b) => {
+        if (!a) return 1;
+        if (!b) return -1;
+        return a.localeCompare(b);
+      });
+      playerTop = arrayOrdenado[0];
+      playerBottom = arrayOrdenado[1];
+    }
+
+    // =========================================================================
+    // REGRA 2: Mapeamento Genético de Chaves (Jogos 15 em diante)
+    // Identifica de onde os jogadores vieram para colocá-los no lugar exato
+    // =========================================================================
+    const linhagem = {
+      15: { top: 1, bottom: 'bye-leo' },
+      16: { top: 2, bottom: 3 },
+      17: { top: 4, bottom: 5 },
+      18: { top: 6, bottom: 7 },
+      19: { top: 8, bottom: 'bye-kahoe' },
+      20: { top: 9, bottom: 10 },
+      21: { top: 11, bottom: 12 },
+      22: { top: 13, bottom: 14 },
+      23: { top: 15, bottom: 16 },
+      24: { top: 17, bottom: 18 },
+      25: { top: 19, bottom: 20 },
+      26: { top: 21, bottom: 22 },
+      27: { top: 23, bottom: 24 },
+      28: { top: 25, bottom: 26 },
+      29: { top: 27, bottom: 28 }
+    }[jogo.idJogo];
+
+    if (linhagem) {
+      const getVencedorAntigo = (idAnterior) => {
+        if (idAnterior === 'bye-leo') return 'Leo';
+        if (idAnterior === 'bye-kahoe') return 'Kahoe';
+        const matchAnterior = confrontos.find(c => c.idJogo === idAnterior);
+        return matchAnterior?.vencedor;
+      };
+
+      const esperadoNoTop = getVencedorAntigo(linhagem.top);
+      const esperadoNoBottom = getVencedorAntigo(linhagem.bottom);
+
+      // Desinverte visualmente se o Backend mandou fora de ordem
+      if (
+        (esperadoNoBottom && playerTop === esperadoNoBottom) || 
+        (esperadoNoTop && playerBottom === esperadoNoTop)
+      ) {
+        playerTop = jogo.jogador2;
+        playerBottom = jogo.jogador1;
+      }
+    }
+
+    const venceuTop = jogo.vencedor && jogo.vencedor === playerTop;
+    const venceuBottom = jogo.vencedor && jogo.vencedor === playerBottom;
 
     return (
       <div className={`match-card ${isFinal ? 'final-card' : ''} ${jogo.vencedor ? 'decided-card' : ''}`}>
         <div className="match-header" style={isFinal ? { color: 'var(--galaxy-gold, #fbbf24)' } : {}}>Jogo {jogo.idJogo}</div>
-        <div className={`player-row ${venceu1 ? 'winner' : ''}`}>
-          <span className="player-name" title={jogo.jogador1}>{jogo.jogador1 || 'A definir...'}</span>
-          {venceu1 && <span className="trophy">🏆</span>}
+        
+        {/* SLOT DE CIMA (TOP) */}
+        <div className={`player-row ${venceuTop ? 'winner' : ''}`}>
+          <span className="player-name" title={playerTop}>{playerTop || 'A definir...'}</span>
+          {venceuTop && <span className="trophy">🏆</span>}
         </div>
+        
         <div className="divider" style={isFinal ? { backgroundColor: 'rgba(251, 191, 36, 0.2)' } : {}}></div>
-        <div className={`player-row ${venceu2 ? 'winner' : ''}`}>
-          <span className="player-name" title={jogo.jogador2}>{jogo.jogador2 || 'A definir...'}</span>
-          {venceu2 && <span className="trophy">🏆</span>}
+        
+        {/* SLOT DE BAIXO (BOTTOM) */}
+        <div className={`player-row ${venceuBottom ? 'winner' : ''}`}>
+          <span className="player-name" title={playerBottom}>{playerBottom || 'A definir...'}</span>
+          {venceuBottom && <span className="trophy">🏆</span>}
         </div>
       </div>
     );
@@ -115,7 +178,6 @@ export default function AbaConfrontos() {
 
     return (
       <div className="bracket-cell">
-        {/* === RECEBENDO DOS PAIS === */}
         {hasParents && isLeft && <div className="line-h line-in-left" style={{ backgroundColor: inGold }}></div>}
         {hasParents && isRight && <div className="line-h line-in-right" style={{ backgroundColor: inGold }}></div>}
         {isCenter && (
@@ -125,28 +187,20 @@ export default function AbaConfrontos() {
           </>
         )}
 
-        {/* CONTAINER DO CARD COM A TAÇA FLUTUANTE AUMENTADA */}
         <div style={{ position: 'relative', width: '100%', zIndex: 10 }}>
-          
-          {/* 🏆 A TAÇA SÓ APARECE NO CENTRO DA GRANDE FINAL */}
           {isCenter && (
             <div className="floating-trophy-large">
-              
-              {/* === NOME DO CAMPEÃO BRILHANDO JUNTO COM A TAÇA === */}
               {jogo?.vencedor && (
                 <div className="champion-label">
                   ⭐ {jogo.vencedor} ⭐
                 </div>
               )}
-              
               🏆
             </div>
           )}
-          
           <MatchCard jogo={jogo} isFinal={isCenter} />
         </div>
 
-        {/* === ENVIANDO PARA OS FILHOS === */}
         {hasChildren && isLeft && (
           <>
             <div className="line-h line-out-right" style={{ backgroundColor: outGold }}></div>
@@ -167,9 +221,6 @@ export default function AbaConfrontos() {
 
   return (
     <div className="bracket-full-width-container">
-      {/* ========================================================= */}
-      {/* 🎉 MÁGICA DO GRANDE POUSO (CHUVA DE CONFETES) 🎉 */}
-      {/* ========================================================= */}
       {final && final.vencedor && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 9999, pointerEvents: 'none' }}>
           <Confetti 
