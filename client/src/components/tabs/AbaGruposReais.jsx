@@ -122,7 +122,7 @@ export default function AbaGruposReais() {
         setTerceiros(res.data?.terceiros ?? []);
         
         // ==========================================
-        // 💉 VACINA ANTI-BUG DA API (Austrália x Egito)
+        // 💉 VACINA ANTI-BUG DA API
         // ==========================================
         let mataMataLimpo = res.data?.mataMata ?? [];
         
@@ -130,35 +130,17 @@ export default function AbaGruposReais() {
           return {
             ...fase,
             jogos: fase.jogos.map(jogo => {
-              
-              // 1. Corrige o placar e o vencedor na Rodada de 32
               if (jogo.home?.nome === 'Austrália' && jogo.away?.nome === 'Egito') {
-                return {
-                  ...jogo,
-                  placarHome: 1,      
-                  placarAway: 1,      
-                  penaltisHome: 2,    
-                  penaltisAway: 4,    
-                  vencedor: 'Egito'   
-                };
+                return { ...jogo, placarHome: 1, placarAway: 1, penaltisHome: 2, penaltisAway: 4, vencedor: 'Egito' };
               }
-
-              // 2. Avança o Egito para as Oitavas de Final contra a Argentina
               if (fase.fase === 'Oitavas de Final') {
                 if (jogo.home?.nome === 'Argentina' && !jogo.away?.nome) {
-                  return { 
-                    ...jogo, 
-                    away: { nome: 'Egito', escudo: 'https://crests.football-data.org/825.svg' } 
-                  };
+                  return { ...jogo, away: { nome: 'Egito', escudo: 'https://crests.football-data.org/825.svg' } };
                 }
                 if (jogo.away?.nome === 'Argentina' && !jogo.home?.nome) {
-                  return { 
-                    ...jogo, 
-                    home: { nome: 'Egito', escudo: 'https://crests.football-data.org/825.svg' } 
-                  };
+                  return { ...jogo, home: { nome: 'Egito', escudo: 'https://crests.football-data.org/825.svg' } };
                 }
               }
-
               return jogo;
             })
           };
@@ -188,11 +170,38 @@ export default function AbaGruposReais() {
   const terceiroLugar = porFase['Disputa de 3º Lugar']?.[0];
   const final = porFase['Final']?.[0];
 
+  // ============================================================================
+  // ✨ SKELETON LOADERS - AGORA USANDO A MESMA ESTRUTURA DA ABA 5
+  // ============================================================================
+  if (carregando) {
+    return (
+      <section className="tab-content" style={{ padding: '20px' }}>
+        
+        {/* Skeleton do Título */}
+        <div className="skeleton-card" style={{ width: '300px', height: '35px', marginBottom: '40px', borderRadius: '6px' }}></div>
+
+        {/* Skeleton do Chaveamento (Exatamente igual ao da Aba Confrontos) */}
+        <div className="bracket-full-width-container" style={{ display: 'flex', gap: '20px', justifyContent: 'center', padding: '10px 20px 40px 20px' }}>
+          <div className="skeleton-card" style={{ width: '220px' }}></div>
+          <div className="skeleton-card" style={{ width: '250px', transform: 'scale(1.1)', border: '1px solid rgba(251, 191, 36, 0.5)' }}></div>
+          <div className="skeleton-card" style={{ width: '220px' }}></div>
+        </div>
+
+        {/* Skeleton das Tabelas de Grupos e Ranking */}
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+          <div className="skeleton-card" style={{ flex: '2 1 500px', height: '400px', borderRadius: '12px' }}></div>
+          <div className="skeleton-card" style={{ flex: '1 1 300px', height: '400px', borderRadius: '12px' }}></div>
+        </div>
+
+      </section>
+    );
+  }
+
   return (
     <section className="tab-content">
 
       {/* === CHAVEAMENTO REAL DO MATA-MATA === */}
-      {!carregando && !erro && rodada32.length > 0 && (
+      {!erro && rodada32.length > 0 && (
         <>
           <h2 style={{ padding: '0 20px' }}>⚔️ Chaveamento Real do Mata-Mata</h2>
           <p style={{ color: '#aaa', marginBottom: 10, padding: '0 20px' }}>
@@ -268,18 +277,13 @@ export default function AbaGruposReais() {
         </>
       )}
 
-      {/* =========================================================
-          A MÁGICA ACONTECE AQUI: GRUPOS E TERCEIROS LADO A LADO
-          ========================================================= */}
       <div className="container-fase-grupos cosmic-panel" style={{ padding: '20px', background: 'transparent', border: 'none', boxShadow: 'none' }}>
         
         {/* COLUNA ESQUERDA: FASE DE GRUPOS */}
         <div className="coluna-grupos">
           <h2>📊 Fase de Grupos — Tabela Real</h2>
           
-          {carregando ? (
-            <p>Carregando...</p>
-          ) : erro ? (
+          {erro ? (
             <p style={{ color: '#ff6666' }}>{erro}</p>
           ) : grupos.length === 0 ? (
             <p style={{ color: '#888' }}>Nenhum dado disponível ainda.</p>
@@ -330,21 +334,21 @@ export default function AbaGruposReais() {
         </div>
 
         {/* COLUNA DIREITA: RANKING DOS 3º COLOCADOS */}
-        {!carregando && !erro && terceiros.length > 0 && (
+        {!erro && terceiros.length > 0 && (
           <div 
             className="coluna-terceiros cosmic-panel" 
             style={{ 
               padding: '15px', 
               display: 'flex', 
               flexDirection: 'column', 
-              margin: 0 /* A MÁGICA DO ALINHAMENTO: tira a margem padrão que estava encurtando o painel */
+              margin: 0
             }}
           >
             <div style={{ background: 'rgba(0,102,255,0.1)', padding: '10px 14px', borderRadius: '6px', borderBottom: '1px solid rgba(0,102,255,0.2)', marginBottom: '15px' }}>
-  <h3 style={{ color: 'var(--galaxy-gold)', margin: 0, fontSize: '1.1rem', textAlign: 'center' }}>
-    🏆 Ranking dos 3º Colocados
-  </h3>
-</div>
+              <h3 style={{ color: 'var(--galaxy-gold)', margin: 0, fontSize: '1.1rem', textAlign: 'center' }}>
+                🏆 Ranking dos 3º Colocados
+              </h3>
+            </div>
             
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <table className="ranking-table" style={{ height: '100%', marginBottom: 0 }}>
@@ -352,7 +356,7 @@ export default function AbaGruposReais() {
                   <tr>
                     <th style={{ width: '12%', textAlign: 'center' }}>RNK</th>
                     <th style={{ width: '46%', textAlign: 'left' }}>Seleção</th>
-                    <th style={{ width: '14%', textAlign: 'center' }}>GRP</th> {/* NOVA COLUNA DE GRUPO */}
+                    <th style={{ width: '14%', textAlign: 'center' }}>GRP</th>
                     <th style={{ width: '14%', textAlign: 'center' }}>PTS</th>
                     <th style={{ width: '14%', textAlign: 'center' }}>SG</th>
                   </tr>

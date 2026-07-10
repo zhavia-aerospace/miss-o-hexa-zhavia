@@ -958,3 +958,15 @@ footer {
 @media (max-width: 650px) {
   .grid-grupos-bolao { grid-template-columns: 1fr !important; }
 }
+/* =========================================
+   ✨ ANIMAÇÃO PULSANTE SKELETON (NOVO)
+   ========================================= */
+@keyframes pulse-anim {
+  0% { opacity: 0.2; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.2; }
+}
+
+.pulse-anim {
+  animation: pulse-anim 1.5s ease-in-out infinite;
+}
