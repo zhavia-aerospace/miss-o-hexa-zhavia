@@ -121,9 +121,6 @@ export default function AbaGruposReais() {
         setGrupos(res.data?.grupos ?? []);
         setTerceiros(res.data?.terceiros ?? []);
         
-        // ==========================================
-        // 💉 VACINA ANTI-BUG DA API
-        // ==========================================
         let mataMataLimpo = res.data?.mataMata ?? [];
         
         mataMataLimpo = mataMataLimpo.map(fase => {
@@ -167,40 +164,65 @@ export default function AbaGruposReais() {
   const oitavas = porFase['Oitavas de Final'] ?? [];
   const quartas = porFase['Quartas de Final'] ?? [];
   const semifinal = porFase['Semifinal'] ?? [];
-  const terceiroLugar = porFase['Disputa de 3º Lugar']?.[0];
-  const final = porFase['Final']?.[0];
+  let terceiroLugar = porFase['Disputa de 3º Lugar']?.[0];
+  let final = porFase['Final']?.[0];
 
   // ============================================================================
-  // ✨ SKELETON LOADERS - AGORA USANDO A MESMA ESTRUTURA DA ABA 5
+  // ✨ VACINA VISUAL: AUTO-PREENCHER FINAL E 3º LUGAR E PINTAR LINHAS DE OURO
+  // ============================================================================
+  if (final || terceiroLugar) {
+    final = final ? { ...final } : null;
+    terceiroLugar = terceiroLugar ? { ...terceiroLugar } : null;
+
+    const semiEsq = semifinal[0];
+    const semiDir = semifinal[1];
+
+    // Processa a Semifinal Esquerda (Espanha x França)
+    if (semiEsq?.vencedor) {
+      const vencedorEsq = semiEsq.vencedor === semiEsq.home?.nome ? semiEsq.home : semiEsq.away;
+      const perdedorEsq = semiEsq.vencedor === semiEsq.home?.nome ? semiEsq.away : semiEsq.home;
+      
+      if (final && !final.home?.nome) final.home = vencedorEsq;
+      if (terceiroLugar && !terceiroLugar.home?.nome) terceiroLugar.home = perdedorEsq;
+    }
+
+    // Processa a Semifinal Direita (Inglaterra x Argentina)
+    if (semiDir?.vencedor) {
+      const vencedorDir = semiDir.vencedor === semiDir.home?.nome ? semiDir.home : semiDir.away;
+      const perdedorDir = semiDir.vencedor === semiDir.home?.nome ? semiDir.away : semiDir.home;
+      
+      if (final && !final.away?.nome) final.away = vencedorDir;
+      if (terceiroLugar && !terceiroLugar.away?.nome) terceiroLugar.away = perdedorDir;
+    }
+  }
+
+  const colorOn = 'var(--galaxy-gold, #fbbf24)';
+  const colorOff = 'rgba(96, 165, 250, 0.3)';
+  const corLinhaEsq = semifinal[0]?.vencedor ? colorOn : colorOff;
+  const corLinhaDir = semifinal[1]?.vencedor ? colorOn : colorOff;
+
+  // ============================================================================
+  // ✨ SKELETON LOADERS
   // ============================================================================
   if (carregando) {
     return (
       <section className="tab-content" style={{ padding: '20px' }}>
-        
-        {/* Skeleton do Título */}
         <div className="skeleton-card" style={{ width: '300px', height: '35px', marginBottom: '40px', borderRadius: '6px' }}></div>
-
-        {/* Skeleton do Chaveamento (Exatamente igual ao da Aba Confrontos) */}
         <div className="bracket-full-width-container" style={{ display: 'flex', gap: '20px', justifyContent: 'center', padding: '10px 20px 40px 20px' }}>
           <div className="skeleton-card" style={{ width: '220px' }}></div>
           <div className="skeleton-card" style={{ width: '250px', transform: 'scale(1.1)', border: '1px solid rgba(251, 191, 36, 0.5)' }}></div>
           <div className="skeleton-card" style={{ width: '220px' }}></div>
         </div>
-
-        {/* Skeleton das Tabelas de Grupos e Ranking */}
         <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
           <div className="skeleton-card" style={{ flex: '2 1 500px', height: '400px', borderRadius: '12px' }}></div>
           <div className="skeleton-card" style={{ flex: '1 1 300px', height: '400px', borderRadius: '12px' }}></div>
         </div>
-
       </section>
     );
   }
 
   return (
     <section className="tab-content">
-
-      {/* === CHAVEAMENTO REAL DO MATA-MATA === */}
       {!erro && rodada32.length > 0 && (
         <>
           <h2 style={{ padding: '0 20px' }}>⚔️ Chaveamento Real do Mata-Mata</h2>
@@ -232,8 +254,10 @@ export default function AbaGruposReais() {
               {/* COLUNA CENTRAL */}
               <div className="bracket-column" style={{ flex: 1.5, position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '0 20px' }}>
                 <div style={{ width: '100%', position: 'relative', display: 'flex', flexDirection: 'column', gap: '50px' }}>
-                  <div style={{ position: 'absolute', left: '-20px', top: '85px', bottom: '55px', width: '20px', borderLeft: '2px solid rgba(96, 165, 250, 0.3)', borderTop: '2px solid rgba(96, 165, 250, 0.3)', borderBottom: '2px solid rgba(96, 165, 250, 0.3)', zIndex: 1 }}></div>
-                  <div style={{ position: 'absolute', right: '-20px', top: '85px', bottom: '55px', width: '20px', borderRight: '2px solid rgba(96, 165, 250, 0.3)', borderTop: '2px solid rgba(96, 165, 250, 0.3)', borderBottom: '2px solid rgba(96, 165, 250, 0.3)', zIndex: 1 }}></div>
+                  
+                  {/* ✨ LINHAS CONECTORAS DINÂMICAS QUE BRILHAM */}
+                  <div style={{ position: 'absolute', left: '-20px', top: '85px', bottom: '55px', width: '20px', borderLeft: `2px solid ${corLinhaEsq}`, borderTop: `2px solid ${corLinhaEsq}`, borderBottom: `2px solid ${corLinhaEsq}`, zIndex: 1, transition: 'all 0.3s' }}></div>
+                  <div style={{ position: 'absolute', right: '-20px', top: '85px', bottom: '55px', width: '20px', borderRight: `2px solid ${corLinhaDir}`, borderTop: `2px solid ${corLinhaDir}`, borderBottom: `2px solid ${corLinhaDir}`, zIndex: 1, transition: 'all 0.3s' }}></div>
 
                   {/* FINAL */}
                   <div style={{ position: 'relative', zIndex: 10 }}>
