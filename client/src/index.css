@@ -970,3 +970,58 @@ footer {
 .pulse-anim {
   animation: pulse-anim 1.5s ease-in-out infinite;
 }
+/* =========================================
+   🚀 EFEITOS DE RASTRO DE LUZ (FLUIDO PREMIUM)
+   ========================================= */
+
+/* Transição ultra suave e "elástica" para todos os cards */
+.match-card {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease, filter 0.4s ease !important;
+  cursor: default;
+}
+
+/* Cursor e efeito de clique apenas nas áreas das seleções */
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.clickable-row:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.clickable-row:active {
+  transform: scale(0.98);
+}
+
+/* O brilho intenso e suave do card focado */
+.highlighted-card {
+  transform: scale(1.08) !important;
+  border-color: var(--galaxy-gold) !important;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.5), inset 0 0 10px rgba(251, 191, 36, 0.1) !important;
+  z-index: 50 !important;
+}
+
+/* O "apagão" cinematográfico do resto da árvore */
+.dimmed-card {
+  opacity: 0.2 !important;
+  filter: grayscale(80%) !important;
+}
+
+/* ⚡ A MÁGICA DA FLUIDEZ NAS LINHAS CONECTORAS */
+.line-h, .line-v {
+  transition: background-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out !important;
+}
+
+/* O caminho de luz (Vencedor) */
+.line-highlight {
+  background-color: var(--galaxy-gold) !important;
+  box-shadow: 0 0 8px var(--galaxy-gold) !important;
+  z-index: 40;
+}
+
+/* O caminho apagado (Perdedor ou não focado) */
+.line-dimmed {
+  background-color: rgba(96, 165, 250, 0.05) !important;
+  box-shadow: none !important;
+}

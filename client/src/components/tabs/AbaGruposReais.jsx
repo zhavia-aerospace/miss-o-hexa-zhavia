@@ -8,7 +8,7 @@ function preencher(jogos, inicio, fim) {
 }
 
 // === CARD DE JOGO REAL ===
-function RealMatchCard({ jogo, isFinal, isThird }) {
+function RealMatchCard({ jogo, isFinal, isThird, selectedTeam, setSelectedTeam }) {
   if (!jogo) return <div className="match-card empty" style={{ opacity: 0.3 }}>A definir</div>;
 
   const homeNome = jogo.home?.nome;
@@ -17,19 +17,36 @@ function RealMatchCard({ jogo, isFinal, isThird }) {
   const venceuAway = jogo.vencedor && jogo.vencedor === awayNome;
   const isDecided = !!jogo.vencedor;
 
+  // Lógica de Foco
+  const isHighlighted = selectedTeam && (homeNome === selectedTeam || awayNome === selectedTeam);
+  const isDimmed = selectedTeam && !isHighlighted;
+  
+  let cardClasses = `match-card ${isFinal ? 'final-card' : ''} ${isThird ? 'third-place-card' : ''} ${isDecided ? 'decided-card' : ''}`;
+  if (isHighlighted) cardClasses += ' highlighted-card';
+  if (isDimmed) cardClasses += ' dimmed-card';
+
+  const handleTeamClick = (teamName, e) => {
+    e.stopPropagation();
+    if (!teamName) return;
+    setSelectedTeam(prev => prev === teamName ? null : teamName);
+  };
+
   return (
-    <div className={`match-card ${isFinal ? 'final-card' : ''} ${isThird ? 'third-place-card' : ''} ${isDecided ? 'decided-card' : ''}`}>
+    <div className={cardClasses}>
+      
       {/* TIME DA CASA */}
-      <div className={`player-row ${venceuHome ? 'winner' : ''}`}>
-        <span className="player-name" title={homeNome ?? 'A definir...'}>
+      <div 
+        className={`player-row ${venceuHome ? 'winner' : ''} clickable-row`}
+        onClick={(e) => handleTeamClick(homeNome, e)}
+        title="Clique para mapear o percurso desta seleção"
+      >
+        <span className="player-name">
           {jogo.home?.escudo ? (
             <img src={jogo.home.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />
           ) : (
             <div className="placeholder-flag-blink">?</div>
           )}
-          <span style={{ opacity: homeNome ? 1 : 0.6 }}>
-            {homeNome ?? 'A definir...'}
-          </span>
+          <span style={{ opacity: homeNome ? 1 : 0.6 }}>{homeNome ?? 'A definir...'}</span>
         </span>
         <span>
           {jogo.placarHome ?? ''}
@@ -40,16 +57,18 @@ function RealMatchCard({ jogo, isFinal, isThird }) {
       <div className="divider" style={isFinal ? { backgroundColor: 'rgba(251, 191, 36, 0.2)' } : {}}></div>
       
       {/* TIME VISITANTE */}
-      <div className={`player-row ${venceuAway ? 'winner' : ''}`}>
-        <span className="player-name" title={awayNome ?? 'A definir...'}>
+      <div 
+        className={`player-row ${venceuAway ? 'winner' : ''} clickable-row`}
+        onClick={(e) => handleTeamClick(awayNome, e)}
+        title="Clique para mapear o percurso desta seleção"
+      >
+        <span className="player-name">
           {jogo.away?.escudo ? (
             <img src={jogo.away.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />
           ) : (
             <div className="placeholder-flag-blink">?</div>
           )}
-          <span style={{ opacity: awayNome ? 1 : 0.6 }}>
-            {awayNome ?? 'A definir...'}
-          </span>
+          <span style={{ opacity: awayNome ? 1 : 0.6 }}>{awayNome ?? 'A definir...'}</span>
         </span>
         <span>
           {jogo.placarAway ?? ''}
@@ -67,10 +86,9 @@ function RealMatchCard({ jogo, isFinal, isThird }) {
 }
 
 // === CÉLULA DO CHAVEAMENTO REAL ===
-function RealBracketCell({ jogo, side, phase, index, totalItems }) {
+function RealBracketCell({ jogo, side, phase, index, totalItems, selectedTeam, setSelectedTeam }) {
   const isLeft = side === 'left';
   const isRight = side === 'right';
-
   const hasParents = phase !== 'Rodada de 32';
   const hasChildren = true;
   const needsVertical = totalItems > 1;
@@ -81,27 +99,38 @@ function RealBracketCell({ jogo, side, phase, index, totalItems }) {
   const outGold = jogo?.vencedor ? colorOn : colorOff;
   const inGold = (jogo?.home?.nome || jogo?.away?.nome) ? colorOn : colorOff;
 
+  const isTeamInMatch = selectedTeam && (jogo?.home?.nome === selectedTeam || jogo?.away?.nome === selectedTeam);
+  const teamAdvanced = selectedTeam && (phase === 'Semifinal' ? isTeamInMatch : jogo?.vencedor === selectedTeam);
+
+  let lineInClass = '';
+  let lineOutClass = '';
+
+  if (selectedTeam) {
+    lineInClass = isTeamInMatch ? 'line-highlight' : 'line-dimmed';
+    lineOutClass = teamAdvanced ? 'line-highlight' : 'line-dimmed';
+  }
+
   return (
     <div className="bracket-cell">
-      {hasParents && isLeft && <div className="line-h line-in-left" style={{ backgroundColor: inGold }}></div>}
-      {hasParents && isRight && <div className="line-h line-in-right" style={{ backgroundColor: inGold }}></div>}
+      {hasParents && isLeft && <div className={`line-h line-in-left ${lineInClass}`} style={{ backgroundColor: lineInClass ? '' : inGold }}></div>}
+      {hasParents && isRight && <div className={`line-h line-in-right ${lineInClass}`} style={{ backgroundColor: lineInClass ? '' : inGold }}></div>}
 
       <div style={{ position: 'relative', width: '100%', zIndex: 10 }}>
-        <RealMatchCard jogo={jogo} isFinal={false} />
+        <RealMatchCard jogo={jogo} isFinal={false} selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} />
       </div>
 
       {hasChildren && isLeft && (
         <>
-          <div className="line-h line-out-right" style={{ backgroundColor: outGold }}></div>
-          {needsVertical && index % 2 === 0 && <div className="line-v line-v-down-right" style={{ backgroundColor: outGold }}></div>}
-          {needsVertical && index % 2 === 1 && <div className="line-v line-v-up-right" style={{ backgroundColor: outGold }}></div>}
+          <div className={`line-h line-out-right ${lineOutClass}`} style={{ backgroundColor: lineOutClass ? '' : outGold }}></div>
+          {needsVertical && index % 2 === 0 && <div className={`line-v line-v-down-right ${lineOutClass}`} style={{ backgroundColor: lineOutClass ? '' : outGold }}></div>}
+          {needsVertical && index % 2 === 1 && <div className={`line-v line-v-up-right ${lineOutClass}`} style={{ backgroundColor: lineOutClass ? '' : outGold }}></div>}
         </>
       )}
       {hasChildren && isRight && (
         <>
-          <div className="line-h line-out-left" style={{ backgroundColor: outGold }}></div>
-          {needsVertical && index % 2 === 0 && <div className="line-v line-v-down-left" style={{ backgroundColor: outGold }}></div>}
-          {needsVertical && index % 2 === 1 && <div className="line-v line-v-up-left" style={{ backgroundColor: outGold }}></div>}
+          <div className={`line-h line-out-left ${lineOutClass}`} style={{ backgroundColor: lineOutClass ? '' : outGold }}></div>
+          {needsVertical && index % 2 === 0 && <div className={`line-v line-v-down-left ${lineOutClass}`} style={{ backgroundColor: lineOutClass ? '' : outGold }}></div>}
+          {needsVertical && index % 2 === 1 && <div className={`line-v line-v-up-left ${lineOutClass}`} style={{ backgroundColor: lineOutClass ? '' : outGold }}></div>}
         </>
       )}
     </div>
@@ -114,6 +143,14 @@ export default function AbaGruposReais() {
   const [mataMata, setMataMata] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+  
+  const [selectedTeam, setSelectedTeam] = useState(null);
+
+  useEffect(() => {
+    const handleGlobalClick = () => setSelectedTeam(null);
+    window.addEventListener('click', handleGlobalClick);
+    return () => window.removeEventListener('click', handleGlobalClick);
+  }, []);
 
   useEffect(() => {
     getGruposReais()
@@ -122,7 +159,6 @@ export default function AbaGruposReais() {
         setTerceiros(res.data?.terceiros ?? []);
         
         let mataMataLimpo = res.data?.mataMata ?? [];
-        
         mataMataLimpo = mataMataLimpo.map(fase => {
           return {
             ...fase,
@@ -167,9 +203,11 @@ export default function AbaGruposReais() {
   let terceiroLugar = porFase['Disputa de 3º Lugar']?.[0];
   let final = porFase['Final']?.[0];
 
-  // ============================================================================
-  // ✨ VACINA VISUAL: AUTO-PREENCHER FINAL E 3º LUGAR E PINTAR LINHAS DE OURO
-  // ============================================================================
+  let vencedorEsqNome = null;
+  let perdedorEsqNome = null;
+  let vencedorDirNome = null;
+  let perdedorDirNome = null;
+
   if (final || terceiroLugar) {
     final = final ? { ...final } : null;
     terceiroLugar = terceiroLugar ? { ...terceiroLugar } : null;
@@ -177,33 +215,61 @@ export default function AbaGruposReais() {
     const semiEsq = semifinal[0];
     const semiDir = semifinal[1];
 
-    // Processa a Semifinal Esquerda (Espanha x França)
     if (semiEsq?.vencedor) {
+      vencedorEsqNome = semiEsq.vencedor;
+      perdedorEsqNome = semiEsq.vencedor === semiEsq.home?.nome ? semiEsq.away?.nome : semiEsq.home?.nome;
+      
       const vencedorEsq = semiEsq.vencedor === semiEsq.home?.nome ? semiEsq.home : semiEsq.away;
       const perdedorEsq = semiEsq.vencedor === semiEsq.home?.nome ? semiEsq.away : semiEsq.home;
-      
       if (final && !final.home?.nome) final.home = vencedorEsq;
       if (terceiroLugar && !terceiroLugar.home?.nome) terceiroLugar.home = perdedorEsq;
     }
 
-    // Processa a Semifinal Direita (Inglaterra x Argentina)
     if (semiDir?.vencedor) {
+      vencedorDirNome = semiDir.vencedor;
+      perdedorDirNome = semiDir.vencedor === semiDir.home?.nome ? semiDir.away?.nome : semiDir.home?.nome;
+
       const vencedorDir = semiDir.vencedor === semiDir.home?.nome ? semiDir.home : semiDir.away;
       const perdedorDir = semiDir.vencedor === semiDir.home?.nome ? semiDir.away : semiDir.home;
-      
       if (final && !final.away?.nome) final.away = vencedorDir;
       if (terceiroLugar && !terceiroLugar.away?.nome) terceiroLugar.away = perdedorDir;
     }
   }
 
-  const colorOn = 'var(--galaxy-gold, #fbbf24)';
-  const colorOff = 'rgba(96, 165, 250, 0.3)';
-  const corLinhaEsq = semifinal[0]?.vencedor ? colorOn : colorOff;
-  const corLinhaDir = semifinal[1]?.vencedor ? colorOn : colorOff;
+  // ============================================================================
+  // ✨ ENGENHARIA DE LUZ Z-INDEX E GEOMETRIA PIXEL-PERFECT
+  // ============================================================================
+  const getLineStyle = (isFinished, winnerName, loserName, isTopPath) => {
+    const colorOn = 'var(--galaxy-gold, #fbbf24)';
+    const colorOff = 'rgba(96, 165, 250, 0.3)';
+    const colorDimmed = 'rgba(96, 165, 250, 0.05)';
 
-  // ============================================================================
-  // ✨ SKELETON LOADERS
-  // ============================================================================
+    let color = isFinished ? colorOn : colorOff;
+    let opacity = 1;
+    let filter = 'none';
+    let zIndex = 1;
+
+    if (selectedTeam) {
+      const isMyPath = isTopPath ? (selectedTeam === winnerName) : (selectedTeam === loserName);
+      if (isMyPath) {
+        color = colorOn;
+        filter = 'drop-shadow(0 0 4px var(--galaxy-gold))';
+        opacity = 1;
+        zIndex = 2; // Linha acesa vem para a frente!
+      } else {
+        color = colorDimmed;
+        opacity = 0.2;
+        zIndex = 1; // Linha apagada vai para trás!
+      }
+    }
+    return { color, opacity, filter, zIndex };
+  };
+
+  const styleTopLeft = getLineStyle(!!semifinal[0]?.vencedor, vencedorEsqNome, perdedorEsqNome, true);
+  const styleBotLeft = getLineStyle(!!semifinal[0]?.vencedor, vencedorEsqNome, perdedorEsqNome, false);
+  const styleTopRight = getLineStyle(!!semifinal[1]?.vencedor, vencedorDirNome, perdedorDirNome, true);
+  const styleBotRight = getLineStyle(!!semifinal[1]?.vencedor, vencedorDirNome, perdedorDirNome, false);
+
   if (carregando) {
     return (
       <section className="tab-content" style={{ padding: '20px' }}>
@@ -223,11 +289,12 @@ export default function AbaGruposReais() {
 
   return (
     <section className="tab-content">
+
       {!erro && rodada32.length > 0 && (
         <>
           <h2 style={{ padding: '0 20px' }}>⚔️ Chaveamento Real do Mata-Mata</h2>
           <p style={{ color: '#aaa', marginBottom: 10, padding: '0 20px' }}>
-            Confrontos reais da Copa, atualizados conforme a fase de grupos definir os classificados.
+            Clique sobre uma seleção para mapear a rota exata dela no torneio.
           </p>
 
           <div className="bracket-full-width-container">
@@ -236,28 +303,36 @@ export default function AbaGruposReais() {
               {/* LADO ESQUERDO */}
               <div className="bracket-column">
                 <div className="column-title">Rodada de 32</div>
-                {preencher(rodada32, 0, 8).map((jogo, i) => <RealBracketCell key={`l-32-${i}`} jogo={jogo} side="left" phase="Rodada de 32" index={i} totalItems={8} />)}
+                {preencher(rodada32, 0, 8).map((jogo, i) => <RealBracketCell key={`l-32-${i}`} jogo={jogo} side="left" phase="Rodada de 32" index={i} totalItems={8} selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} />)}
               </div>
               <div className="bracket-column">
                 <div className="column-title">Oitavas</div>
-                {preencher(oitavas, 0, 4).map((jogo, i) => <RealBracketCell key={`l-oit-${i}`} jogo={jogo} side="left" phase="Oitavas" index={i} totalItems={4} />)}
+                {preencher(oitavas, 0, 4).map((jogo, i) => <RealBracketCell key={`l-oit-${i}`} jogo={jogo} side="left" phase="Oitavas" index={i} totalItems={4} selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} />)}
               </div>
               <div className="bracket-column">
                 <div className="column-title">Quartas</div>
-                {preencher(quartas, 0, 2).map((jogo, i) => <RealBracketCell key={`l-qua-${i}`} jogo={jogo} side="left" phase="Quartas" index={i} totalItems={2} />)}
+                {preencher(quartas, 0, 2).map((jogo, i) => <RealBracketCell key={`l-qua-${i}`} jogo={jogo} side="left" phase="Quartas" index={i} totalItems={2} selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} />)}
               </div>
               <div className="bracket-column">
                 <div className="column-title">Semifinal</div>
-                {preencher(semifinal, 0, 1).map((jogo, i) => <RealBracketCell key={`l-sem-${i}`} jogo={jogo} side="left" phase="Semifinal" index={i} totalItems={1} />)}
+                {preencher(semifinal, 0, 1).map((jogo, i) => <RealBracketCell key={`l-sem-${i}`} jogo={jogo} side="left" phase="Semifinal" index={i} totalItems={1} selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} />)}
               </div>
 
               {/* COLUNA CENTRAL */}
               <div className="bracket-column" style={{ flex: 1.5, position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '0 20px' }}>
                 <div style={{ width: '100%', position: 'relative', display: 'flex', flexDirection: 'column', gap: '50px' }}>
                   
-                  {/* ✨ LINHAS CONECTORAS DINÂMICAS QUE BRILHAM */}
-                  <div style={{ position: 'absolute', left: '-20px', top: '85px', bottom: '55px', width: '20px', borderLeft: `2px solid ${corLinhaEsq}`, borderTop: `2px solid ${corLinhaEsq}`, borderBottom: `2px solid ${corLinhaEsq}`, zIndex: 1, transition: 'all 0.3s' }}></div>
-                  <div style={{ position: 'absolute', right: '-20px', top: '85px', bottom: '55px', width: '20px', borderRight: `2px solid ${corLinhaDir}`, borderTop: `2px solid ${corLinhaDir}`, borderBottom: `2px solid ${corLinhaDir}`, zIndex: 1, transition: 'all 0.3s' }}></div>
+                  {/* ESQUERDA - CAMINHO PARA A FINAL (CIMA) - Ajuste milimétrico de -19px na junção */}
+                  <div style={{ position: 'absolute', left: '-20px', top: '85px', bottom: 'calc(50% - 19px)', width: '20px', borderLeft: `2px solid ${styleTopLeft.color}`, borderTop: `2px solid ${styleTopLeft.color}`, zIndex: styleTopLeft.zIndex, transition: 'all 0.4s ease', opacity: styleTopLeft.opacity, filter: styleTopLeft.filter }}></div>
+                  
+                  {/* ESQUERDA - CAMINHO PARA 3º LUGAR (BAIXO) - Ajuste milimétrico de +17px na junção */}
+                  <div style={{ position: 'absolute', left: '-20px', top: 'calc(50% + 17px)', bottom: '55px', width: '20px', borderLeft: `2px solid ${styleBotLeft.color}`, borderBottom: `2px solid ${styleBotLeft.color}`, zIndex: styleBotLeft.zIndex, transition: 'all 0.4s ease', opacity: styleBotLeft.opacity, filter: styleBotLeft.filter }}></div>
+
+                  {/* DIREITA - CAMINHO PARA A FINAL (CIMA) */}
+                  <div style={{ position: 'absolute', right: '-20px', top: '85px', bottom: 'calc(50% - 19px)', width: '20px', borderRight: `2px solid ${styleTopRight.color}`, borderTop: `2px solid ${styleTopRight.color}`, zIndex: styleTopRight.zIndex, transition: 'all 0.4s ease', opacity: styleTopRight.opacity, filter: styleTopRight.filter }}></div>
+                  
+                  {/* DIREITA - CAMINHO PARA 3º LUGAR (BAIXO) */}
+                  <div style={{ position: 'absolute', right: '-20px', top: 'calc(50% + 17px)', bottom: '55px', width: '20px', borderRight: `2px solid ${styleBotRight.color}`, borderBottom: `2px solid ${styleBotRight.color}`, zIndex: styleBotRight.zIndex, transition: 'all 0.4s ease', opacity: styleBotRight.opacity, filter: styleBotRight.filter }}></div>
 
                   {/* FINAL */}
                   <div style={{ position: 'relative', zIndex: 10 }}>
@@ -266,14 +341,14 @@ export default function AbaGruposReais() {
                       🏆
                     </div>
                     <div className="column-title" style={{ color: 'var(--galaxy-gold, #fbbf24)', textShadow: '0 0 10px rgba(251, 191, 36, 0.4)' }}>Grande Final</div>
-                    <RealMatchCard jogo={final} isFinal={true} />
+                    <RealMatchCard jogo={final} isFinal={true} selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} />
                   </div>
 
                   {/* 3º LUGAR */}
                   {terceiroLugar && (
                     <div style={{ position: 'relative', zIndex: 10 }}>
                       <div className="column-title" style={{ color: '#cd7f32', textShadow: '0 0 10px rgba(205, 127, 50, 0.4)' }}>Disputa de 3º Lugar</div>
-                      <RealMatchCard jogo={terceiroLugar} isThird={true} />
+                      <RealMatchCard jogo={terceiroLugar} isThird={true} selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} />
                     </div>
                   )}
                 </div>
@@ -282,19 +357,19 @@ export default function AbaGruposReais() {
               {/* LADO DIREITO */}
               <div className="bracket-column">
                 <div className="column-title">Semifinal</div>
-                {preencher(semifinal, 1, 2).map((jogo, i) => <RealBracketCell key={`r-sem-${i}`} jogo={jogo} side="right" phase="Semifinal" index={i} totalItems={1} />)}
+                {preencher(semifinal, 1, 2).map((jogo, i) => <RealBracketCell key={`r-sem-${i}`} jogo={jogo} side="right" phase="Semifinal" index={i} totalItems={1} selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} />)}
               </div>
               <div className="bracket-column">
                 <div className="column-title">Quartas</div>
-                {preencher(quartas, 2, 4).map((jogo, i) => <RealBracketCell key={`r-qua-${i}`} jogo={jogo} side="right" phase="Quartas" index={i} totalItems={2} />)}
+                {preencher(quartas, 2, 4).map((jogo, i) => <RealBracketCell key={`r-qua-${i}`} jogo={jogo} side="right" phase="Quartas" index={i} totalItems={2} selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} />)}
               </div>
               <div className="bracket-column">
                 <div className="column-title">Oitavas</div>
-                {preencher(oitavas, 4, 8).map((jogo, i) => <RealBracketCell key={`r-oit-${i}`} jogo={jogo} side="right" phase="Oitavas" index={i} totalItems={4} />)}
+                {preencher(oitavas, 4, 8).map((jogo, i) => <RealBracketCell key={`r-oit-${i}`} jogo={jogo} side="right" phase="Oitavas" index={i} totalItems={4} selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} />)}
               </div>
               <div className="bracket-column">
                 <div className="column-title">Rodada de 32</div>
-                {preencher(rodada32, 8, 16).map((jogo, i) => <RealBracketCell key={`r-32-${i}`} jogo={jogo} side="right" phase="Rodada de 32" index={i} totalItems={8} />)}
+                {preencher(rodada32, 8, 16).map((jogo, i) => <RealBracketCell key={`r-32-${i}`} jogo={jogo} side="right" phase="Rodada de 32" index={i} totalItems={8} selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} />)}
               </div>
             </div>
           </div>
