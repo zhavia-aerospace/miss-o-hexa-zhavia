@@ -5,8 +5,12 @@ import { getGruposReais } from '../services/api.js';
 export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodios = [], onFechar }) {
   const [classificadosAtivos, setClassificadosAtivos] = useState([]);
   const [podioOficial, setPodioOficial] = useState({ p1: null, p2: null, p3: null });
-  const [gruposOficiais, setGruposOficiais] = useState({}); // <-- Guarda os resultados reais dos grupos
+  const [gruposOficiais, setGruposOficiais] = useState({});
   const [carregou, setCarregou] = useState(false);
+  
+  // 💡 Novos estados para guardar quem está em qual partida final
+  const [finalistas, setFinalistas] = useState([]);
+  const [disputantesTerceiro, setDisputantesTerceiro] = useState([]);
 
   // =========================================================================
   // COMUNICAÇÃO COM O SATÉLITE (Busca quem tá vivo, Campeões e Grupos)
@@ -14,14 +18,24 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
   useEffect(() => {
     getGruposReais()
       .then((res) => {
-        // 1. Puxa quem ainda está vivo
+        // 1. Puxa quem ainda está vivo no geral
         const ativos = res.data?.classificadosAtivos || [];
         setClassificadosAtivos(ativos.map(time => time.trim().toLowerCase()));
 
-        // 2. Procura os campeões oficiais no mata-mata
+        // 2. Procura os campeões e os times de cada final
         const mataMata = res.data?.mataMata || [];
         const jogoFinal = mataMata.find(f => f.fase === 'Final')?.jogos?.[0];
         const jogoTerceiro = mataMata.find(f => f.fase === 'Disputa de 3º Lugar')?.jogos?.[0];
+
+        // 👉 Salva quem são os finalistas
+        const f1 = jogoFinal?.home?.nome?.trim().toLowerCase();
+        const f2 = jogoFinal?.away?.nome?.trim().toLowerCase();
+        setFinalistas([f1, f2].filter(Boolean));
+
+        // 👉 Salva quem vai disputar o 3º lugar
+        const t1 = jogoTerceiro?.home?.nome?.trim().toLowerCase();
+        const t2 = jogoTerceiro?.away?.nome?.trim().toLowerCase();
+        setDisputantesTerceiro([t1, t2].filter(Boolean));
 
         let p1 = null, p2 = null, p3 = null;
 
@@ -60,23 +74,38 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
 
   const dadosPodio = podio || palpite.podio;
 
-  // =========================================================================
-  // MÁGICA DA TRAVA VISUAL (Cadeado)
-  // =========================================================================
   const temNome = meuNome && meuNome.trim().length > 0;
   const isOlhandoParaMimMesmo = temNome && palpite.nome.trim().toLowerCase() === meuNome.trim().toLowerCase();
   const euJaEnvieiPodio = temNome && listaPodios.some(p => p.nome.trim().toLowerCase() === meuNome.trim().toLowerCase());
   const deveBloquear = listaPodios.length > 0 && !isOlhandoParaMimMesmo && !euJaEnvieiPodio;
 
   // =========================================================================
-  // LÓGICAS DE ELIMINAÇÃO E ACERTO
+  // LÓGICAS DE ELIMINAÇÃO E ACERTO (AGORA POSICIONAL 🧠)
   // =========================================================================
   const formataNome = (nome) => nome ? nome.trim().toLowerCase() : '';
 
-  const isEliminado = (time) => {
+  // 💡 Nova verificação de eliminação muito mais inteligente
+  const isEliminadoDoPodio = (time, posicaoDesejada) => {
     if (!time || !carregou || classificadosAtivos.length === 0) return false;
     const timeChutado = formataNome(time);
-    return !classificadosAtivos.some(ativo => timeChutado.startsWith(ativo));
+
+    // Regra 1: O time já foi totalmente eliminado do torneio? (Caiu nas Oitavas, Quartas, etc)
+    const aindaTaNoTorneio = classificadosAtivos.some(ativo => timeChutado.startsWith(ativo));
+    if (!aindaTaNoTorneio) return true;
+
+    // Regra 2: Chutou 1º ou 2º lugar, MAS o time perdeu a semi e foi pra disputa de 3º? -> Eliminado!
+    if (posicaoDesejada === 1 || posicaoDesejada === 2) {
+      const taNaDisputaDeTerceiro = disputantesTerceiro.some(t => timeChutado.startsWith(t));
+      if (taNaDisputaDeTerceiro) return true;
+    }
+
+    // Regra 3: Chutou 3º lugar, MAS o time ganhou a semi e foi pra Final? -> Eliminado!
+    if (posicaoDesejada === 3) {
+      const taNaFinal = finalistas.some(f => timeChutado.startsWith(f));
+      if (taNaFinal) return true;
+    }
+
+    return false;
   };
 
   const isAcerto = (timeChutado, timeOficial) => {
@@ -88,9 +117,10 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
   const acertouP2 = isAcerto(dadosPodio?.p2, podioOficial.p2);
   const acertouP3 = isAcerto(dadosPodio?.p3, podioOficial.p3);
 
-  const elimP1 = !acertouP1 && isEliminado(dadosPodio?.p1);
-  const elimP2 = !acertouP2 && isEliminado(dadosPodio?.p2);
-  const elimP3 = !acertouP3 && isEliminado(dadosPodio?.p3);
+  // 👉 Passamos a posição alvo para a nova função
+  const elimP1 = !acertouP1 && isEliminadoDoPodio(dadosPodio?.p1, 1);
+  const elimP2 = !acertouP2 && isEliminadoDoPodio(dadosPodio?.p2, 2);
+  const elimP3 = !acertouP3 && isEliminadoDoPodio(dadosPodio?.p3, 3);
 
   const getEstiloPodio = (medalha, acertou, eliminado) => {
     let bg, border, shadow, color = '#fff', icon, decor = 'none', op = 1, filter = 'none';
@@ -121,7 +151,7 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
   const styleP3 = getEstiloPodio('bronze', acertouP3, elimP3);
 
   // =========================================================================
-  // NOVO: RENDERIZADOR DE PALPITES DOS GRUPOS (COM PONTUAÇÃO PARCIAL E ESTÉTICA PREMIUM)
+  // RENDERIZADOR DE PALPITES DOS GRUPOS
   // =========================================================================
   const renderPalpiteGrupo = (chute, posicao, letraGrupo) => {
     const baseStyle = {
@@ -143,11 +173,9 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
       );
     }
 
-    // Pega os dois classificados reais daquele grupo
     const p1Oficial = gruposOficiais[letraGrupo]?.p1;
     const p2Oficial = gruposOficiais[letraGrupo]?.p2;
     
-    // ⏳ PENDENTE (a API ainda não tem o resultado final dos dois classificados do grupo)
     if (!p1Oficial || !p2Oficial) {
       return (
         <div style={{ ...baseStyle, background: 'rgba(255,255,255,0.03)' }}>
@@ -158,11 +186,9 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
       );
     }
 
-    // Verifica se acertou na mosca ou se o time passou na outra vaga
     const acertouExato = isAcerto(chute, posicao === 1 ? p1Oficial : p2Oficial);
     const acertouOutraPosicao = isAcerto(chute, posicao === 1 ? p2Oficial : p1Oficial);
 
-    // 🎯 CRAVOU (Acertou o time e a posição exata)
     if (acertouExato) {
       return (
         <div style={{ ...baseStyle, background: 'rgba(0, 255, 102, 0.08)', borderLeft: '2px solid #00ff66' }}>
@@ -174,7 +200,6 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
       );
     } 
     
-    // ⚠️ PONTUOU PARCIAL (O time classificou, mas na posição invertida)
     if (acertouOutraPosicao) {
       return (
         <div style={{ ...baseStyle, background: 'rgba(251, 191, 36, 0.08)', borderLeft: '2px solid #fbbf24' }}>
@@ -186,7 +211,6 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
       );
     }
 
-    // ☠️ ERROU (O time não passou de fase)
     return (
       <div style={{ ...baseStyle, background: 'rgba(255, 51, 51, 0.05)', borderLeft: '2px solid #ff6666' }}>
         <span style={{ color: '#aaa' }}>
@@ -209,7 +233,6 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
           👑 Pódio Chutado
         </strong>
         
-        {/* CASO 1: SISTEMA BLOQUEADO */}
         {deveBloquear ? (
           <div style={{ background: 'rgba(255, 204, 0, 0.04)', border: '1px dashed var(--galaxy-gold)', borderRadius: '8px', padding: '15px', textAlign: 'center', marginBottom: '20px', boxShadow: '0 4px 15px rgba(255, 204, 0, 0.02)' }}>
             <span style={{ fontSize: '2rem', display: 'block', marginBottom: '6px' }}>🔒</span>
@@ -220,7 +243,6 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
           </div>
         ) : dadosPodio && (dadosPodio.p1 || dadosPodio.p2 || dadosPodio.p3) ? (
           
-          /* CASO 2: PÓDIO REVELADO COM MÁGICA VISUAL */
           <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
             <div style={{ flex: 1, background: styleP1.bg, border: styleP1.border, borderRadius: '8px', padding: '12px 5px', textAlign: 'center', opacity: styleP1.op, filter: styleP1.filter, transition: 'all 0.5s ease', boxShadow: styleP1.shadow }}>
               <span style={{ fontSize: '1.6rem', display: 'block', marginBottom: '6px' }}>{styleP1.icon}</span>
@@ -236,7 +258,6 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
             </div>
           </div>
         ) : (
-          /* CASO 3: NÃO VOTOU */
           <div style={{ background: 'rgba(0,0,0,0.25)', padding: 12, borderRadius: 6, border: '1px solid rgba(0,102,255,0.15)', textAlign: 'center', color: '#888', fontSize: '0.85rem', marginBottom: '20px' }}>
             Nenhum pódio enviado por este astronauta.
           </div>
@@ -244,7 +265,6 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
 
         <hr style={{ border: 0, borderTop: '1px solid rgba(255,255,255,0.05)', margin: '0 0 15px' }} />
         
-        {/* === PALPITES DE GRUPOS (AGORA INTELIGENTES) === */}
         <strong style={{ color: 'var(--galaxy-gold)', display: 'block', marginBottom: 12, fontSize: '0.9rem' }}>📋 Palpites Grupos</strong>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
           {LETRAS_GRUPOS.map((letra) => {
