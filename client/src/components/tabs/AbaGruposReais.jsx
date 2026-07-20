@@ -31,6 +31,50 @@ function RealMatchCard({ jogo, isFinal, isThird, selectedTeam, setSelectedTeam }
     setSelectedTeam(prev => prev === teamName ? null : teamName);
   };
 
+  // 💡 Mapeamento dinâmico e elegante das posições (Ouro, Prata, Bronze, Honra)
+  let badgeHome = null;
+  let badgeAway = null;
+
+  if (isDecided) {
+    if (isFinal) {
+      badgeHome = venceuHome 
+        ? { text: '1º 🥇', bg: 'rgba(251, 191, 36, 0.15)', borderColor: 'rgba(251, 191, 36, 0.5)', color: '#fbbf24' } 
+        : { text: '2º 🥈', bg: 'rgba(209, 209, 209, 0.15)', borderColor: 'rgba(209, 209, 209, 0.5)', color: '#d1d1d1' };
+      badgeAway = venceuAway 
+        ? { text: '1º 🥇', bg: 'rgba(251, 191, 36, 0.15)', borderColor: 'rgba(251, 191, 36, 0.5)', color: '#fbbf24' } 
+        : { text: '2º 🥈', bg: 'rgba(209, 209, 209, 0.15)', borderColor: 'rgba(209, 209, 209, 0.5)', color: '#d1d1d1' };
+    } else if (isThird) {
+      badgeHome = venceuHome 
+        ? { text: '3º 🥉', bg: 'rgba(205, 127, 50, 0.15)', borderColor: 'rgba(205, 127, 50, 0.5)', color: '#cd7f32' } 
+        : { text: '4º', bg: 'rgba(71, 85, 105, 0.2)', borderColor: 'rgba(71, 85, 105, 0.4)', color: '#94a3b8' };
+      badgeAway = venceuAway 
+        ? { text: '3º 🥉', bg: 'rgba(205, 127, 50, 0.15)', borderColor: 'rgba(205, 127, 50, 0.5)', color: '#cd7f32' } 
+        : { text: '4º', bg: 'rgba(71, 85, 105, 0.2)', borderColor: 'rgba(71, 85, 105, 0.4)', color: '#94a3b8' };
+    }
+  }
+
+  const renderBadge = (badge) => {
+    if (!badge) return null;
+    return (
+      <span style={{ 
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2px 5px', 
+        fontSize: '0.65rem', 
+        fontWeight: 'bold', 
+        borderRadius: '4px', 
+        backgroundColor: badge.bg, 
+        color: badge.color,
+        border: `1px solid ${badge.borderColor}`,
+        boxShadow: `0 0 5px ${badge.bg}`,
+        flexShrink: 0 // Impede que a medalha seja esmagada
+      }}>
+        {badge.text}
+      </span>
+    );
+  };
+
   return (
     <div className={cardClasses}>
       
@@ -40,14 +84,18 @@ function RealMatchCard({ jogo, isFinal, isThird, selectedTeam, setSelectedTeam }
         onClick={(e) => handleTeamClick(homeNome, e)}
         title="Clique para mapear o percurso desta seleção"
       >
-        <span className="player-name">
-          {jogo.home?.escudo ? (
-            <img src={jogo.home.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />
-          ) : (
-            <div className="placeholder-flag-blink">?</div>
-          )}
-          <span style={{ opacity: homeNome ? 1 : 0.6 }}>{homeNome ?? 'A definir...'}</span>
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {/* A largura máxima encolhe dinamicamente se a medalha estiver presente! */}
+          <span className="player-name" style={{ maxWidth: badgeHome ? '75px' : '115px' }}>
+            {jogo.home?.escudo ? (
+              <img src={jogo.home.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />
+            ) : (
+              <div className="placeholder-flag-blink">?</div>
+            )}
+            <span style={{ opacity: homeNome ? 1 : 0.6 }}>{homeNome ?? 'A definir...'}</span>
+          </span>
+          {renderBadge(badgeHome)}
+        </div>
         <span>
           {jogo.placarHome ?? ''}
           {jogo.penaltisHome != null && <span style={{ color: 'var(--galaxy-gold)', fontWeight: 'bold' }}> ({jogo.penaltisHome})</span>}
@@ -62,14 +110,17 @@ function RealMatchCard({ jogo, isFinal, isThird, selectedTeam, setSelectedTeam }
         onClick={(e) => handleTeamClick(awayNome, e)}
         title="Clique para mapear o percurso desta seleção"
       >
-        <span className="player-name">
-          {jogo.away?.escudo ? (
-            <img src={jogo.away.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />
-          ) : (
-            <div className="placeholder-flag-blink">?</div>
-          )}
-          <span style={{ opacity: awayNome ? 1 : 0.6 }}>{awayNome ?? 'A definir...'}</span>
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span className="player-name" style={{ maxWidth: badgeAway ? '75px' : '115px' }}>
+            {jogo.away?.escudo ? (
+              <img src={jogo.away.escudo} alt="" style={{ width: 12, height: 12, marginRight: 4, verticalAlign: 'middle' }} />
+            ) : (
+              <div className="placeholder-flag-blink">?</div>
+            )}
+            <span style={{ opacity: awayNome ? 1 : 0.6 }}>{awayNome ?? 'A definir...'}</span>
+          </span>
+          {renderBadge(badgeAway)}
+        </div>
         <span>
           {jogo.placarAway ?? ''}
           {jogo.penaltisAway != null && <span style={{ color: 'var(--galaxy-gold)', fontWeight: 'bold' }}> ({jogo.penaltisAway})</span>}
