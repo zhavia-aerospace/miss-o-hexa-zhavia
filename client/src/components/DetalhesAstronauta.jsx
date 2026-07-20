@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LETRAS_GRUPOS } from '../data/grupos.js';
-import { getGruposReais } from '../services/api.js';
+import { getGruposReais, getRanking } from '../services/api.js';
 
 export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodios = [], onFechar }) {
   const [classificadosAtivos, setClassificadosAtivos] = useState([]);
@@ -10,14 +10,18 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
   
   const [finalistas, setFinalistas] = useState([]);
   const [disputantesTerceiro, setDisputantesTerceiro] = useState([]);
-  
-  // 💡 Novo estado para rastrear em qual fase os outros times caíram
   const [mapaEliminacoes, setMapaEliminacoes] = useState({});
+  
+  const [pontuacaoReal, setPontuacaoReal] = useState(0);
 
-  // =========================================================================
-  // COMUNICAÇÃO COM O SATÉLITE
-  // =========================================================================
   useEffect(() => {
+    // Sincroniza a pontuação oficial deste usuário
+    getRanking().then(res => {
+      const rankData = res.find(r => r.astronauta.trim().toLowerCase() === palpite.nome.trim().toLowerCase());
+      if (rankData) setPontuacaoReal(rankData.pontuacao);
+    }).catch(() => {});
+
+    // Busca os dados da Copa Real
     getGruposReais()
       .then((res) => {
         const ativos = res.data?.classificadosAtivos || [];
@@ -53,22 +57,16 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
 
         setPodioOficial({ p1, p2, p3, p4 });
 
-        // 💡 RASTREADOR DE ELIMINAÇÕES: Descobre onde cada time caiu no mata-mata
         const elim = {};
         mataMata.forEach(fase => {
-          // Ignoramos finais porque esses vão pro Top 4
           if (fase.fase === 'Final' || fase.fase === 'Disputa de 3º Lugar') return;
-          
           fase.jogos.forEach(jogo => {
             if (jogo.vencedor) {
               const home = jogo.home?.nome?.trim().toLowerCase();
               const away = jogo.away?.nome?.trim().toLowerCase();
               const vencedor = jogo.vencedor.trim().toLowerCase();
               const perdedor = (vencedor === home) ? away : (vencedor === away ? home : null);
-              
-              if (perdedor) {
-                elim[perdedor] = fase.fase;
-              }
+              if (perdedor) elim[perdedor] = fase.fase;
             }
           });
         });
@@ -89,7 +87,7 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
       })
       .catch((err) => console.error("Falha ao buscar dados da Copa:", err))
       .finally(() => setCarregou(true));
-  }, []);
+  }, [palpite.nome]);
 
   if (!palpite) return null;
 
@@ -100,9 +98,6 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
   const euJaEnvieiPodio = temNome && listaPodios.some(p => p.nome.trim().toLowerCase() === meuNome.trim().toLowerCase());
   const deveBloquear = listaPodios.length > 0 && !isOlhandoParaMimMesmo && !euJaEnvieiPodio;
 
-  // =========================================================================
-  // LÓGICAS DE ELIMINAÇÃO E ACERTO
-  // =========================================================================
   const formataNome = (nome) => nome ? nome.trim().toLowerCase() : '';
 
   const isAcerto = (timeChutado, timeOficial) => {
@@ -134,27 +129,21 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
     return false;
   };
 
-  // 💡 Inteligência ampliada: Retorna ONDE o time parou (Top 4 ou Fases Anteriores)
   const getPosicaoRealInfo = (timeChutado) => {
     if (!timeChutado || !carregou) return null;
     const t = formataNome(timeChutado);
     
-    // Cores de destaque para o Top 4
     const goldColor = { color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.1)', border: 'rgba(251, 191, 36, 0.3)' };
-    // Cores cinzas/neutras para quem caiu antes
     const silverColor = { color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.1)', border: 'rgba(148, 163, 184, 0.2)' };
 
-    // 1. O time chegou no Top 4?
     if (podioOficial.p1 && isAcerto(t, podioOficial.p1)) return { texto: 'Ficou em 1º', medal: '🥇', ...goldColor };
     if (podioOficial.p2 && isAcerto(t, podioOficial.p2)) return { texto: 'Ficou em 2º', medal: '🥈', ...goldColor };
     if (podioOficial.p3 && isAcerto(t, podioOficial.p3)) return { texto: 'Ficou em 3º', medal: '🥉', ...goldColor };
     if (podioOficial.p4 && isAcerto(t, podioOficial.p4)) return { texto: 'Ficou em 4º', medal: '🏅', ...goldColor };
 
-    // 2. Se não tá no Top 4, o time já foi eliminado da Copa?
     const aindaTaNoTorneio = classificadosAtivos.some(ativo => t.startsWith(ativo));
     
     if (!aindaTaNoTorneio && classificadosAtivos.length > 0) {
-      // Procura no registro de quedas do mata-mata
       for (const [perdedor, fase] of Object.entries(mapaEliminacoes)) {
         if (t.startsWith(perdedor) || perdedor.startsWith(t)) {
           if (fase === 'Quartas de Final') return { texto: 'Caiu nas Quartas', medal: '✈️', ...silverColor };
@@ -163,11 +152,10 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
           return { texto: `Caiu na ${fase}`, medal: '✈️', ...silverColor };
         }
       }
-      // Se já caiu e não está no mata-mata, só pode ter caído nos grupos!
       return { texto: 'Caiu nos Grupos', medal: '🧳', ...silverColor };
     }
 
-    return null; // Time segue vivo e ainda não definiu posição
+    return null; 
   };
 
   const acertouP1 = isAcerto(dadosPodio?.p1, podioOficial.p1);
@@ -219,14 +207,8 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
   // =========================================================================
   const renderPalpiteGrupo = (chute, posicao, letraGrupo) => {
     const baseStyle = {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '5px 8px',
-      borderRadius: '4px',
-      marginBottom: '4px',
-      fontSize: '0.8rem',
-      lineHeight: 1.2
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      padding: '5px 8px', borderRadius: '4px', marginBottom: '4px', fontSize: '0.8rem', lineHeight: 1.2
     };
 
     if (!chute) {
@@ -292,6 +274,84 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
         <h3 style={{ color: 'var(--galaxy-gold)', marginBottom: 15, fontSize: '1.25rem' }}>
           📊 Telemetria: {palpite.nome}
         </h3>
+
+        {/* 🚀 HUD DE DESEMPENHO SÊNIOR: Precisão baseada no Gabarito Oficial de Pontos */}
+        {(() => {
+          let pontosCalculados = 0;
+          let pontosMaximosAteAgora = 0;
+
+          // 1. Calcula a pontuação e os pontos máximos dos GRUPOS
+          LETRAS_GRUPOS.forEach((letra) => {
+            const g = palpite.grupos?.[letra];
+            const p1Oficial = gruposOficiais[letra]?.p1;
+            const p2Oficial = gruposOficiais[letra]?.p2;
+            
+            // Se o grupo já encerrou, ele soma 10 pts no máximo possível
+            if (p1Oficial && p2Oficial) {
+              pontosMaximosAteAgora += 10;
+
+              if (g) {
+                const acertouP1Exato = isAcerto(g[0], p1Oficial);
+                const acertouP2Exato = isAcerto(g[1], p2Oficial);
+                const acertouP1Invertido = isAcerto(g[0], p2Oficial);
+                const acertouP2Invertido = isAcerto(g[1], p1Oficial);
+
+                let acertosTotais = 0;
+                if (acertouP1Exato || acertouP1Invertido) acertosTotais++;
+                if (acertouP2Exato || acertouP2Invertido) acertosTotais++;
+
+                // Regras oficiais do Regulamento
+                if (acertosTotais === 1) pontosCalculados += 4;
+                if (acertosTotais === 2) {
+                  pontosCalculados += 8;
+                  if (acertouP1Exato && acertouP2Exato) pontosCalculados += 2; // Bônus de 10
+                }
+              }
+            }
+          });
+
+          // 2. Calcula a pontuação e os pontos máximos do PÓDIO
+          let acertosPodioExatos = 0;
+
+          if (podioOficial.p1) pontosMaximosAteAgora += 25;
+          if (podioOficial.p2) pontosMaximosAteAgora += 15;
+          if (podioOficial.p3) pontosMaximosAteAgora += 10;
+          
+          if (podioOficial.p1 && podioOficial.p2 && podioOficial.p3) {
+            pontosMaximosAteAgora += 5; // Bônus máximo do pódio
+          }
+
+          if (dadosPodio) {
+            // No pódio, só pontua se cravar a posição exata! Posição invertida não vale nada.
+            if (podioOficial.p1 && acertouP1) { pontosCalculados += 25; acertosPodioExatos++; }
+            if (podioOficial.p2 && acertouP2) { pontosCalculados += 15; acertosPodioExatos++; }
+            if (podioOficial.p3 && acertouP3) { pontosCalculados += 10; acertosPodioExatos++; }
+
+            if (podioOficial.p1 && podioOficial.p2 && podioOficial.p3 && acertosPodioExatos === 3) {
+              pontosCalculados += 5; // Bônus de pódio cravado
+            }
+          }
+
+          // A Matemática Perfeita: (Pontos Conquistados / Máximo de Pontos Possíveis nas vagas já decididas)
+          let taxaPrecisao = pontosMaximosAteAgora > 0 ? Math.round((pontosCalculados / pontosMaximosAteAgora) * 100) : 0;
+          if (taxaPrecisao > 100) taxaPrecisao = 100;
+          
+          // Exibe a pontuação real vinda da API, ou o cálculo simulado como fallback
+          const pontuacaoExibida = pontuacaoReal || pontosCalculados;
+
+          return (
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+              <div style={{ flex: 1, background: 'rgba(251, 191, 36, 0.08)', border: '1px solid rgba(251, 191, 36, 0.3)', borderRadius: '6px', padding: '10px', textAlign: 'center' }}>
+                <span style={{ display: 'block', fontSize: '0.65rem', color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Pontuação</span>
+                <span style={{ display: 'block', fontSize: '1.3rem', fontWeight: 'bold', color: '#fff' }}>{pontuacaoExibida} <span style={{fontSize:'0.7rem', color:'#888'}}>PTS</span></span>
+              </div>
+              <div style={{ flex: 1, background: 'rgba(0, 255, 102, 0.08)', border: '1px solid rgba(0, 255, 102, 0.3)', borderRadius: '6px', padding: '10px', textAlign: 'center' }}>
+                <span style={{ display: 'block', fontSize: '0.65rem', color: '#00ff66', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Eficiência de Pontos</span>
+                <span style={{ display: 'block', fontSize: '1.3rem', fontWeight: 'bold', color: '#fff' }}>{taxaPrecisao}%</span>
+              </div>
+            </div>
+          );
+        })()}
 
         <strong style={{ color: 'var(--galaxy-gold)', display: 'block', marginBottom: 12, fontSize: '0.9rem' }}>
           👑 Pódio Chutado
