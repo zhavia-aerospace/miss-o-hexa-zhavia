@@ -170,6 +170,20 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
   const infoRealP2 = getPosicaoRealInfo(dadosPodio?.p2);
   const infoRealP3 = getPosicaoRealInfo(dadosPodio?.p3);
 
+  // 💡 Cálculo Isolado do Pódio para o Micro-HUD
+  let ptsPodio = 0;
+  let acertosPodioExatosParaBonus = 0;
+  const podioAvaliado = podioOficial.p1 || podioOficial.p2 || podioOficial.p3;
+  
+  if (dadosPodio) {
+    if (podioOficial.p1 && acertouP1) { ptsPodio += 25; acertosPodioExatosParaBonus++; }
+    if (podioOficial.p2 && acertouP2) { ptsPodio += 15; acertosPodioExatosParaBonus++; }
+    if (podioOficial.p3 && acertouP3) { ptsPodio += 10; acertosPodioExatosParaBonus++; }
+    if (podioOficial.p1 && podioOficial.p2 && podioOficial.p3 && acertosPodioExatosParaBonus === 3) {
+      ptsPodio += 5; // Bônus de cravar tudo
+    }
+  }
+
   const getEstiloPodio = (medalha, acertou, eliminado, posRealInfo) => {
     let bg, border, shadow, color = '#fff', icon, decor = 'none', op = 1, filter = 'none';
 
@@ -269,27 +283,37 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
 
   return (
     <div className="modal-detalhes-astronauta" onClick={onFechar}>
+      
+      {/* 💡 CSS INJETADO PARA A ANIMAÇÃO DE BOOT DO SISTEMA */}
+      <style>{`
+        @keyframes bootUpAnim {
+          0% { opacity: 0; transform: translateY(15px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .boot-anim {
+          opacity: 0;
+          animation: bootUpAnim 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+
       <div className="modal-detalhes-content" style={{ maxHeight: '85vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
         <button className="modal-detalhes-fechar" onClick={onFechar}>✕</button>
-        <h3 style={{ color: 'var(--galaxy-gold)', marginBottom: 15, fontSize: '1.25rem' }}>
+        <h3 className="boot-anim" style={{ color: 'var(--galaxy-gold)', marginBottom: 15, fontSize: '1.25rem', animationDelay: '0ms' }}>
           📊 Telemetria: {palpite.nome}
         </h3>
 
-        {/* 🚀 HUD DE DESEMPENHO SÊNIOR: Precisão baseada no Gabarito Oficial de Pontos */}
+        {/* 🚀 HUD DE DESEMPENHO SÊNIOR */}
         {(() => {
           let pontosCalculados = 0;
           let pontosMaximosAteAgora = 0;
 
-          // 1. Calcula a pontuação e os pontos máximos dos GRUPOS
           LETRAS_GRUPOS.forEach((letra) => {
             const g = palpite.grupos?.[letra];
             const p1Oficial = gruposOficiais[letra]?.p1;
             const p2Oficial = gruposOficiais[letra]?.p2;
             
-            // Se o grupo já encerrou, ele soma 10 pts no máximo possível
             if (p1Oficial && p2Oficial) {
               pontosMaximosAteAgora += 10;
-
               if (g) {
                 const acertouP1Exato = isAcerto(g[0], p1Oficial);
                 const acertouP2Exato = isAcerto(g[1], p2Oficial);
@@ -300,47 +324,35 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
                 if (acertouP1Exato || acertouP1Invertido) acertosTotais++;
                 if (acertouP2Exato || acertouP2Invertido) acertosTotais++;
 
-                // Regras oficiais do Regulamento
                 if (acertosTotais === 1) pontosCalculados += 4;
                 if (acertosTotais === 2) {
                   pontosCalculados += 8;
-                  if (acertouP1Exato && acertouP2Exato) pontosCalculados += 2; // Bônus de 10
+                  if (acertouP1Exato && acertouP2Exato) pontosCalculados += 2;
                 }
               }
             }
           });
 
-          // 2. Calcula a pontuação e os pontos máximos do PÓDIO
           let acertosPodioExatos = 0;
-
           if (podioOficial.p1) pontosMaximosAteAgora += 25;
           if (podioOficial.p2) pontosMaximosAteAgora += 15;
           if (podioOficial.p3) pontosMaximosAteAgora += 10;
-          
-          if (podioOficial.p1 && podioOficial.p2 && podioOficial.p3) {
-            pontosMaximosAteAgora += 5; // Bônus máximo do pódio
-          }
+          if (podioOficial.p1 && podioOficial.p2 && podioOficial.p3) pontosMaximosAteAgora += 5;
 
           if (dadosPodio) {
-            // No pódio, só pontua se cravar a posição exata! Posição invertida não vale nada.
             if (podioOficial.p1 && acertouP1) { pontosCalculados += 25; acertosPodioExatos++; }
             if (podioOficial.p2 && acertouP2) { pontosCalculados += 15; acertosPodioExatos++; }
             if (podioOficial.p3 && acertouP3) { pontosCalculados += 10; acertosPodioExatos++; }
-
-            if (podioOficial.p1 && podioOficial.p2 && podioOficial.p3 && acertosPodioExatos === 3) {
-              pontosCalculados += 5; // Bônus de pódio cravado
-            }
+            if (podioOficial.p1 && podioOficial.p2 && podioOficial.p3 && acertosPodioExatos === 3) pontosCalculados += 5;
           }
 
-          // A Matemática Perfeita: (Pontos Conquistados / Máximo de Pontos Possíveis nas vagas já decididas)
           let taxaPrecisao = pontosMaximosAteAgora > 0 ? Math.round((pontosCalculados / pontosMaximosAteAgora) * 100) : 0;
           if (taxaPrecisao > 100) taxaPrecisao = 100;
           
-          // Exibe a pontuação real vinda da API, ou o cálculo simulado como fallback
           const pontuacaoExibida = pontuacaoReal || pontosCalculados;
 
           return (
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+            <div className="boot-anim" style={{ display: 'flex', gap: '10px', marginBottom: '20px', animationDelay: '100ms' }}>
               <div style={{ flex: 1, background: 'rgba(251, 191, 36, 0.08)', border: '1px solid rgba(251, 191, 36, 0.3)', borderRadius: '6px', padding: '10px', textAlign: 'center' }}>
                 <span style={{ display: 'block', fontSize: '0.65rem', color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Pontuação</span>
                 <span style={{ display: 'block', fontSize: '1.3rem', fontWeight: 'bold', color: '#fff' }}>{pontuacaoExibida} <span style={{fontSize:'0.7rem', color:'#888'}}>PTS</span></span>
@@ -353,12 +365,25 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
           );
         })()}
 
-        <strong style={{ color: 'var(--galaxy-gold)', display: 'block', marginBottom: 12, fontSize: '0.9rem' }}>
-          👑 Pódio Chutado
-        </strong>
+        {/* 🏆 CABEÇALHO DO PÓDIO COM MICRO-HUD */}
+        <div className="boot-anim" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, animationDelay: '200ms' }}>
+          <strong style={{ color: 'var(--galaxy-gold)', fontSize: '0.9rem' }}>
+            👑 Pódio Chutado
+          </strong>
+          {podioAvaliado && (
+            <span style={{ 
+              background: ptsPodio > 0 ? 'rgba(251, 191, 36, 0.1)' : 'rgba(255, 255, 255, 0.05)', 
+              color: ptsPodio > 0 ? '#fbbf24' : '#666', 
+              padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold',
+              border: `1px solid ${ptsPodio > 0 ? 'rgba(251, 191, 36, 0.3)' : 'transparent'}`
+            }}>
+              {ptsPodio > 0 ? `+${ptsPodio}` : '0'} PTS
+            </span>
+          )}
+        </div>
         
         {deveBloquear ? (
-          <div style={{ background: 'rgba(255, 204, 0, 0.04)', border: '1px dashed var(--galaxy-gold)', borderRadius: '8px', padding: '15px', textAlign: 'center', marginBottom: '20px', boxShadow: '0 4px 15px rgba(255, 204, 0, 0.02)' }}>
+          <div className="boot-anim" style={{ background: 'rgba(255, 204, 0, 0.04)', border: '1px dashed var(--galaxy-gold)', borderRadius: '8px', padding: '15px', textAlign: 'center', marginBottom: '20px', boxShadow: '0 4px 15px rgba(255, 204, 0, 0.02)', animationDelay: '300ms' }}>
             <span style={{ fontSize: '2rem', display: 'block', marginBottom: '6px' }}>🔒</span>
             <strong style={{ color: 'var(--galaxy-gold)', display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>CONTEÚDO CRIPTOGRAFADO</strong>
             <p style={{ color: '#aaa', fontSize: '0.8rem', margin: 0, lineHeight: 1.4, whiteSpace: 'normal', wordWrap: 'break-word' }}>
@@ -367,7 +392,7 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
           </div>
         ) : dadosPodio && (dadosPodio.p1 || dadosPodio.p2 || dadosPodio.p3) ? (
           
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+          <div className="boot-anim" style={{ display: 'flex', gap: '10px', marginBottom: '20px', animationDelay: '300ms' }}>
             
             {/* CARD 1º LUGAR */}
             <div style={{ flex: 1, background: styleP1.bg, border: styleP1.border, borderRadius: '8px', padding: '12px 5px', textAlign: 'center', opacity: styleP1.op, filter: styleP1.filter, transition: 'all 0.5s ease', boxShadow: styleP1.shadow, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -404,28 +429,70 @@ export default function DetalhesAstronauta({ palpite, podio, meuNome, listaPodio
 
           </div>
         ) : (
-          <div style={{ background: 'rgba(0,0,0,0.25)', padding: 12, borderRadius: 6, border: '1px solid rgba(0,102,255,0.15)', textAlign: 'center', color: '#888', fontSize: '0.85rem', marginBottom: '20px' }}>
+          <div className="boot-anim" style={{ background: 'rgba(0,0,0,0.25)', padding: 12, borderRadius: 6, border: '1px solid rgba(0,102,255,0.15)', textAlign: 'center', color: '#888', fontSize: '0.85rem', marginBottom: '20px', animationDelay: '300ms' }}>
             Nenhum pódio enviado por este astronauta.
           </div>
         )}
 
-        <hr style={{ border: 0, borderTop: '1px solid rgba(255,255,255,0.05)', margin: '0 0 15px' }} />
+        <hr className="boot-anim" style={{ border: 0, borderTop: '1px solid rgba(255,255,255,0.05)', margin: '0 0 15px', animationDelay: '350ms' }} />
         
-        <strong style={{ color: 'var(--galaxy-gold)', display: 'block', marginBottom: 12, fontSize: '0.9rem' }}>📋 Palpites Grupos</strong>
+        <strong className="boot-anim" style={{ color: 'var(--galaxy-gold)', display: 'block', marginBottom: 12, fontSize: '0.9rem', animationDelay: '400ms' }}>
+          📋 Palpites Grupos
+        </strong>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-          {LETRAS_GRUPOS.map((letra) => {
+          {LETRAS_GRUPOS.map((letra, index) => {
             const g = palpite.grupos?.[letra];
+            const p1Oficial = gruposOficiais[letra]?.p1;
+            const p2Oficial = gruposOficiais[letra]?.p2;
+            const grupoEncerrado = p1Oficial && p2Oficial;
+            
+            // 💡 Cálculo Isolado do Grupo para o Micro-HUD
+            let ptsGrupo = 0;
+            if (g && grupoEncerrado) {
+              const acertouP1Exato = isAcerto(g[0], p1Oficial);
+              const acertouP2Exato = isAcerto(g[1], p2Oficial);
+              const acertouP1Invertido = isAcerto(g[0], p2Oficial);
+              const acertouP2Invertido = isAcerto(g[1], p1Oficial);
+
+              let acertosTotais = 0;
+              if (acertouP1Exato || acertouP1Invertido) acertosTotais++;
+              if (acertouP2Exato || acertouP2Invertido) acertosTotais++;
+
+              if (acertosTotais === 1) ptsGrupo = 4;
+              if (acertosTotais === 2) {
+                ptsGrupo = 8;
+                if (acertouP1Exato && acertouP2Exato) ptsGrupo += 2; // Bônus de ordem
+              }
+            }
+
             return (
-              <div key={letra} style={{ background: 'rgba(0,0,0,0.25)', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(0,102,255,0.15)' }}>
-                <strong style={{ color: 'var(--galaxy-gold)', display: 'block', marginBottom: 6, fontSize: '0.85rem' }}>Grupo {letra}</strong>
-                {g ? (
-                  <>
-                    {renderPalpiteGrupo(g[0], 1, letra)}
-                    {renderPalpiteGrupo(g[1], 2, letra)}
-                  </>
-                ) : (
-                  <span style={{ color: '#666', fontSize: '0.8rem' }}>Não enviado</span>
-                )}
+              <div key={letra} className="boot-anim" style={{ background: 'rgba(0,0,0,0.25)', borderRadius: 6, border: '1px solid rgba(0,102,255,0.15)', overflow: 'hidden', animationDelay: `${500 + (index * 50)}ms` }}>
+                
+                {/* 🏆 CABEÇALHO DO GRUPO COM MICRO-HUD */}
+                <div style={{ background: 'rgba(0,102,255,0.1)', padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <strong style={{ color: 'var(--galaxy-gold)', fontSize: '0.85rem' }}>Grupo {letra}</strong>
+                  {grupoEncerrado && (
+                    <span style={{ 
+                      background: ptsGrupo > 0 ? 'rgba(0, 255, 102, 0.1)' : 'rgba(255, 255, 255, 0.05)', 
+                      color: ptsGrupo > 0 ? '#00ff66' : '#666', 
+                      padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold',
+                      border: `1px solid ${ptsGrupo > 0 ? 'rgba(0, 255, 102, 0.3)' : 'transparent'}`
+                    }}>
+                      {ptsGrupo > 0 ? `+${ptsGrupo}` : '0'} PTS
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ padding: '0 12px 10px 12px' }}>
+                  {g ? (
+                    <>
+                      {renderPalpiteGrupo(g[0], 1, letra)}
+                      {renderPalpiteGrupo(g[1], 2, letra)}
+                    </>
+                  ) : (
+                    <span style={{ color: '#666', fontSize: '0.8rem' }}>Não enviado</span>
+                  )}
+                </div>
               </div>
             );
           })}
