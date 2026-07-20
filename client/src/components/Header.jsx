@@ -1,3 +1,5 @@
+import ContagemRegressiva from './ContagemRegressiva.jsx';
+
 export default function Header({ abaAtiva, onMudarAba, identificado }) {
   const abas = [
     { id: 'home', label: '🛸 1. Diretrizes' },
@@ -14,7 +16,16 @@ export default function Header({ abaAtiva, onMudarAba, identificado }) {
       <h1>Supercopa Zhavia</h1>
       <div className="subtitle">🚀 Órbita da Vitória • Copa do Mundo 🌌</div>
 
-      <nav className="space-nav">
+      {/* ⏳ RELÓGIO DE LANÇAMENTO COMPACTO */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '15px', marginBottom: '5px' }}>
+        <ContagemRegressiva 
+          dataAlvo="2030-06-08T16:00:00Z" 
+          titulo="Missão 2030" 
+          compacto={true} 
+        />
+      </div>
+
+      <nav className="space-nav" style={{ marginTop: '15px' }}>
         {abas.map((aba) => (
           <button
             key={aba.id}

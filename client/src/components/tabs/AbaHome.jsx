@@ -1,6 +1,12 @@
+import ContagemRegressiva from '../ContagemRegressiva.jsx';
+
 export default function AbaHome() {
   return (
     <section className="tab-content">
+      
+      {/* ⏳ RELÓGIO DE LANÇAMENTO (Definido para Junho de 2030 - Centenário) */}
+      <ContagemRegressiva dataAlvo="2030-06-08T16:00:00Z" titulo="Próxima Copa: Edição Centenário" />
+
       <div className="cosmic-panel" style={{ textAlign: 'center' }}>
         <h2>🪐 Missão Supercopa Zhavia: Comando de Bordo</h2>
         <p style={{ fontSize: '1.15rem', lineHeight: 1.6, maxWidth: 800, margin: '0 auto' }}>
